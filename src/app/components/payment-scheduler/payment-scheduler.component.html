@@ -1,0 +1,52 @@
+<div class="flex justify-center items-center h-screen">
+  <p-card header="Create payment schedule">
+    <form [formGroup]="form">
+      <p-fluid class="grid grid-cols-1 gap-4">
+        <p-float-label variant="on">
+          <p-date-picker showIcon inputId="startDate" iconDisplay="input" formControlName="startDate" [minDate]="today" [maxDate]="minDate"/>
+          <label for="startDate">Start Date</label>
+        </p-float-label>
+        <p-float-label variant="on">
+          <p-date-picker showIcon inputId="travelDate" iconDisplay="input" formControlName="travelDate"
+                         [minDate]="minDate"/>
+          <label for="travelDate">Travel Date</label>
+        </p-float-label>
+        <p-float-label variant="on">
+          <p-input-number inputId="totalAmount" mode="currency" currency="PHP" formControlName="totalAmount"/>
+          <label for="totalAmount">Total Amount</label>
+        </p-float-label>
+        <p-divider/>
+        <p-float-label variant="on">
+          <p-input-number inputId="downPayment" mode="currency" currency="PHP" formControlName="downPayment"/>
+          <label for="downPayment">Down Payment</label>
+        </p-float-label>
+        <p-float-label variant="on">
+          <p-date-picker inputId="lastPaymentDate" formControlName="lastPaymentDate"/>
+          <label for="lastPaymentDate">Last Payment Date</label>
+        </p-float-label>
+        <p-divider/>
+        <ng-container *ngIf="schedule.length">
+          <p-table [value]="schedule">
+            <ng-template #header>
+              <tr>
+                <th id="date">Date</th>
+                <th id="amount">Amount</th>
+              </tr>
+            </ng-template>
+            <ng-template #body let-schedule>
+              <tr>
+                <td>{{schedule.date}}</td>
+                <td>&#8369; {{schedule.amount}}</td>
+              </tr>
+            </ng-template>
+          </p-table>
+          <p-divider/>
+        </ng-container>
+      </p-fluid>
+      <div class="flex gap-4 justify-center items-center">
+        <p-button label="Generate Schedule" icon="pi pi-check" (onClick)="generateSchedule()" [disabled]="!form.valid"/>
+        <p-button label="Clear" icon="pi pi-trash" severity="warn" (onClick)="clear()"/>
+      </div>
+    </form>
+  </p-card>
+</div>

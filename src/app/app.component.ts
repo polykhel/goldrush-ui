@@ -1,12 +1,36 @@
-import { Component } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
+import { Component, OnInit } from '@angular/core';
+import { Router, RouterOutlet } from '@angular/router';
+import { MenuItem } from 'primeng/api';
+import { Menubar } from 'primeng/menubar';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet],
+  imports: [Menubar, RouterOutlet],
   templateUrl: './app.component.html',
-  styleUrl: './app.component.css'
+  styleUrl: './app.component.css',
+  standalone: true
 })
-export class AppComponent {
-  title = 'payment-scheduler';
+export class AppComponent implements OnInit {
+  items: MenuItem[] | undefined;
+
+  constructor(private router: Router) {}
+
+  ngOnInit() {
+    this.items = [
+      {
+        label: 'Home',
+        icon: 'pi pi-home',
+        command: () => {
+          this.router.navigate(['/']);
+        },
+      },
+      {
+        label: 'Payment Scheduler',
+        icon: 'pi pi-wallet',
+        command: () => {
+          this.router.navigate(['/payment-scheduler']);
+        },
+      },
+    ];
+  }
 }
