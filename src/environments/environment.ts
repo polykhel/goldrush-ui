@@ -1,3 +1,3 @@
 export const environment = {
-  backendUrl: 'http://localhost:1337',
+  backendUrl: process.env['NG_APP_BACKEND_URL'],
 };
