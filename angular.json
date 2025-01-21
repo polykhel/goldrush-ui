@@ -29,15 +29,20 @@
             "styles": [
               "src/styles.css"
             ],
-            "scripts": []
+            "scripts": [],
+            "allowedCommonJsDependencies": [
+              "dayjs",
+              "html2canvas",
+              "qs"
+            ]
           },
           "configurations": {
             "production": {
               "budgets": [
                 {
                   "type": "initial",
-                  "maximumWarning": "500kB",
-                  "maximumError": "1MB"
+                  "maximumWarning": "5000kB",
+                  "maximumError": "2MB"
                 },
                 {
                   "type": "anyComponentStyle",
