@@ -1,0 +1,137 @@
+<div class="grid grid-cols-1 gap-4 p-4">
+  <form [formGroup]="form">
+    <p-fluid class="grid grid-cols-2 gap-4">
+      <p-float-label variant="on">
+        <p-select inputId="country" formControlName="country" [options]="countries" optionLabel="name">
+          <ng-template #selectedItem let-selectedOption>
+            <div class="flex items-center gap-2" *ngIf="selectedOption">
+              <img
+                src="https://primefaces.org/cdn/primeng/images/demo/flag/flag_placeholder.png" alt="Flag"
+                [class]="'flag flag-' + selectedOption.code.toLowerCase()"
+                style="width: 18px"
+              />
+              <div>{{ selectedOption.name }}</div>
+            </div>
+          </ng-template>
+          <ng-template let-country #item>
+            <div class="flex items-center gap-2">
+              <img src="https://primefaces.org/cdn/primeng/images/demo/flag/flag_placeholder.png" alt="Flag"
+                   [class]="'flag flag-' + country.code.toLowerCase()" style="width: 18px"/>
+              <div>{{ country.name }}</div>
+            </div>
+          </ng-template>
+          <ng-template #dropdownicon>
+            <i class="pi pi-map"></i>
+          </ng-template>
+          <ng-template #header>
+            <div class="font-medium px-3 py-2">Available Countries</div>
+          </ng-template>
+          <ng-template #footer>
+            <div class="px-3 py-3">
+              <p-button label="Add New" fluid severity="secondary" text size="small" icon="pi pi-plus"/>
+            </div>
+          </ng-template>
+        </p-select>
+        <label for="country">Country</label>
+      </p-float-label>
+      <p-float-label variant="on">
+        <p-select inputId="provider" [options]="providers" formControlName="provider" optionLabel="name"></p-select>
+        <label for="provider">Providers</label>
+      </p-float-label>
+      <p-float-label variant="on">
+        <p-date-picker showIcon inputId="travelDates" iconDisplay="input" selectionMode="range"
+                       formControlName="travelDates"/>
+        <label for="travelDates">Travel Dates</label>
+      </p-float-label>
+      <p-float-label variant="on">
+        <p-select [options]="packages" formControlName="package">
+          <ng-template let-pkg #selectedItem>
+            <span *ngIf="pkg">{{ pkg.name }} <span class="font-semibold">{{ pkg.duration }}</span></span>
+          </ng-template>
+          <ng-template let-pkg #item>
+            <span>{{ pkg.name }} <span class="font-semibold">{{ pkg.duration }}</span></span>
+          </ng-template>
+        </p-select>
+        <label for="package">Packages</label>
+      </p-float-label>
+      <p-float-label variant="on" class="col-span-2">
+        <input type="text" pInputText id="title" formControlName="title">
+        <label for="title">Title</label>
+      </p-float-label>
+      <p-float-label variant="on">
+        <p-input-number inputId="noOfPax" formControlName="noOfPax"/>
+        <label for="noOfPax">No. of Pax</label>
+      </p-float-label>
+      <p-float-label variant="on">
+        <p-input-number inputId="ratePerPax" mode="currency" currency="PHP" formControlName="ratePerPax"/>
+        <label for="ratePerPax">Rate per Pax</label>
+      </p-float-label>
+      <div class="flex flex-wrap gap-4">
+        <div class="flex items-center">
+          <p-radio-button value="Flight" formControlName="modeOfTransportation" inputId="flight"/>
+          <label for="flight" class="ml-2">Flight</label>
+        </div>
+        <div class="flex items-center">
+          <p-radio-button value="Bus" formControlName="modeOfTransportation" inputId="bus"/>
+          <label for="bus" class="ml-2">Bus</label>
+        </div>
+      </div>
+      <div *ngIf="form.controls.modeOfTransportation.value === 'Flight'">
+        <p-checkbox inputId="flightIncluded" [binary]="true" formControlName="flightIncluded"/>
+        <label for="flightIncluded" class="ml-2">Is flight included in the price?</label>
+      </div>
+      <p-fluid class="grid grid-cols-1 gap-2" *ngIf="form.controls.modeOfTransportation.value === 'Flight'">
+        <p-float-label variant="on">
+          <input type="text" pInputText id="departure" formControlName="departure"/>
+          <label for="departure">Departure</label>
+        </p-float-label>
+        <p-float-label variant="on">
+          <input type="text" pInputText id="arrival" formControlName="arrival"/>
+          <label for="arrival">Arrival</label>
+        </p-float-label>
+        <p-float-label variant="on">
+          <input type="text" pInputText id="airline" formControlName="airline"/>
+          <label for="airline">Airline</label>
+        </p-float-label>
+      </p-fluid>
+      <p-fluid class="grid grid-cols-1 gap-2" *ngIf="!form.controls.flightIncluded.value">
+        <p-float-label variant="on">
+          <p-input-number inputId="departurePrice" mode="currency" currency="PHP" formControlName="departurePrice"/>
+          <label for="departurePrice">Departure Price</label>
+        </p-float-label>
+        <p-float-label variant="on">
+          <p-input-number inputId="arrivalPrice" mode="currency" currency="PHP" formControlName="arrivalPrice"/>
+          <label for="arrivalPrice">Arrival Price</label>
+        </p-float-label>
+        <p-float-label variant="on">
+          <p-input-number inputId="totalFlightPrice" mode="currency" currency="PHP" formControlName="totalFlightPrice"/>
+          <label for="totalFlightPrice">Total Flight Price</label>
+        </p-float-label>
+      </p-fluid>
+      <p-float-label variant="on" [ngClass]="{'next-row': form.controls.modeOfTransportation.value !== 'Flight' || form.controls.flightIncluded.value}">
+        <p-input-number inputId="totalRatePerPax" mode="currency" currency="PHP" formControlName="totalRatePerPax"/>
+        <label for="totalRatePerPax">Total Rate per Pax</label>
+      </p-float-label>
+      <p-float-label variant="on">
+        <p-input-number inputId="suggestedRatePerPax" mode="currency" currency="PHP"
+                        formControlName="suggestedRatePerPax"/>
+        <label for="suggestedRatePerPax">Suggested Rate per Pax</label>
+      </p-float-label>
+      <p-float-label class="col-span-2" variant="on">
+        <textarea pTextarea formControlName="inclusions" id="inclusions"></textarea>
+        <label for="inclusions">Inclusions</label>
+      </p-float-label>
+      <p-float-label class="col-span-2" variant="on">
+        <textarea pTextarea formControlName="exclusions" id="exclusions"></textarea>
+        <label for="exclusions">Exclusions</label>
+      </p-float-label>
+      <p-float-label class="col-span-2" variant="on">
+        <textarea pTextarea formControlName="optionalTours" id="optionalTours"></textarea>
+        <label for="optionalTours">Optional Tours</label>
+      </p-float-label>
+    </p-fluid>
+  </form>
+  <div class="flex gap-4 justify-center items-center">
+    <p-button label="Preview" icon="pi pi-eye" (onClick)="generate()"/>
+  </div>
+</div>

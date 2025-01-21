@@ -1,1 +1,8 @@
-<h1>Welcome to Goldrush</h1>
+<p-card>
+  <ng-container *ngIf="isLoggedIn; else loginButton">
+    <p>You are logged in</p>
+  </ng-container>
+  <ng-template #loginButton>
+    <p-button (onClick)="login()">Login via Google</p-button>
+  </ng-template>
+</p-card>

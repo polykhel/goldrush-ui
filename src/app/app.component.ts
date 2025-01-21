@@ -7,8 +7,7 @@ import { Menubar } from 'primeng/menubar';
   selector: 'app-root',
   imports: [Menubar, RouterOutlet],
   templateUrl: './app.component.html',
-  styleUrl: './app.component.css',
-  standalone: true
+  styleUrl: './app.component.css'
 })
 export class AppComponent implements OnInit {
   items: MenuItem[] | undefined;
@@ -30,6 +29,26 @@ export class AppComponent implements OnInit {
         command: () => {
           this.router.navigate(['/payment-scheduler']);
         },
+      },
+      {
+        label: 'Quotation Generator',
+        icon: 'pi pi-file-word',
+        command: () => {
+          this.router.navigate(['/quotation-generator']);
+        },
+      },
+      {
+        label: 'Tools',
+        icon: 'pi pi-wrench',
+        items: [
+          {
+            label: 'List to JSON',
+            icon: 'pi pi-file-json',
+            command: () => {
+              this.router.navigate(['/tools/list-to-json']);
+            },
+          }
+        ]
       },
     ];
   }

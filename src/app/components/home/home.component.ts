@@ -1,10 +1,27 @@
-import { Component } from '@angular/core';
+import { NgIf } from '@angular/common';
+import { Component, OnInit } from '@angular/core';
+import { AuthService } from '@core/services/auth.service';
+import { environment } from '@env/environment';
+import { Button } from 'primeng/button';
+import { Card } from 'primeng/card';
 
 @Component({
   selector: 'app-home',
-  imports: [],
+  imports: [Button, Card, NgIf],
   templateUrl: './home.component.html',
   styleUrl: './home.component.css',
-  standalone: true,
 })
-export class HomeComponent {}
+export class HomeComponent implements OnInit {
+  private baseUrl = environment.backendUrl;
+  isLoggedIn = false;
+
+  constructor(private authService: AuthService) {}
+
+  ngOnInit(): void {
+    this.isLoggedIn = this.authService.isLoggedIn();
+  }
+
+  login() {
+    window.location.href = `${this.baseUrl}/api/connect/google`;
+  }
+}

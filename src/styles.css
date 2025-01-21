@@ -3,3 +3,21 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@font-face {
+  font-family: 'Consolas';
+  src: url('/fonts/Consolas.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'LT Superior Mono';
+  src: url('/fonts/LTSuperiorMono-Regular.otf') format('opentype');
+}
+
+.font-consolas {
+  font-family: 'Consolas', sans-serif;
+}
+
+.font-lt {
+  font-family: 'LT Superior Mono', sans-serif;
+}

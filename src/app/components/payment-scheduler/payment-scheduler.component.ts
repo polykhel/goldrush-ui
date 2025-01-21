@@ -10,8 +10,7 @@ import { FloatLabel } from 'primeng/floatlabel';
 import { Fluid } from 'primeng/fluid';
 import { InputNumber } from 'primeng/inputnumber';
 import { TableModule } from 'primeng/table';
-
-type Schedule = { date: string; amount: string };
+import { Schedule } from '@models/schedule.model';
 
 @Component({
   selector: 'app-payment-scheduler',
@@ -28,8 +27,7 @@ type Schedule = { date: string; amount: string };
     TableModule,
   ],
   templateUrl: './payment-scheduler.component.html',
-  styleUrl: './payment-scheduler.component.css',
-  standalone: true,
+  styleUrl: './payment-scheduler.component.css'
 })
 export class PaymentSchedulerComponent {
   minDate: Date = dayjs().add(45, 'day').toDate();
