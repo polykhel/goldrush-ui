@@ -39,5 +39,5 @@ jobs:
           key: ${{ secrets.VPS_PASSWORD }}
           source: dist/browser/*
           strip_components: 2
-          target: /var/www/html
-          overwrite: true
+          target: /home/goldrush/ui
+          rm: true
