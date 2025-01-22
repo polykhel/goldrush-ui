@@ -24,10 +24,10 @@ export class AppComponent implements OnInit {
         },
       },
       {
-        label: 'Payment Scheduler',
-        icon: 'pi pi-wallet',
+        label: 'Inquiry Form',
+        icon: 'pi pi-envelope',
         command: () => {
-          this.router.navigate(['/payment-scheduler']);
+          this.router.navigate(['/inquiry-form']);
         },
       },
       {
@@ -35,6 +35,13 @@ export class AppComponent implements OnInit {
         icon: 'pi pi-file-word',
         command: () => {
           this.router.navigate(['/quotation-generator']);
+        },
+      },
+      {
+        label: 'Payment Scheduler',
+        icon: 'pi pi-wallet',
+        command: () => {
+          this.router.navigate(['/payment-scheduler']);
         },
       },
       {

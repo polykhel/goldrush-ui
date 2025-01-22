@@ -1,0 +1,194 @@
+<div class="flex justify-center items-center mt-4">
+  <form [formGroup]="inquiryForm" class="bg-gray-50 p-6 rounded shadow-md">
+    <div class="flex justify-center items-center mb-4">
+      <h2 class="text-xl font-bold bg-gray-300 p-2 rounded flex-grow mr-3">Inquiry Slip</h2>
+      <div>
+        <p-float-label variant="on">
+          <p-date-picker inputId="date" formControlName="date" [showIcon]="true" dateFormat="mm-dd-yy"></p-date-picker>
+          <label for="date">Date:</label>
+        </p-float-label>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <p-float-label variant="on">
+        <input pInputText type="text" id="clientName" formControlName="clientName"
+               class="w-full border border-gray-300 px-3 py-2 rounded focus:outline-none focus:ring focus:ring-blue-300">
+        <label for="clientName">Client Name:</label>
+      </p-float-label>
+      <div>
+        <div class="flex items-center space-x-2">
+          <span class="text-gray-700 whitespace-nowrap font-bold">Contact Point:</span>
+          <p-checkbox name="contactPoint" value="FB" formControlName="contactPointFB" binary="true"></p-checkbox>
+          <span class="mr-2">FB</span>
+          <p-checkbox name="contactPoint" value="PM" formControlName="contactPointPM" binary="true"></p-checkbox>
+          <span class="mr-2">PM</span>
+          <input pInputText type="text" placeholder="Others" formControlName="contactPointOther"
+                 class="border border-gray-300 px-2 py-1 rounded w-1/2">
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 gap-6">
+        <div class="flex items-center space-x-2">
+          <span class="whitespace-nowrap text-gray-700 font-bold">Travel Details:</span>
+          <p-float-label variant="on">
+            <p-input-number [inputStyle]="{ width: '6rem' }" inputId="days" type="number"
+                            formControlName="travelDays" [showButtons]="true"/>
+            <label for="days">Days</label>
+          </p-float-label>
+          <p-float-label variant="on">
+            <p-input-number [inputStyle]="{ width: '6rem' }" inputId="nights" type="number"
+                            formControlName="travelNights" [showButtons]="true"/>
+            <label for="nights">Nights</label>
+          </p-float-label>
+          <p-float-label variant="on">
+            <input pInputText class="w-64" type="text" formControlName="destination" id="destination">
+            <label for="destination">Destination</label>
+          </p-float-label>
+        </div>
+        <div formArrayName="dateRanges" class="grid grid-cols-2">
+          <div *ngFor="let dateRange of dateRanges.controls; let i = index" [formGroupName]="i" class="mb-2">
+            <div class="flex items-center space-x-2">
+              <p-float-label variant="on">
+                <p-date-picker formControlName="dates" [showIcon]="true" dateFormat="mm-dd-yy" selectionMode="range"/>
+                <label for="dates">Dates:</label>
+              </p-float-label>
+              <p-button *ngIf="dateRanges.length > 1" icon="pi pi-times" (click)="removeDateRange(i)" class="ml-2"
+                        ariaLabel="Remove Date"
+                        [rounded]="true" [text]="true" [raised]="true" severity="danger" size="small"/>
+            </div>
+          </div>
+          <p-button class="col-span-2" icon="pi pi-plus" (click)="addDateRange()" variant="text" [raised]="true" label="Add More"
+                    size="small"/>
+        </div>
+        <div class="flex items-center space-x-2">
+          <span class="whitespace-nowrap text-gray-700 font-bold">PAX:</span>
+          <p-float-label variant="on">
+            <p-input-number [inputStyle]="{ width: '6rem' }" inputId="paxAdult" type="number"
+                            formControlName="paxAdult" [showButtons]="true"/>
+            <label for="paxAdult">Adult</label>
+          </p-float-label>
+          <p-float-label variant="on">
+            <input pInputText type="text" formControlName="paxChildAges" id="paxChildAges">
+            <label for="paxChildAges">Child Ages</label>
+          </p-float-label>
+        </div>
+      </div>
+
+      <div>
+        <label for="packages" class="text-gray-700 font-bold mb-2">Packages:</label>
+        <div class="grid grid-cols-2 gap-2">
+          <div class="flex items-center gap-2">
+            <p-radio-button value="allIn" formControlName="packageType" inputId="allIn" />
+            <label for="allIn">ALL-IN</label>
+          </div>
+          <div class="flex items-center gap-2">
+            <p-radio-button value="landArrangement" formControlName="packageType" inputId="landArrangement" />
+            <label for="landArrangement">LAND ARRANGEMENT ONLY</label>
+          </div>
+          <div class="flex items-center gap-2">
+            <p-radio-button value="tourOnly" formControlName="packageType" inputId="tourOnly" />
+            <label for="tourOnly">TOUR ONLY</label>
+          </div>
+          <div class="flex items-center gap-2">
+            <p-radio-button value="flightOnly" formControlName="packageType" inputId="flightOnly" />
+            <label for="flightOnly">FLIGHT ONLY</label>
+          </div>
+        </div>
+        <div class="col-span-2 mt-3">
+          <label for="otherServices" class="text-gray-700 font-bold mb-2">Other Services:</label>
+          <textarea id="otherServices" formControlName="otherServices" rows="2"
+                    class="w-full border border-gray-300 px-3 py-2 rounded focus:outline-none focus:ring focus:ring-blue-300"></textarea>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 gap-6">
+        <div>
+          <label class="text-gray-700 font-bold" for="priceChecklist">Price Checklist:</label>
+          <div class="grid grid-cols-1 gap-2 mt-3">
+            <p-input-group>
+              <p-inputgroup-addon>
+                <p-checkbox name="priceChecklist" value="UOS TRACKER" formControlName="priceChecklistUosTracker"
+                            [binary]="true"/>
+              </p-inputgroup-addon>
+              <input type="text" pInputText placeholder="UOS Tracker"/>
+            </p-input-group>
+            <p-input-group>
+              <p-inputgroup-addon>
+                <p-checkbox name="priceChecklist" value="BK PACKAGE" formControlName="priceChecklistBkPackage"
+                            [binary]="true"/>
+              </p-inputgroup-addon>
+              <input type="text" pInputText placeholder="BK Package"/>
+            </p-input-group>
+            <p-input-group>
+              <p-inputgroup-addon>
+                <p-checkbox name="priceChecklist" value="VIA MARKETING /HOLIDAYS TAB"
+                            formControlName="priceChecklistBkPackage" [binary]="true"/>
+              </p-inputgroup-addon>
+              <input type="text" pInputText placeholder="VIA Marketing/Holidays Tab"/>
+            </p-input-group>
+          </div>
+        </div>
+
+        <div>
+          <label class="text-gray-700 font-bold mb-2" for="emailQuotation">Email for Quotation:</label>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
+            <p-input-group>
+              <p-inputgroup-addon>
+                <p-checkbox name="priceChecklist" value="UOS GMAIL" formControlName="emailQuotationUosGmail"
+                            [binary]="true"/>
+              </p-inputgroup-addon>
+              <input type="text" pInputText placeholder="UOS Gmail"/>
+            </p-input-group>
+            <p-input-group>
+              <p-inputgroup-addon>
+                <p-checkbox name="priceChecklist" value="BK TRACKER" formControlName="emailQuotationBkGmail"
+                            [binary]="true"/>
+              </p-inputgroup-addon>
+              <input type="text" pInputText placeholder="BK Gmail"/>
+            </p-input-group>
+            <p-input-group>
+              <p-inputgroup-addon>
+                <p-checkbox name="priceChecklist" value="VIA EMAIL US" formControlName="emailQuotationViaEmailUs"
+                            [binary]="true"/>
+              </p-inputgroup-addon>
+              <input type="text" pInputText placeholder="Via Email US"/>
+            </p-input-group>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <label for="remarks" class="text-gray-700 font-bold">Remarks:</label>
+        <textarea pTextarea id="remarks" formControlName="remarks" rows="9"
+                  class="w-full border border-gray-300 mt-3 px-3 py-2 rounded focus:outline-none focus:ring focus:ring-blue-300"></textarea>
+      </div>
+
+      <div class="md:col-span-2 md:grid md:grid-cols-4">
+        <div class="md:col-span-2 flex items-center space-x-4">
+          <label class="text-gray-700 font-bold" for="quotationSubmitted">Quotation
+            Submitted?</label>
+          <p-radio-button name="quotationSubmitted" value="yes"
+                         formControlName="quotationSubmitted" inputId="quotationSubmittedYes" />
+          <label for="quotationSubmittedYes">Yes</label>
+          <p-radio-button name="quotationSubmitted" value="no"
+                         formControlName="quotationSubmitted"></p-radio-button>
+          <label for="quotationSubmittedNo">No</label>
+        </div>
+        <p-float-label variant="on">
+          <input type="text" id="roe" formControlName="roe" pInputText>
+          <label for="roe" class="text-gray-700 font-bold">ROE:</label>
+        </p-float-label>
+        <p-float-label variant="on">
+          <input type="text" id="tp" formControlName="tp" pInputText>
+          <label for="tp" class="text-gray-700 font-bold">TP:</label>
+        </p-float-label>
+      </div>
+
+    </div>
+
+    <div class="mt-6 flex justify-center">
+      <p-button type="submit" [rounded]="true" severity="success" label="Submit" icon="pi pi-check"/>
+    </div>
+  </form>
+</div>

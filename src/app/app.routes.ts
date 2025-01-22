@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { HomeComponent } from '@components/home/home.component';
+import { InquiryFormComponent } from '@components/inquiry-form/inquiry-form.component';
 import { PaymentSchedulerComponent } from '@components/payment-scheduler/payment-scheduler.component';
 import { QuotationGeneratorComponent } from '@components/quotation-generator/quotation-generator.component';
 import { ListToJsonComponent } from '@components/tools/list-to-json/list-to-json.component';
@@ -10,6 +11,11 @@ export const routes: Routes = [
   {
     path: 'home',
     component: HomeComponent,
+  },
+  {
+    path: 'inquiry-form',
+    component: InquiryFormComponent,
+    canActivate: [AuthGuard],
   },
   {
     path: 'payment-scheduler',
