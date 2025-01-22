@@ -22,6 +22,11 @@ jobs:
       - name: Install dependencies
         run: npm install
 
+      - name: Create .env file
+        run: |
+          touch .env
+          echo NG_APP_BACKEND_URL = ${{ secrets.NG_APP_BACKEND_URL }} >> .env
+
       - name: Build Angular app
         run: npm run build --omit=dev
 
@@ -32,4 +37,5 @@ jobs:
           username: ${{ secrets.VPS_USER }}
           password: ${{ secrets.VPS_PASSWORD }}
           source: dist/browser/*
+          strip_components: 2
           target: /var/www/html
