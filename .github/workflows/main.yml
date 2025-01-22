@@ -40,3 +40,4 @@ jobs:
           source: dist/browser/*
           strip_components: 2
           target: /var/www/html
+          overwrite: true
