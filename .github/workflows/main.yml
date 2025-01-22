@@ -36,7 +36,7 @@ jobs:
         with:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USER }}
-          password: ${{ secrets.VPS_PASSWORD }}
+          key: ${{ secrets.VPS_PASSWORD }}
           source: dist/browser/*
           strip_components: 2
           target: /var/www/html
