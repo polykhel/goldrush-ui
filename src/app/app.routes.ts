@@ -1,17 +1,12 @@
 import { Routes } from '@angular/router';
-import { ListToJsonComponent } from '@components/tools/list-to-json/list-to-json.component';
-import { AuthCallbackComponent } from '@core/auth/auth-callback.component';
 import { HomeComponent } from '@components/home/home.component';
 import { PaymentSchedulerComponent } from '@components/payment-scheduler/payment-scheduler.component';
 import { QuotationGeneratorComponent } from '@components/quotation-generator/quotation-generator.component';
+import { ListToJsonComponent } from '@components/tools/list-to-json/list-to-json.component';
+import { AuthCallbackComponent } from '@core/auth/auth-callback.component';
 import { AuthGuard } from '@core/auth/auth.guard';
 
 export const routes: Routes = [
-  {
-    path: '',
-    redirectTo: 'home',
-    pathMatch: 'full',
-  },
   {
     path: 'home',
     component: HomeComponent,
@@ -28,10 +23,20 @@ export const routes: Routes = [
   },
   {
     path: 'tools/list-to-json',
-    component: ListToJsonComponent
+    component: ListToJsonComponent,
   },
   {
     path: 'auth/callback/google',
     component: AuthCallbackComponent,
+  },
+  {
+    path: '',
+    redirectTo: 'home',
+    pathMatch: 'full',
+  },
+  {
+    path: '**',
+    redirectTo: 'home',
+    pathMatch: 'full',
   },
 ];
