@@ -13,24 +13,22 @@ jobs:
         uses: actions/checkout@v4.2.2
 
       - name: Cache node modules
-        uses: actions/cache@v4.2.0
+        uses: actions/setup-node@v4
         with:
-          path: ~/.npm
-          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-node-
+          node-version: 20
+          cache: 'npm'
 
       - name: Install dependencies
-        run: npm install
+        run: npm install --omit=dev
 
       - name: Build Angular app
-        run: npm run build --prod
+        run: npm run build --omit=dev
 
       - name: Transfer to VPS
-        uses: appleboy/ssh-action@master
+        uses: appleboy/scp-action@v0.1.7
         with:
-          host: ${{ secrets.VPS_HOST }}
-          username: ${{ secrets.VPS_USERNAME }}
-          password: ${{ secrets.VPS_PASSWORD }}
-          script: |
-            scp -r dist/* ${{ secrets.VPS_USERNAME }}@${{ secrets.VPS_HOST }}:~/web
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          password: ${{ secrets.PASSWORD }}
+          source: dist
+          target: ~/web
