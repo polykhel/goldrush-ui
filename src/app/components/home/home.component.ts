@@ -4,10 +4,11 @@ import { AuthService } from '@core/services/auth.service';
 import { environment } from '@env/environment';
 import { Button } from 'primeng/button';
 import { Card } from 'primeng/card';
+import { PortalComponent } from '../portal/portal.component';
 
 @Component({
   selector: 'app-home',
-  imports: [Button, Card, NgIf],
+  imports: [Button, Card, NgIf, PortalComponent],
   templateUrl: './home.component.html',
   styleUrl: './home.component.css',
 })
