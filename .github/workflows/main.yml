@@ -31,5 +31,5 @@ jobs:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USER }}
           password: ${{ secrets.VPS_PASSWORD }}
-          source: dist
-          target: ~/web
+          source: dist/browser
+          target: /var/www/html
