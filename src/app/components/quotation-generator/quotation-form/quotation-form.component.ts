@@ -134,6 +134,10 @@ export class QuotationFormComponent implements OnInit {
     return this.form.controls.ratePerPax;
   }
 
+  get flightIncluded() {
+    return this.form.controls.flightIncluded;
+  }
+
   ngOnInit(): void {
     this.country.valueChanges
       .pipe(takeUntil(this.destroy$))
@@ -170,7 +174,7 @@ export class QuotationFormComponent implements OnInit {
         this.calculateTotalFlightPrice();
       });
 
-    merge(this.ratePerPax.valueChanges, this.totalFlightPrice.valueChanges)
+    merge(this.ratePerPax.valueChanges, this.totalFlightPrice.valueChanges, this.flightIncluded.valueChanges)
       .pipe(takeUntil(this.destroy$))
       .subscribe(() => {
         this.calculateTotalRatePerPax();
@@ -206,11 +210,15 @@ export class QuotationFormComponent implements OnInit {
   calculateTotalFlightPrice(): void {
     const departurePrice = this.departurePrice.value ?? 0;
     const arrivalPrice = this.arrivalPrice.value ?? 0;
-    console.log(arrivalPrice, departurePrice);
     this.totalFlightPrice.setValue(departurePrice + arrivalPrice);
   }
 
   calculateTotalRatePerPax(): void {
+    if (this.flightIncluded.value) {
+      this.form.controls.totalRatePerPax.setValue(this.ratePerPax.value);
+      return;
+    }
+
     const ratePerPax = this.ratePerPax.value ?? 0;
     const totalFlightPrice = this.totalFlightPrice.value ?? 0;
     const total = totalFlightPrice + ratePerPax;

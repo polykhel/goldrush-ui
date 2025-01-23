@@ -31,7 +31,10 @@ export class QuotationGeneratorComponent {
     const element = document.getElementById('preview');
     if (element) {
       if (type === 'img') {
-        html2canvas(element, { allowTaint: true, useCORS: true }).then(
+        html2canvas(element, {
+          allowTaint: true,
+          useCORS: true
+        }).then(
           (canvas) => {
             const imgData = canvas.toDataURL('image/png');
             const link = document.createElement('a');
