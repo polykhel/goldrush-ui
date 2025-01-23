@@ -5,12 +5,14 @@ import { CountryService } from '@core/services/country.service';
 import { DestroyService } from '@core/services/destroy.service';
 import { PackageService } from '@core/services/package.service';
 import { ProviderService } from '@core/services/provider.service';
+import { formatPairedValues, formatValue } from '@core/utils/string.util';
 import { environment } from '@env/environment';
 import { Asset } from '@models/asset.model';
 import { Country } from '@models/country.model';
 import { Package } from '@models/package.model';
 import { Provider } from '@models/provider.model';
 import { Quotation } from '@models/quotation.model';
+import dayjs from 'dayjs';
 import { Button } from 'primeng/button';
 import { Checkbox } from 'primeng/checkbox';
 import { DatePicker } from 'primeng/datepicker';
@@ -22,6 +24,14 @@ import { RadioButton } from 'primeng/radiobutton';
 import { Select } from 'primeng/select';
 import { Textarea } from 'primeng/textarea';
 import { merge, takeUntil } from 'rxjs';
+
+type FlightDetail = Partial<{
+  flightNumber: string | null;
+  iataCode: string | null;
+  date: Date | null;
+  startTime: Date | null;
+  endTime: Date | null;
+}>;
 
 @Component({
   selector: 'app-quotation-form',
@@ -69,15 +79,27 @@ export class QuotationFormComponent implements OnInit {
     noOfPax: this.formBuilder.control<number | null>(null, [
       Validators.required,
     ]),
-    modeOfTransportation: this.formBuilder.control<string | null>(null, [
+    modeOfTransportation: this.formBuilder.control<string | null>('Flight', [
       Validators.required,
     ]),
     flightIncluded: this.formBuilder.control<boolean>(true, [
       Validators.required,
     ]),
     airline: this.formBuilder.control<string | null>(null),
-    departure: this.formBuilder.control<string | null>(null),
-    arrival: this.formBuilder.control<string | null>(null),
+    departure: this.formBuilder.group({
+      flightNumber: this.formBuilder.control<string | null>(null),
+      iataCode: this.formBuilder.control<string | null>('MNL'),
+      date: this.formBuilder.control<Date | null>(null),
+      startTime: this.formBuilder.control<Date | null>(null),
+      endTime: this.formBuilder.control<Date | null>(null),
+    }),
+    arrival: this.formBuilder.group({
+      flightNumber: this.formBuilder.control<string | null>(null),
+      iataCode: this.formBuilder.control<string | null>('MNL'),
+      date: this.formBuilder.control<Date | null>(null),
+      startTime: this.formBuilder.control<Date | null>(null),
+      endTime: this.formBuilder.control<Date | null>(null),
+    }),
     arrivalPrice: this.formBuilder.control<number | null>(null),
     departurePrice: this.formBuilder.control<number | null>(null),
     totalFlightPrice: this.formBuilder.control<number | null>({
@@ -174,7 +196,11 @@ export class QuotationFormComponent implements OnInit {
         this.calculateTotalFlightPrice();
       });
 
-    merge(this.ratePerPax.valueChanges, this.totalFlightPrice.valueChanges, this.flightIncluded.valueChanges)
+    merge(
+      this.ratePerPax.valueChanges,
+      this.totalFlightPrice.valueChanges,
+      this.flightIncluded.valueChanges,
+    )
       .pipe(takeUntil(this.destroy$))
       .subscribe(() => {
         this.calculateTotalRatePerPax();
@@ -189,6 +215,27 @@ export class QuotationFormComponent implements OnInit {
       .subscribe((data) => {
         if (data) {
           this.updateDetails(data);
+        }
+      });
+
+    this.form.controls.travelDates.valueChanges
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((travelDates) => {
+        if (travelDates) {
+          if (travelDates[0]) {
+            this.form.controls.departure.controls.date.setValue(travelDates[0]);
+          } else {
+            this.form.controls.departure.controls.date.setValue(null);
+          }
+
+          if (travelDates[1]) {
+            this.form.controls.arrival.controls.date.setValue(travelDates[1]);
+          } else {
+            this.form.controls.arrival.controls.date.setValue(null);
+          }
+        } else {
+          this.form.controls.departure.controls.date.setValue(null);
+          this.form.controls.arrival.controls.date.setValue(null);
         }
       });
   }
@@ -269,15 +316,46 @@ export class QuotationFormComponent implements OnInit {
     );
   }
 
+  getFlightDetails(flightDetail: FlightDetail, nextCode?: string | null) {
+    const date = flightDetail.date
+      ? dayjs(flightDetail.date).format('MM/DD/YY')
+      : '';
+    const startTime = flightDetail.startTime
+      ? dayjs(flightDetail.startTime).format('HH:mm')
+      : '';
+    const endTime = flightDetail.endTime
+      ? dayjs(flightDetail.endTime).format('HH:mm')
+      : '';
+    const route = formatPairedValues(flightDetail.iataCode, nextCode);
+    const timeRange = formatPairedValues(startTime, endTime);
+
+    return [
+      formatValue(flightDetail.flightNumber),
+      route,
+      formatValue(date),
+      timeRange,
+    ]
+      .filter(Boolean)
+      .join(' ');
+  }
+
   generate() {
-    let value = this.form.value;
+    const value = this.form.value;
 
     const flightDetails: string[] = [];
     if (value.departure) {
-      flightDetails.push(value.departure);
+      const departureDetails = this.getFlightDetails(
+        value.departure,
+        value.arrival?.iataCode,
+      );
+      if (departureDetails) flightDetails.push(departureDetails);
     }
     if (value.arrival) {
-      flightDetails.push(value.arrival);
+      const arrivalDetails = this.getFlightDetails(
+        value.arrival,
+        value.departure?.iataCode,
+      );
+      if (arrivalDetails) flightDetails.push(arrivalDetails);
     }
 
     this.onFormChange.emit({

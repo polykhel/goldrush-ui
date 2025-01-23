@@ -66,7 +66,7 @@
         <p-input-number inputId="ratePerPax" mode="currency" currency="PHP" formControlName="ratePerPax"/>
         <label for="ratePerPax">Rate per Pax</label>
       </p-float-label>
-      <div class="flex flex-wrap gap-4">
+      <div class="flex flex-wrap gap-4 col-span-2">
         <div class="flex items-center">
           <p-radio-button value="Flight" formControlName="modeOfTransportation" inputId="flight"/>
           <label for="flight" class="ml-2">Flight</label>
@@ -75,39 +75,87 @@
           <p-radio-button value="Bus" formControlName="modeOfTransportation" inputId="bus"/>
           <label for="bus" class="ml-2">Bus</label>
         </div>
+        <p-fluid class="grid grid-cols-2 gap-2" *ngIf="form.controls.modeOfTransportation.value === 'Flight'">
+          <div class="grid grid-cols-2 gap-2">
+            <div formGroupName="departure" class="flex flex-col gap-2">
+              <span class="font-semibold">Departure</span>
+              <p-float-label variant="on">
+                <input type="text" pInputText id="departureFlightNumber" formControlName="flightNumber"/>
+                <label for="departureFlightNumber">Flight Number</label>
+              </p-float-label>
+              <p-float-label variant="on">
+                <input type="text" pInputText id="departureIataCode" formControlName="iataCode"/>
+                <label for="departureIataCode">IATA Code</label>
+              </p-float-label>
+              <p-float-label variant="on">
+                <p-date-picker id="departureDate" formControlName="date" [showIcon]="true"></p-date-picker>
+                <label for="departureDate">Date</label>
+              </p-float-label>
+              <div class="grid grid-cols-2 gap-1">
+                <p-float-label variant="on">
+                  <p-date-picker id="departureStartTime" formControlName="startTime" [timeOnly]="true"></p-date-picker>
+                  <label for="departureStartTime">Start Time</label>
+                </p-float-label>
+                <p-float-label variant="on">
+                  <p-date-picker id="departureEndTime" formControlName="endTime" [timeOnly]="true"></p-date-picker>
+                  <label for="departureEndTime">End Time</label>
+                </p-float-label>
+              </div>
+            </div>
+            <div formGroupName="arrival" class="flex flex-col gap-2">
+              <span class="font-semibold">Arrival</span>
+              <p-float-label variant="on">
+                <input type="text" pInputText id="arrivalFlightNumber" formControlName="flightNumber"/>
+                <label for="arrivalFlightNumber">Flight Number</label>
+              </p-float-label>
+              <p-float-label variant="on">
+                <p-select inputId="arrivalIataCode" [options]="country.value?.iataCodes" [editable]="true" formControlName="iataCode" optionLabel="title"/>
+                <label for="arrivalIataCode">IATA Code</label>
+              </p-float-label>
+              <p-float-label variant="on">
+                <p-date-picker id="arrivalDate" formControlName="date" [showIcon]="true"></p-date-picker>
+                <label for="arrivalDate">Date</label>
+              </p-float-label>
+              <div class="grid grid-cols-2 gap-1">
+                <p-float-label variant="on">
+                  <p-date-picker id="arrivalStartTime" formControlName="startTime" [timeOnly]="true"></p-date-picker>
+                  <label for="arrivalStartTime">Start Time</label>
+                </p-float-label>
+                <p-float-label variant="on">
+                  <p-date-picker id="arrivalEndTime" formControlName="endTime" [timeOnly]="true"></p-date-picker>
+                  <label for="arrivalEndTime">End Time</label>
+                </p-float-label>
+              </div>
+            </div>
+            <div class="col-span-2">
+              <p-float-label variant="on">
+                <input type="text" pInputText id="airline" formControlName="airline"/>
+                <label for="airline">Airline</label>
+              </p-float-label>
+            </div>
+          </div>
+          <div class="flex flex-col gap-2">
+            <div>
+              <p-checkbox inputId="flightIncluded" [binary]="true" formControlName="flightIncluded"/>
+              <label for="flightIncluded" class="ml-2">Is flight included in the price?</label>
+            </div>
+            <ng-container *ngIf="!form.controls.flightIncluded.value">
+              <p-float-label variant="on">
+                <p-input-number inputId="departurePrice" mode="currency" currency="PHP" formControlName="departurePrice"/>
+                <label for="departurePrice">Departure Price</label>
+              </p-float-label>
+              <p-float-label variant="on">
+                <p-input-number inputId="arrivalPrice" mode="currency" currency="PHP" formControlName="arrivalPrice"/>
+                <label for="arrivalPrice">Arrival Price</label>
+              </p-float-label>
+              <p-float-label variant="on">
+                <p-input-number inputId="totalFlightPrice" mode="currency" currency="PHP" formControlName="totalFlightPrice"/>
+                <label for="totalFlightPrice">Total Flight Price</label>
+              </p-float-label>
+            </ng-container>
+          </div>
+        </p-fluid>
       </div>
-      <div *ngIf="form.controls.modeOfTransportation.value === 'Flight'">
-        <p-checkbox inputId="flightIncluded" [binary]="true" formControlName="flightIncluded"/>
-        <label for="flightIncluded" class="ml-2">Is flight included in the price?</label>
-      </div>
-      <p-fluid class="grid grid-cols-1 gap-2" *ngIf="form.controls.modeOfTransportation.value === 'Flight'">
-        <p-float-label variant="on">
-          <input type="text" pInputText id="departure" formControlName="departure"/>
-          <label for="departure">Departure</label>
-        </p-float-label>
-        <p-float-label variant="on">
-          <input type="text" pInputText id="arrival" formControlName="arrival"/>
-          <label for="arrival">Arrival</label>
-        </p-float-label>
-        <p-float-label variant="on">
-          <input type="text" pInputText id="airline" formControlName="airline"/>
-          <label for="airline">Airline</label>
-        </p-float-label>
-      </p-fluid>
-      <p-fluid class="grid grid-cols-1 gap-2" *ngIf="!form.controls.flightIncluded.value">
-        <p-float-label variant="on">
-          <p-input-number inputId="departurePrice" mode="currency" currency="PHP" formControlName="departurePrice"/>
-          <label for="departurePrice">Departure Price</label>
-        </p-float-label>
-        <p-float-label variant="on">
-          <p-input-number inputId="arrivalPrice" mode="currency" currency="PHP" formControlName="arrivalPrice"/>
-          <label for="arrivalPrice">Arrival Price</label>
-        </p-float-label>
-        <p-float-label variant="on">
-          <p-input-number inputId="totalFlightPrice" mode="currency" currency="PHP" formControlName="totalFlightPrice"/>
-          <label for="totalFlightPrice">Total Flight Price</label>
-        </p-float-label>
-      </p-fluid>
       <p-float-label variant="on" [ngClass]="{'next-row': form.controls.modeOfTransportation.value !== 'Flight' || form.controls.flightIncluded.value}">
         <p-input-number inputId="totalRatePerPax" mode="currency" currency="PHP" formControlName="totalRatePerPax"/>
         <label for="totalRatePerPax">Total Rate per Pax</label>
