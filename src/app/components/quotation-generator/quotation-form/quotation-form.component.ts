@@ -263,6 +263,7 @@ export class QuotationFormComponent implements OnInit {
   calculateTotalRatePerPax(): void {
     if (this.flightIncluded.value) {
       this.form.controls.totalRatePerPax.setValue(this.ratePerPax.value);
+      this.form.controls.suggestedRatePerPax.setValue(this.ratePerPax.value);
       return;
     }
 
