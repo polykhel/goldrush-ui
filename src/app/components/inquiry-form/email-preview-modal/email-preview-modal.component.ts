@@ -1,5 +1,6 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { EmailData } from '@core/utils/email.util';
 import { PrimeTemplate } from 'primeng/api';
 import { Dialog } from 'primeng/dialog';
 import { TabView, TabPanel } from 'primeng/tabview';
@@ -15,9 +16,9 @@ import { ProviderQuotation } from '@models/inquiry.model';
 })
 export class EmailPreviewModalComponent {
   @Input() visible = false;
-  @Input() emailData!: Map<string, string>;
+  @Input() emailData!: Map<string, EmailData>;
   @Input() providers!: Map<string, Provider>;
-  @Input() providerQuotations: ProviderQuotation[] = [];
+  @Input() providerQuotations: any[] = [];
   @Input() isSending = false;
 
   @Output() visibleChange = new EventEmitter<boolean>();
@@ -28,8 +29,11 @@ export class EmailPreviewModalComponent {
     return this.providers.get(key)?.name || 'Unknown Provider';
   }
 
-  isProviderSent(key: string): boolean {
-    return this.providerQuotations[Number(key)]?.sent || false;
+  isProviderSent(providerId: string): boolean {
+    const quotation = this.providerQuotations.find(
+      (q) => q.provider === providerId
+    );
+    return quotation?.sent || false;
   }
 
   getStatusClass(key: string): string {

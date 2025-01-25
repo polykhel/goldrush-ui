@@ -9,11 +9,13 @@ import {
   Validators,
 } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
+import { EmailService } from '@app/core/services/email.service';
 import { AuthService } from '@core/services/auth.service';
 import { DestroyService } from '@core/services/destroy.service';
 import { ExchangeRateService } from '@core/services/exchange-rate.service';
 import { InquiryService } from '@core/services/inquiry.service';
 import { ProviderService } from '@core/services/provider.service';
+import { EmailData, prepareProviderEmail } from '@core/utils/email.util';
 import {
   Inquiry,
   ProviderQuotation,
@@ -71,7 +73,7 @@ export class InquiryFormComponent implements OnInit {
   formBuilder = inject(FormBuilder);
   isEditMode = false;
   showEmailPreview = false;
-  emailData = new Map<string, string>();
+  emailData = new Map<string, EmailData>();
   isSending = false;
 
   inquiryForm = this.formBuilder.group({
@@ -128,10 +130,11 @@ export class InquiryFormComponent implements OnInit {
     private authService: AuthService,
     private destroy$: DestroyService,
     private inquiryService: InquiryService,
+    private emailService: EmailService,
     private messageService: MessageService,
     private route: ActivatedRoute,
     private location: Location,
-    private router: Router
+    private router: Router,
   ) {
     this.addDateRange();
   }
@@ -374,9 +377,19 @@ export class InquiryFormComponent implements OnInit {
 
   sendQuotations() {
     if (this.inquiryForm.valid) {
-      this.emailData = this.inquiryService.prepareEmailData(
+      this.emailData = prepareProviderEmail(
         this.mapProviderQuotations(this.inquiryForm.getRawValue()),
       );
+
+      if (this.emailData.size === 0) {
+        this.messageService.add({
+          severity: 'info',
+          summary: 'No Quotations',
+          detail: 'No new quotations to send. All selected quotations have already been sent.',
+        });
+        return;
+      }
+
       this.showEmailPreview = true;
     } else {
       this.messageService.add({
@@ -390,12 +403,40 @@ export class InquiryFormComponent implements OnInit {
   async handleSendEmails() {
     try {
       this.isSending = true;
-      await firstValueFrom(
-        this.inquiryService.sendEmails(
-          this.currentInquiry!.documentId,
-          this.emailData,
-        ),
+      const emailPromises = Array.from(this.emailData.entries()).map(
+        async ([providerId, emailData]) => {
+          const provider = this.providerMap.get(providerId);
+          if (!provider) {
+            console.error(`Provider not found for ID: ${providerId}`);
+            return;
+          }
+
+          return firstValueFrom(
+            this.emailService.sendEmail({
+              to: provider.email,
+              subject: emailData.subject,
+              html: emailData.emailContent,
+            }),
+          );
+        },
       );
+
+      await Promise.all(emailPromises.filter(Boolean));
+
+      // Update sent status for providers
+      const quotations = this.providerQuotations.controls;
+      this.emailData.forEach((_, providerId) => {
+        const index = quotations.findIndex(
+          (q) => q.get('provider')?.value === providerId,
+        );
+        if (index !== -1) {
+          quotations[index].patchValue({ sent: true });
+        }
+      });
+
+      // Save the inquiry with updated sent status
+      this.saveInquiry();
+
       this.messageService.add({
         severity: 'success',
         summary: 'Success',
@@ -403,6 +444,7 @@ export class InquiryFormComponent implements OnInit {
       });
       this.showEmailPreview = false;
     } catch (error) {
+      console.error('Error sending emails:', error);
       this.messageService.add({
         severity: 'error',
         summary: 'Error',
@@ -430,7 +472,9 @@ export class InquiryFormComponent implements OnInit {
 
   mapProviderQuotations(inquiry: any): ProviderQuotationRequest[] {
     return inquiry.providerQuotations
-      .filter((quotation: any) => quotation.includeInEmail)
+      .filter((quotation: any) =>
+        quotation.includeInEmail && !quotation.sent
+      )
       .map((quotation: any) => ({
         providerId: quotation.provider,
         dateRanges: inquiry.dateRanges,

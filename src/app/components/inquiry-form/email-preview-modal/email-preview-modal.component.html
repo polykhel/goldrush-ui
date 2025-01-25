@@ -12,7 +12,8 @@
               {{ isProviderSent(email.key) ? 'Already Sent' : 'Not Sent' }}
             </span>
       </div>
-      <pre class="whitespace-pre-wrap">{{ email.value }}</pre>
+      <pre class="whitespace-pre-wrap">{{ email.value.subject }}</pre>
+      <div [innerHTML]="email.value.emailContent"></div>
     </p-tabPanel>
   </p-tabView>
 
