@@ -8,25 +8,57 @@
     </header>
   </ng-template>
 
+  <div class="flex justify-end gap-2 mb-4">
+    <p-inputgroup>
+      <p-inputgroup-addon>
+        <i class="pi pi-search"></i>
+      </p-inputgroup-addon>
+      <input 
+        pInputText 
+        type="text" 
+        (input)="onSearch($event)"
+        [value]="searchTerm"
+        placeholder="Search client or destination..."/>
+    </p-inputgroup>
+  </div>
+
   <p-table
     [value]="inquiries"
     [rows]="10"
     [paginator]="true"
-    [globalFilterFields]="['clientName', 'destination']"
     [tableStyle]="{ 'min-width': '75rem' }"
     [rowHover]="true"
     dataKey="id"
     [showCurrentPageReport]="true"
     [loading]="loading"
     currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
+    (onPage)="onPage($event)"
+    [rowsPerPageOptions]="[10, 25, 50]"
+    [sortField]="sortField"
+    [sortOrder]="sortOrder"
+    (onSort)="onSort($event)"
+    [totalRecords]="totalRecords"
+    [lazy]="true"
   >
     <ng-template pTemplate="header">
       <tr>
-        <th id="clientName">Client Name</th>
-        <th id="destination">Destination</th>
+        <th id="clientName" pSortableColumn="clientName">
+          Client Name
+          <p-sortIcon field="clientName"></p-sortIcon>
+        </th>
+        <th id="destination" pSortableColumn="destination">
+          Destination
+          <p-sortIcon field="destination"></p-sortIcon>
+        </th>
         <th id="travelDates">Travel Dates</th>
-        <th id="status">Status</th>
-        <th id="createdAt">Created At</th>
+        <th id="status" pSortableColumn="submitted">
+          Status
+          <p-sortIcon field="submitted"></p-sortIcon>
+        </th>
+        <th id="createdAt" pSortableColumn="createdAt">
+          Created At
+          <p-sortIcon field="createdAt"></p-sortIcon>
+        </th>
         <th id="actions">Actions</th>
       </tr>
     </ng-template>

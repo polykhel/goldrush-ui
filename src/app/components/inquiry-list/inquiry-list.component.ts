@@ -1,5 +1,5 @@
 import { DatePipe, NgForOf } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
 import { InquiryService } from '@core/services/inquiry.service';
 import { Inquiry } from '@models/inquiry.model';
@@ -7,57 +7,112 @@ import { ConfirmationService, MessageService } from 'primeng/api';
 import { Button } from 'primeng/button';
 import { Card } from 'primeng/card';
 import { ConfirmDialog } from 'primeng/confirmdialog';
+import { InputGroup } from 'primeng/inputgroup';
+import { InputGroupAddon } from 'primeng/inputgroupaddon';
+import { InputText } from 'primeng/inputtext';
 import { TableModule } from 'primeng/table';
 import { Toast } from 'primeng/toast';
-import { firstValueFrom } from 'rxjs';
+import { firstValueFrom, Subject, debounceTime, distinctUntilChanged } from 'rxjs';
 
 @Component({
   selector: 'app-inquiry-list',
   standalone: true,
-  imports: [TableModule, Toast, ConfirmDialog, Button, Card, DatePipe, NgForOf],
+  imports: [
+    TableModule,
+    Toast,
+    ConfirmDialog,
+    Button,
+    Card,
+    DatePipe,
+    NgForOf,
+    InputGroup,
+    InputGroupAddon,
+    InputText,
+  ],
   providers: [MessageService, ConfirmationService],
   templateUrl: './inquiry-list.component.html',
 })
-export class InquiryListComponent implements OnInit {
+export class InquiryListComponent implements OnInit, OnDestroy {
   inquiries: Inquiry[] = [];
   first = 0;
   rows = 10;
   totalRecords = 0;
   loading = false;
+  sortField: string = 'createdAt';
+  sortOrder: number = -1;
+  searchTerm: string = '';
+  private searchSubject = new Subject<string>();
+  private currentPage = 0;
+  private pageSize = 10;
 
   constructor(
     private inquiryService: InquiryService,
     private router: Router,
     private messageService: MessageService,
     private confirmationService: ConfirmationService,
-  ) {}
+  ) {
+    this.setupSearch();
+  }
 
   ngOnInit() {
     this.loadInquiries();
   }
 
-  async loadInquiries(event?: any) {
-    try {
-      this.loading = true;
-      const page = event ? (event.first / event.rows) + 1 : 1;
-      const response = await firstValueFrom(
-        this.inquiryService.getInquiries({
-          page,
-          pageSize: event?.rows || this.rows,
-          sort: [event?.sortField ? `${event.sortField}:${event.sortOrder === 1 ? 'asc' : 'desc'}` : 'createdAt:desc']
-        })
-      );
-      this.inquiries = response.data;
-      this.totalRecords = response.meta.pagination.total;
-    } catch (error) {
-      this.messageService.add({
-        severity: 'error',
-        summary: 'Error',
-        detail: 'Failed to load inquiries'
+  ngOnDestroy() {
+    this.searchSubject.complete();
+  }
+
+  private setupSearch() {
+    this.searchSubject
+      .pipe(debounceTime(300), distinctUntilChanged())
+      .subscribe(() => {
+        this.currentPage = 0;
+        this.loadInquiries();
       });
-    } finally {
-      this.loading = false;
-    }
+  }
+
+  onSearch(event: any) {
+    this.searchTerm = event.target.value;
+    this.searchSubject.next(this.searchTerm);
+  }
+
+  onSort(event: any) {
+    this.sortField = event.field;
+    this.sortOrder = event.order;
+    this.loadInquiries();
+  }
+
+  onPage(event: any) {
+    this.currentPage = event.first / event.rows;
+    this.pageSize = event.rows;
+    this.loadInquiries();
+  }
+
+  private loadInquiries() {
+    this.loading = true;
+    this.inquiryService
+      .getInquiries({
+        page: this.currentPage,
+        pageSize: this.pageSize,
+        sortField: this.sortField,
+        sortOrder: this.sortOrder,
+        search: this.searchTerm,
+      })
+      .subscribe({
+        next: (response) => {
+          this.inquiries = response.items;
+          this.totalRecords = response.total;
+          this.loading = false;
+        },
+        error: (error) => {
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: 'Failed to load inquiries',
+          });
+          this.loading = false;
+        },
+      });
   }
 
   createInquiry() {
@@ -95,11 +150,5 @@ export class InquiryListComponent implements OnInit {
         detail: 'Failed to delete inquiry',
       });
     }
-  }
-
-  onPage(event: any) {
-    this.first = event.first;
-    this.rows = event.rows;
-    this.loadInquiries(event);
   }
 }

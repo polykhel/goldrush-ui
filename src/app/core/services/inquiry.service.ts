@@ -1,4 +1,4 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { environment } from '@env/environment';
 import { SingleData, ListData } from '@models/base.model';
@@ -11,6 +11,14 @@ interface PaginationParams {
   page?: number;
   pageSize?: number;
   sort?: string[];
+}
+
+interface InquiryParams {
+  page: number;
+  pageSize: number;
+  sortField?: string;
+  sortOrder?: number;
+  search?: string;
 }
 
 @Injectable({
@@ -26,17 +34,40 @@ export class InquiryService {
     return inquiry;
   }
 
-  getInquiries(params: PaginationParams = {}) {
+  getInquiries(params: InquiryParams) {
     const query = qs.stringify({
       pagination: {
-        page: params.page || 1,
-        pageSize: params.pageSize || 10
+        page: params.page + 1,
+        pageSize: params.pageSize
       },
-      sort: params.sort || ['createdAt:desc'],
+      sort: params.sortField ? 
+        [`${params.sortField}:${params.sortOrder === 1 ? 'asc' : 'desc'}`] : 
+        ['createdAt:desc'],
+      filters: {
+        $or: params.search ? [
+          {
+            clientName: {
+              $containsi: params.search
+            }
+          },
+          {
+            destination: {
+              $containsi: params.search
+            }
+          }
+        ] : undefined,
+      },
       populate: ['dateRanges']
-    }, { encodeValuesOnly: true });
+    }, {
+      encodeValuesOnly: true
+    });
 
-    return this.http.get<ListData<Inquiry>>(`${this.baseUrl}?${query}`);
+    return this.http.get<ListData<Inquiry>>(`${this.baseUrl}?${query}`).pipe(
+      map(response => ({
+        items: response.data,
+        total: response.meta.pagination.total
+      }))
+    );
   }
 
   getInquiry(id: string): Observable<Inquiry> {
