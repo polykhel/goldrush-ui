@@ -487,6 +487,7 @@ export class InquiryFormComponent implements OnInit {
         packageType: inquiry.packageType,
         preferredHotel: inquiry.preferredHotel,
         otherServices: inquiry.otherServices,
+        emailRemarks: quotation.emailRemarks,
         sender: `${this.currentUser?.firstName} ${this.currentUser?.lastName?.charAt(0)}.`,
         sent: quotation.sent,
       }));
