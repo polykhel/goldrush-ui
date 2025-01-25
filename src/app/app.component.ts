@@ -2,19 +2,24 @@ import { Component, OnInit } from '@angular/core';
 import { Router, RouterOutlet } from '@angular/router';
 import { MenuItem } from 'primeng/api';
 import { Menubar } from 'primeng/menubar';
+import { AuthService } from '@core/services/auth.service';
 
 @Component({
   selector: 'app-root',
   imports: [Menubar, RouterOutlet],
   templateUrl: './app.component.html',
-  styleUrl: './app.component.css'
+  styleUrl: './app.component.css',
 })
 export class AppComponent implements OnInit {
   items: MenuItem[] | undefined;
 
-  constructor(private router: Router) {}
+  constructor(
+    private router: Router,
+    private authService: AuthService,
+  ) {}
 
   ngOnInit() {
+    this.authService.init();
     this.items = [
       {
         label: 'Home',
@@ -27,7 +32,7 @@ export class AppComponent implements OnInit {
         label: 'Inquiry Form',
         icon: 'pi pi-envelope',
         command: () => {
-          this.router.navigate(['/inquiry-form']);
+          this.router.navigate(['/inquiries']);
         },
       },
       {
@@ -54,8 +59,8 @@ export class AppComponent implements OnInit {
             command: () => {
               this.router.navigate(['/tools/list-to-json']);
             },
-          }
-        ]
+          },
+        ],
       },
     ];
   }

@@ -26,4 +26,8 @@ export class ProviderService {
     });
     return this.http.get<ListData<Provider>>(`${this.baseUrl}?${query}`);
   }
+
+  getProviders(): Observable<ListData<Provider>> {
+    return this.http.get<ListData<Provider>>(this.baseUrl);
+  }
 }

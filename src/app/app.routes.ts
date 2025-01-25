@@ -13,7 +13,12 @@ export const routes: Routes = [
     component: HomeComponent,
   },
   {
-    path: 'inquiry-form',
+    path: 'inquiries',
+    component: InquiryFormComponent,
+    canActivate: [AuthGuard],
+  },
+  {
+    path: 'inquiries/:id/edit',
     component: InquiryFormComponent,
     canActivate: [AuthGuard],
   },

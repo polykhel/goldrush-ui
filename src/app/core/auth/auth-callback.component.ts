@@ -23,7 +23,6 @@ export class AuthCallbackComponent implements OnInit {
         if (!params) {
           return;
         }
-        console.log(params);
         this.authService.login(params['access_token']).subscribe(() => {
           this.router.navigate(['/']);
         });
