@@ -1,4 +1,5 @@
 import { ProviderQuotationRequest } from '@models/inquiry.model';
+import dayjs from 'dayjs';
 
 export interface EmailData {
   emailContent: string;
@@ -18,7 +19,7 @@ export function prepareProviderEmail(providerQuotationRequests: ProviderQuotatio
 Please see inquiry details below:<br><br>
 
 Travel Dates: ${formatDateRanges(request.dateRanges)}<br>
-Duration: ${request.travelDays}D/${request.travelNights}N<br>
+Duration: ${request.travelDays}D${request.travelNights}N<br>
 Destination: ${request.destination}<br>
 Pax: ${request.paxAdult} Adult(s)${request.paxChild ? `, ${request.paxChild} Child(ren)` : ''}<br>
 ${request.paxChildAges ? `Child Ages: ${request.paxChildAges} <br>` : ''}
@@ -43,15 +44,25 @@ ${request.sender}
 }
 
 function formatDateRanges(dateRanges: { start: Date, end: Date}[]): string {
+  if (!dateRanges || !dateRanges.length) return ''; // Handle empty input
+
   return dateRanges
-    .map(range => {
-      if (range.start && range.end) {
-        return `${range.start.toLocaleDateString()} - ${range.end.toLocaleDateString()}`;
+    .map((range) => {
+      const startDate = dayjs(range.start);
+      const endDate = dayjs(range.end);
+
+      if (!startDate.isValid() || !endDate.isValid()) {
+        return null;
       }
-      return '';
+
+      if (startDate.month() === endDate.month() && startDate.year() === endDate.year()) {
+        return `${startDate.format('MMM D')} - ${endDate.format('D')} '${startDate.format('YY')}`;
+      } else {
+        return `${startDate.format('MMM D')} '${startDate.format('YY')} - ${endDate.format('MMM D')} '${endDate.format('YY')}`;
+      }
     })
     .filter(Boolean)
-    .join(' or ');
+    .join(', ');
 }
 
 function formatPackageType(type: string): string {

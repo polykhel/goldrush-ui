@@ -142,7 +142,7 @@ export class InquiryListComponent implements OnInit, OnDestroy {
         summary: 'Success',
         detail: 'Inquiry deleted successfully',
       });
-      await this.loadInquiries();
+      this.loadInquiries();
     } catch (error) {
       this.messageService.add({
         severity: 'error',
