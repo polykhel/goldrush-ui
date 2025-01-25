@@ -1,6 +1,7 @@
-import { BaseModel } from './base.model';
+import { AuditedBaseModel } from './base.model';
+import { Provider } from './provider.model';
 
-export interface Inquiry extends BaseModel {
+export interface Inquiry extends AuditedBaseModel {
   clientName: string;
   date: Date;
   contactPoint: string;
@@ -8,7 +9,7 @@ export interface Inquiry extends BaseModel {
   travelDays: number;
   travelNights: number;
   destination: string;
-  dateRanges: { start: Date, end: Date }[];
+  dateRanges: DateRange[];
   preferredHotel: string;
   paxAdult: number;
   paxChild: number;
@@ -19,6 +20,12 @@ export interface Inquiry extends BaseModel {
   remarks?: string;
   submitted: boolean;
 }
+
+export interface DateRange {
+  start: Date;
+  end: Date;
+}
+
 export interface ProviderQuotation {
   includeInEmail: boolean;
   providerStatus: string;
@@ -28,6 +35,22 @@ export interface ProviderQuotation {
   phpEquivalent?: number | null;
   remarks?: string;
   emailRemarks?: string | null;
-  provider: string; // provider ID
+  provider: Provider;
+  sent: boolean;
 }
 
+export interface ProviderQuotationRequest {
+  providerId: string;
+  dateRanges: DateRange[];
+  travelDays: number;
+  travelNights: number;
+  destination: string;
+  paxAdult: number;
+  paxChild: number;
+  paxChildAges?: string | null;
+  packageType: string;
+  preferredHotel: string | null;
+  otherServices?: string | null;
+  sender: string;
+  emailRemarks?: string | null;
+}

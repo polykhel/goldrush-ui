@@ -1,0 +1,33 @@
+<p-dialog
+  [(visible)]="visible"
+  [modal]="true"
+  [style]="{ width: '80vw', maxWidth: '900px' }"
+  (onHide)="onCancel()"
+  header="Email Preview"
+>
+  <p-tabView>
+    <p-tabPanel *ngFor="let email of emailData | keyvalue" [header]="getProviderName(email.key)">
+      <div class="flex justify-content-between mb-3">
+            <span [class]="getStatusClass(email.key)">
+              {{ isProviderSent(email.key) ? 'Already Sent' : 'Not Sent' }}
+            </span>
+      </div>
+      <pre class="whitespace-pre-wrap">{{ email.value }}</pre>
+    </p-tabPanel>
+  </p-tabView>
+
+  <ng-template pTemplate="footer">
+    <p-button
+      label="Cancel"
+      icon="pi pi-times"
+      (onClick)="onCancel()"
+      [text]="true"
+    ></p-button>
+    <p-button
+      label="Send"
+      icon="pi pi-send"
+      (onClick)="onSend()"
+      [disabled]="isSending"
+    ></p-button>
+  </ng-template>
+</p-dialog>

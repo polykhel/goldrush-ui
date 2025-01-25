@@ -1,4 +1,4 @@
-import { DatePipe, NgForOf, NgIf } from '@angular/common';
+import { DatePipe, Location, NgForOf, NgIf } from '@angular/common';
 import { Component, inject, OnInit } from '@angular/core';
 import {
   FormArray,
@@ -8,13 +8,17 @@ import {
   ReactiveFormsModule,
   Validators,
 } from '@angular/forms';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { AuthService } from '@core/services/auth.service';
 import { DestroyService } from '@core/services/destroy.service';
 import { ExchangeRateService } from '@core/services/exchange-rate.service';
 import { InquiryService } from '@core/services/inquiry.service';
 import { ProviderService } from '@core/services/provider.service';
-import { Inquiry } from '@models/inquiry.model';
+import {
+  Inquiry,
+  ProviderQuotation,
+  ProviderQuotationRequest,
+} from '@models/inquiry.model';
 import { Provider } from '@models/provider.model';
 import { User } from '@models/user.model';
 import { MessageService } from 'primeng/api';
@@ -32,19 +36,8 @@ import { RadioButton } from 'primeng/radiobutton';
 import { Select } from 'primeng/select';
 import { Textarea } from 'primeng/textarea';
 import { Toast } from 'primeng/toast';
-import { firstValueFrom, iif, lastValueFrom, takeUntil } from 'rxjs';
-
-type ProviderQuotation = Partial<{
-  includeInEmail: boolean;
-  status: 'pending' | 'received' | 'not_available' | 'no_response';
-  price: number | null;
-  currency: string;
-  exchangeRate: number | null;
-  phpEquivalent: number | null;
-  remarks: string;
-  emailRemarks: string;
-  provider: string;
-}>;
+import { firstValueFrom, iif, takeUntil } from 'rxjs';
+import { EmailPreviewModalComponent } from './email-preview-modal/email-preview-modal.component';
 
 @Component({
   selector: 'app-inquiry-form',
@@ -67,6 +60,7 @@ type ProviderQuotation = Partial<{
     Fluid,
     DatePipe,
     Toast,
+    EmailPreviewModalComponent,
   ],
   templateUrl: './inquiry-form.component.html',
   styleUrl: './inquiry-form.component.css',
@@ -76,6 +70,9 @@ export class InquiryFormComponent implements OnInit {
   currencies = ['PHP', 'USD'];
   formBuilder = inject(FormBuilder);
   isEditMode = false;
+  showEmailPreview = false;
+  emailData = new Map<string, string>();
+  isSending = false;
 
   inquiryForm = this.formBuilder.group({
     clientName: ['', [Validators.required]],
@@ -85,7 +82,7 @@ export class InquiryFormComponent implements OnInit {
     travelDays: [null, [Validators.required]],
     travelNights: [null, [Validators.required]],
     destination: [null, [Validators.required]],
-    dateRanges: this.formBuilder.array<{ start: Date, end: Date }[]>([]),
+    dateRanges: this.formBuilder.array<{ start: Date; end: Date }[]>([]),
     preferredHotel: [null],
     paxAdult: [null, [Validators.required]],
     paxChild: [null, [Validators.required]],
@@ -95,7 +92,7 @@ export class InquiryFormComponent implements OnInit {
     providerQuotations: this.formBuilder.array<ProviderQuotation>([]),
     remarks: [''],
     submitted: this.formBuilder.control<boolean>(false),
-    createdBy: this.formBuilder.control<string | null>({
+    creator: this.formBuilder.control<string | null>({
       value: null,
       disabled: true,
     }),
@@ -103,7 +100,7 @@ export class InquiryFormComponent implements OnInit {
       value: null,
       disabled: true,
     }),
-    updatedBy: this.formBuilder.control<string | null>({
+    modifier: this.formBuilder.control<string | null>({
       value: null,
       disabled: true,
     }),
@@ -113,6 +110,7 @@ export class InquiryFormComponent implements OnInit {
     }),
   });
   providers: Provider[] = [];
+  providerMap = new Map<string, Provider>();
   quotationStatuses = [
     { label: 'Pending', value: 'pending', class: 'text-yellow-600' },
     { label: 'Received', value: 'received', class: 'text-green-600' },
@@ -132,6 +130,8 @@ export class InquiryFormComponent implements OnInit {
     private inquiryService: InquiryService,
     private messageService: MessageService,
     private route: ActivatedRoute,
+    private location: Location,
+    private router: Router
   ) {
     this.addDateRange();
   }
@@ -148,16 +148,16 @@ export class InquiryFormComponent implements OnInit {
     return this.inquiryForm.get('createdAt') as FormControl;
   }
 
-  get createdBy(): FormControl {
-    return this.inquiryForm.get('createdBy') as FormControl;
+  get creator(): FormControl {
+    return this.inquiryForm.get('creator') as FormControl;
+  }
+
+  get modifier(): FormControl {
+    return this.inquiryForm.get('modifier') as FormControl;
   }
 
   get updatedAt(): FormControl {
     return this.inquiryForm.get('updatedAt') as FormControl;
-  }
-
-  get updatedBy(): FormControl {
-    return this.inquiryForm.get('updatedBy') as FormControl;
   }
 
   async initForm() {
@@ -170,21 +170,12 @@ export class InquiryFormComponent implements OnInit {
       );
       this.inquiryForm.patchValue({
         ...this.currentInquiry,
-        date:  new Date(this.currentInquiry.date),
+        date: new Date(this.currentInquiry.date),
         dateRanges: this.currentInquiry.dateRanges.map((dateRange) => ({
           start: new Date(dateRange.start),
           end: new Date(dateRange.end),
         })),
-        providerQuotations: this.currentInquiry.providerQuotations.map(
-          (quotation: any) => ({
-            ...quotation,
-            exchangeRate: quotation.exchangeRate ?? null,
-            phpEquivalent: quotation.phpEquivalent ?? null,
-          }),
-        ),
-      } as any)
-      console.log(this.currentInquiry);
-      console.log(this.inquiryForm.value);
+      } as any);
     }
 
     const providerListData = await firstValueFrom(
@@ -192,31 +183,56 @@ export class InquiryFormComponent implements OnInit {
     );
     if (providerListData) {
       this.providers = providerListData.data;
-      const map =
-        this.currentInquiry?.providerQuotations.map((c) => c.provider) ?? [];
 
-      this.providers
-        .filter((p) => !map.includes(p.documentId))
-        .forEach((provider) => {
-          this.providerQuotations.push(
-            this.formBuilder.group({
-              includeInEmail: [false],
-              providerStatus: ['pending'],
-              price: [null],
-              currency: ['PHP'],
-              exchangeRate: [{ value: null, disabled: true }],
-              phpEquivalent: [{ value: null, disabled: true }],
-              remarks: [''],
-              emailRemarks: [''],
-              provider: [provider.documentId],
-              sent: [false],
-            }),
-          );
-        });
+      this.providerMap = providerListData.data.reduce((acc, provider) => {
+        acc.set(provider.documentId, provider);
+        return acc;
+      }, new Map<string, Provider>());
+
+      const currentProvidersMap =
+        this.currentInquiry?.providerQuotations.reduce(
+          (acc, providerQuotation) => {
+            acc.set(providerQuotation.provider.documentId, providerQuotation);
+            return acc;
+          },
+          new Map<string, ProviderQuotation>(),
+        );
+
+      this.providers.forEach((provider) => {
+        const existingProvider = currentProvidersMap?.get(provider.documentId);
+
+        this.providerQuotations.push(
+          this.formBuilder.group({
+            includeInEmail: [existingProvider?.includeInEmail ?? false],
+            providerStatus: [existingProvider?.providerStatus ?? 'pending'],
+            price: [existingProvider?.price ?? null],
+            currency: [existingProvider?.currency ?? 'PHP'],
+            exchangeRate: [
+              { value: existingProvider?.exchangeRate ?? null, disabled: true },
+            ],
+            phpEquivalent: [
+              {
+                value: existingProvider?.phpEquivalent ?? null,
+                disabled: true,
+              },
+            ],
+            remarks: [existingProvider?.remarks ?? ''],
+            emailRemarks: [existingProvider?.emailRemarks ?? ''],
+            provider: [provider.documentId],
+            sent: [existingProvider?.sent ?? false],
+          }),
+        );
+      });
     }
   }
 
   ngOnInit(): void {
+    this.authService.currentUser$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((user) => {
+        this.currentUser = user;
+      });
+
     this.initForm();
   }
 
@@ -333,6 +349,10 @@ export class InquiryFormComponent implements OnInit {
             summary: 'Success',
             detail: 'Inquiry saved successfully',
           });
+
+          if (!this.isEditMode) {
+            this.router.navigate(['/inquiries']);
+          }
         },
         error: (error) => {
           this.messageService.add({
@@ -354,23 +374,42 @@ export class InquiryFormComponent implements OnInit {
 
   sendQuotations() {
     if (this.inquiryForm.valid) {
-      const emailData = this.inquiryService.prepareEmailData(
-        this.mapFormToModel(this.inquiryForm.getRawValue()),
+      this.emailData = this.inquiryService.prepareEmailData(
+        this.mapProviderQuotations(this.inquiryForm.getRawValue()),
       );
-
-      // For now, just log the email content for each provider
-      Object.entries(emailData).forEach(([providerId, emailContent]) => {
-        console.log(
-          `Email content for provider ${this.providers[Number(providerId)].name}:`,
-        );
-        console.log(emailContent);
-      });
-
+      this.showEmailPreview = true;
+    } else {
       this.messageService.add({
-        severity: 'info',
-        summary: 'Email Preview',
-        detail: 'Check console for email content',
+        severity: 'warn',
+        summary: 'Validation Error',
+        detail: 'Please fill in all required fields',
       });
+    }
+  }
+
+  async handleSendEmails() {
+    try {
+      this.isSending = true;
+      await firstValueFrom(
+        this.inquiryService.sendEmails(
+          this.currentInquiry!.documentId,
+          this.emailData,
+        ),
+      );
+      this.messageService.add({
+        severity: 'success',
+        summary: 'Success',
+        detail: 'Emails sent successfully',
+      });
+      this.showEmailPreview = false;
+    } catch (error) {
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Error',
+        detail: 'Failed to send emails',
+      });
+    } finally {
+      this.isSending = false;
     }
   }
 
@@ -379,9 +418,37 @@ export class InquiryFormComponent implements OnInit {
       ...formValue,
       providerQuotations: formValue.providerQuotations.map(
         (quotation: any) => ({
-          ...quotation
+          ...quotation,
         }),
-      )
+      ),
+      creator: this.isEditMode
+        ? this.currentInquiry?.creator
+        : (this.currentUser?.username ?? null),
+      modifier: this.currentUser?.username ?? null,
     };
+  }
+
+  mapProviderQuotations(inquiry: any): ProviderQuotationRequest[] {
+    return inquiry.providerQuotations
+      .filter((quotation: any) => quotation.includeInEmail)
+      .map((quotation: any) => ({
+        providerId: quotation.provider,
+        dateRanges: inquiry.dateRanges,
+        travelDays: inquiry.travelDays,
+        travelNights: inquiry.travelNights,
+        destination: inquiry.destination,
+        paxAdult: inquiry.paxAdult,
+        paxChild: inquiry.paxChild,
+        paxChildAges: inquiry.paxChildAges,
+        packageType: inquiry.packageType,
+        preferredHotel: inquiry.preferredHotel,
+        otherServices: inquiry.otherServices,
+        sender: `${this.currentUser?.firstName} ${this.currentUser?.lastName?.charAt(0)}.`,
+        sent: quotation.sent,
+      }));
+  }
+
+  goBack() {
+    this.location.back();
   }
 }

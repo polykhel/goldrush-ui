@@ -6,6 +6,7 @@ import { QuotationGeneratorComponent } from '@components/quotation-generator/quo
 import { ListToJsonComponent } from '@components/tools/list-to-json/list-to-json.component';
 import { AuthCallbackComponent } from '@core/auth/auth-callback.component';
 import { AuthGuard } from '@core/auth/auth.guard';
+import { InquiryListComponent } from '@components/inquiry-list/inquiry-list.component';
 
 export const routes: Routes = [
   {
@@ -14,13 +15,15 @@ export const routes: Routes = [
   },
   {
     path: 'inquiries',
-    component: InquiryFormComponent,
-    canActivate: [AuthGuard],
+    component: InquiryListComponent,
   },
   {
-    path: 'inquiries/:id/edit',
+    path: 'inquiries/new',
     component: InquiryFormComponent,
-    canActivate: [AuthGuard],
+  },
+  {
+    path: 'inquiries/:id',
+    component: InquiryFormComponent,
   },
   {
     path: 'payment-scheduler',

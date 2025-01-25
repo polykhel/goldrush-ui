@@ -1,0 +1,77 @@
+<p-card>
+  <ng-template #header>
+    <header class="py-4 px-6 shadow-md">
+      <div class="container mx-auto flex justify-between items-center">
+        <h1 class="text-2xl font-bold">Inquiries</h1>
+        <p-button label="Create New Inquiry" icon="pi pi-plus" (onClick)="createInquiry()"></p-button>
+      </div>
+    </header>
+  </ng-template>
+
+  <p-table
+    [value]="inquiries"
+    [rows]="10"
+    [paginator]="true"
+    [globalFilterFields]="['clientName', 'destination']"
+    [tableStyle]="{ 'min-width': '75rem' }"
+    [rowHover]="true"
+    dataKey="id"
+    [showCurrentPageReport]="true"
+    [loading]="loading"
+    currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
+  >
+    <ng-template pTemplate="header">
+      <tr>
+        <th id="clientName">Client Name</th>
+        <th id="destination">Destination</th>
+        <th id="travelDates">Travel Dates</th>
+        <th id="status">Status</th>
+        <th id="createdAt">Created At</th>
+        <th id="actions">Actions</th>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="body" let-inquiry>
+      <tr>
+        <td>{{ inquiry.clientName }}</td>
+        <td>{{ inquiry.destination }}</td>
+        <td>
+          <div *ngFor="let dateRange of inquiry.dateRanges">
+            {{ dateRange.start | date }} - {{ dateRange.end | date }}
+          </div>
+        </td>
+        <td>
+              <span [class]="inquiry.submitted ? 'text-green-600' : 'text-yellow-600'">
+                {{ inquiry.submitted ? 'Submitted' : 'Draft' }}
+              </span>
+        </td>
+        <td>{{ inquiry.createdAt | date }}</td>
+        <td>
+          <div class="flex gap-2">
+            <p-button
+              icon="pi pi-pencil"
+              severity="secondary"
+              (onClick)="editInquiry(inquiry)"
+              [rounded]="true"
+              [text]="true"
+            ></p-button>
+            <p-button
+              icon="pi pi-trash"
+              severity="danger"
+              (onClick)="confirmDelete(inquiry)"
+              [rounded]="true"
+              [text]="true"
+            ></p-button>
+          </div>
+        </td>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="emptymessage">
+      <tr>
+        <td colspan="6" class="text-center">No inquiries found.</td>
+      </tr>
+    </ng-template>
+  </p-table>
+</p-card>
+
+<p-toast></p-toast>
+<p-confirmDialog header="Delete Confirmation" icon="pi pi-exclamation-triangle"></p-confirmDialog>

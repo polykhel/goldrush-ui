@@ -29,7 +29,7 @@ export class AppComponent implements OnInit {
         },
       },
       {
-        label: 'Inquiry Form',
+        label: 'Inquiries',
         icon: 'pi pi-envelope',
         command: () => {
           this.router.navigate(['/inquiries']);
