@@ -6,16 +6,14 @@ import { environment } from '@env/environment';
 import { DestroyService } from '@services/destroy.service';
 import { MessageService } from 'primeng/api';
 import { Button } from 'primeng/button';
-import { Card } from 'primeng/card';
 import { Toast } from 'primeng/toast';
 import { takeUntil } from 'rxjs';
 import { PortalComponent } from '../portal/portal.component';
 
 @Component({
   selector: 'app-home',
-  imports: [Button, Card, NgIf, PortalComponent, Toast],
+  imports: [Button, NgIf, PortalComponent, Toast],
   templateUrl: './home.component.html',
-  styleUrl: './home.component.css',
   providers: [MessageService],
 })
 export class HomeComponent implements OnInit {
