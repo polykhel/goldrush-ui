@@ -8,18 +8,27 @@
     </header>
   </ng-template>
 
-  <div class="flex justify-end gap-2 mb-4">
+  <div class="flex justify-center items-center gap-2 mb-4">
     <p-inputgroup>
       <p-inputgroup-addon>
         <i class="pi pi-search"></i>
       </p-inputgroup-addon>
-      <input 
-        pInputText 
-        type="text" 
+      <input
+        pInputText
+        type="text"
         (input)="onSearch($event)"
         [value]="searchTerm"
         placeholder="Search client or destination..."/>
     </p-inputgroup>
+    <p-selectButton
+      [options]="statusOptions"
+      [(ngModel)]="selectedStatus"
+      (onChange)="onStatusChange()"
+      [multiple]="false"
+      optionLabel="label"
+      optionValue="value">
+
+    </p-selectButton>
   </div>
 
   <p-table
@@ -39,6 +48,7 @@
     (onSort)="onSort($event)"
     [totalRecords]="totalRecords"
     [lazy]="true"
+    [globalFilterFields]="['destination','client.name']"
   >
     <ng-template pTemplate="header">
       <tr>
@@ -51,9 +61,9 @@
           <p-sortIcon field="destination"></p-sortIcon>
         </th>
         <th id="travelDates">Travel Dates</th>
-        <th id="status" pSortableColumn="submitted">
+        <th id="status" pSortableColumn="inquiryStatus">
           Status
-          <p-sortIcon field="submitted"></p-sortIcon>
+          <p-sortIcon field="inquiryStatus"></p-sortIcon>
         </th>
         <th id="createdAt" pSortableColumn="createdAt">
           Created At
@@ -72,9 +82,10 @@
           </div>
         </td>
         <td>
-              <span [class]="inquiry.submitted ? 'text-green-600' : 'text-yellow-600'">
-                {{ inquiry.submitted ? 'Submitted' : 'Draft' }}
-              </span>
+          <p-tag [severity]="getInquiryStatusConfig(inquiry.inquiryStatus).severity"
+                 [icon]="getInquiryStatusConfig(inquiry.inquiryStatus).icon"
+                 [value]="inquiry.inquiryStatus">
+          </p-tag>
         </td>
         <td>{{ inquiry.createdAt | date }}</td>
         <td>
@@ -93,6 +104,12 @@
               [rounded]="true"
               [text]="true"
             ></p-button>
+            <p-button
+              *ngIf="canGenerateQuotation(inquiry)"
+              icon="pi pi-file"
+              label="Generate Quotation"
+              (click)="navigateToQuotationGenerator(inquiry)">
+            </p-button>
           </div>
         </td>
       </tr>

@@ -2,10 +2,10 @@ import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { environment } from '@env/environment';
 import { ListData, SingleData } from '@models/base.model';
-import { Inquiry } from '@models/inquiry.model';
+import { Inquiry, InquiryStatus } from '@models/inquiry.model';
 import qs from 'qs';
 import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { map, tap } from 'rxjs/operators';
 
 interface InquiryParams {
   page: number;
@@ -13,6 +13,7 @@ interface InquiryParams {
   sortField?: string;
   sortOrder?: number;
   search?: string;
+  status?: string;
 }
 
 @Injectable({
@@ -47,6 +48,13 @@ export class InquiryService {
                 },
               ]
             : undefined,
+          ...(params.status
+            ? {
+                inquiryStatus: {
+                  $eq: params.status,
+                },
+              }
+            : {}),
         },
         populate: ['dateRanges'],
       },
@@ -102,5 +110,10 @@ export class InquiryService {
 
   deleteInquiry(id: string): Observable<SingleData<Inquiry>> {
     return this.http.delete<SingleData<Inquiry>>(`${this.baseUrl}/${id}`);
+  }
+
+  checkQuotationReadiness(inquiry: Inquiry): boolean {
+    const hasQuotations = inquiry.providerQuotations?.some(pq => pq.price);
+    return hasQuotations && inquiry.status === InquiryStatus.READY;
   }
 }

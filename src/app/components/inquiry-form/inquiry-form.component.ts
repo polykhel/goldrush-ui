@@ -17,7 +17,10 @@ import { InquiryService } from '@core/services/inquiry.service';
 import { ProviderService } from '@core/services/provider.service';
 import { EmailData, prepareProviderEmail } from '@core/utils/email.util';
 import {
+  getInquiryStatusConfig,
   Inquiry,
+  InquiryStatus,
+  InquiryStatusConfig,
   ProviderQuotation,
   ProviderQuotationRequest,
 } from '@models/inquiry.model';
@@ -36,6 +39,7 @@ import { InputNumber } from 'primeng/inputnumber';
 import { InputText } from 'primeng/inputtext';
 import { RadioButton } from 'primeng/radiobutton';
 import { Select } from 'primeng/select';
+import { Tag } from 'primeng/tag';
 import { Textarea } from 'primeng/textarea';
 import { Toast } from 'primeng/toast';
 import { firstValueFrom, iif, takeUntil } from 'rxjs';
@@ -63,6 +67,7 @@ import { EmailPreviewModalComponent } from './email-preview-modal/email-preview-
     DatePipe,
     Toast,
     EmailPreviewModalComponent,
+    Tag,
   ],
   templateUrl: './inquiry-form.component.html',
   styleUrl: './inquiry-form.component.css',
@@ -93,7 +98,7 @@ export class InquiryFormComponent implements OnInit {
     otherServices: [''],
     providerQuotations: this.formBuilder.array<ProviderQuotation>([]),
     remarks: [''],
-    submitted: this.formBuilder.control<boolean>(false),
+    inquiryStatus: this.formBuilder.control<InquiryStatus>(InquiryStatus.NEW),
     creator: this.formBuilder.control<string | null>({
       value: null,
       disabled: true,
@@ -119,9 +124,16 @@ export class InquiryFormComponent implements OnInit {
     { label: 'Not Available', value: 'not_available', class: 'text-red-600' },
     { label: 'No Response', value: 'no_response', class: 'text-gray-600' },
   ];
+  inquiryStatusOptions = [
+    { label: 'New', value: 'NEW', class: 'text-blue-600' },
+    { label: 'Pending', value: 'PENDING', class: 'text-yellow-600' },
+    { label: 'Quoted', value: 'QUOTED', class: 'text-green-600' },
+  ];
   isLoadingRate: boolean[] = [];
   exchangeRateLastUpdated: (Date | null)[] = [];
   currentInquiry: Inquiry | null = null;
+  statusConfig = InquiryStatusConfig;
+  protected readonly getInquiryStatusConfig = getInquiryStatusConfig;
   private currentUser: User | null = null;
 
   constructor(
@@ -385,7 +397,8 @@ export class InquiryFormComponent implements OnInit {
         this.messageService.add({
           severity: 'info',
           summary: 'No Quotations',
-          detail: 'No new quotations to send. All selected quotations have already been sent.',
+          detail:
+            'No new quotations to send. All selected quotations have already been sent.',
         });
         return;
       }
@@ -472,9 +485,7 @@ export class InquiryFormComponent implements OnInit {
 
   mapProviderQuotations(inquiry: any): ProviderQuotationRequest[] {
     return inquiry.providerQuotations
-      .filter((quotation: any) =>
-        quotation.includeInEmail && !quotation.sent
-      )
+      .filter((quotation: any) => quotation.includeInEmail && !quotation.sent)
       .map((quotation: any) => ({
         providerId: quotation.provider,
         dateRanges: inquiry.dateRanges,
