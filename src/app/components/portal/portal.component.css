@@ -1,0 +1,25 @@
+.status-badge {
+  padding: 0.25rem 0.5rem;
+  border-radius: 9999px;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.status-pending {
+  background-color: rgb(253 224 71 / 0.2);
+  color: rgb(161 98 7);
+}
+
+.status-completed {
+  background-color: rgb(134 239 172 / 0.2);
+  color: rgb(21 128 61);
+}
+
+.status-cancelled {
+  background-color: rgb(252 165 165 / 0.2);
+  color: rgb(185 28 28);
+}
+
+:host ::ng-deep .p-button {
+  width: 100%;
+}

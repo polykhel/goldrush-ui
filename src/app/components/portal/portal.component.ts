@@ -1,11 +1,46 @@
-import { Component } from '@angular/core';
-import { FormsModule } from '@angular/forms';
-import { Panel } from 'primeng/panel';
+import { Component, OnInit } from '@angular/core';
+import { RouterLink } from '@angular/router';
+import { ButtonModule } from 'primeng/button';
+import { TableModule } from 'primeng/table';
+
+interface Activity {
+  date: string;
+  type: string;
+  customer: string;
+  status: string;
+  id: number;
+}
 
 @Component({
   selector: 'app-portal',
-  imports: [FormsModule, Panel],
   templateUrl: './portal.component.html',
-  styleUrl: './portal.component.css',
+  standalone: true,
+  imports: [
+    ButtonModule,
+    TableModule,
+    RouterLink
+  ]
 })
-export class PortalComponent {}
+export class PortalComponent implements OnInit {
+  recentActivities: Activity[] = [
+    {
+      date: '2024-03-20',
+      type: 'Inquiry',
+      customer: 'John Smith',
+      status: 'Pending',
+      id: 1
+    },
+    // Add more mock data as needed
+  ];
+
+  constructor() {}
+
+  ngOnInit(): void {
+    // Fetch real data here
+  }
+
+  viewActivity(activity: Activity): void {
+    // Implement view logic
+    console.log('Viewing activity:', activity);
+  }
+}
