@@ -116,13 +116,31 @@
           <ng-template pTemplate="header">
             <tr>
               <th id="date">Date</th>
-              <th id="amount">Amount</th>
+              <th id="amount" class="text-right">Base Amount</th>
+              <th id="charge" class="text-right">Interest</th>
+              <th id="total" class="text-right">Total Amount</th>
             </tr>
           </ng-template>
           <ng-template pTemplate="body" let-payment>
             <tr>
               <td headers="date">{{payment.date}}</td>
-              <td headers="amount">₱ {{payment.amount}}</td>
+              <td headers="amount" class="text-right">₱ {{payment.amount}}</td>
+              <td headers="charge" class="text-right">₱ {{payment.charge}}</td>
+              <td headers="total" class="text-right">₱ {{payment.total}}</td>
+            </tr>
+          </ng-template>
+          <ng-template pTemplate="footer" *ngIf="schedule.length > 0">
+            <tr>
+              <td headers="date"><strong>Total</strong></td>
+              <td headers="amount" class="text-right">
+                <strong>₱ {{schedule | sum:'amount'}}</strong>
+              </td>
+              <td headers="charge" class="text-right">
+                <strong>₱ {{schedule | sum:'charge'}}</strong>
+              </td>
+              <td headers="total" class="text-right">
+                <strong>₱ {{schedule | sum:'total'}}</strong>
+              </td>
             </tr>
           </ng-template>
         </p-table>

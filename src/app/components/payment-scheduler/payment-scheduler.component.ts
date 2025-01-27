@@ -1,27 +1,30 @@
 import { NgClass, NgIf } from '@angular/common';
 import { Component, inject } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { SumPipe } from '@pipes/sum.pipe';
 import dayjs from 'dayjs';
+import { MessageService } from 'primeng/api';
 import { Button } from 'primeng/button';
-import { Card } from 'primeng/card';
 import { DatePicker } from 'primeng/datepicker';
-import { Divider } from 'primeng/divider';
 import { FloatLabel } from 'primeng/floatlabel';
 import { Fluid } from 'primeng/fluid';
 import { InputNumber } from 'primeng/inputnumber';
+import { Panel } from 'primeng/panel';
 import { Select } from 'primeng/select';
 import { TableModule } from 'primeng/table';
-import { Schedule } from '@models/schedule.model';
-import { Dropdown } from 'primeng/dropdown';
-import { MessageService } from 'primeng/api';
-import { Panel } from 'primeng/panel';
 import { Toast } from 'primeng/toast';
+
+interface Schedule {
+  date: string;
+  amount: string;
+  charge?: string;
+  total?: string;
+}
 
 @Component({
   selector: 'app-payment-scheduler',
   imports: [
     Button,
-    Card,
     DatePicker,
     FloatLabel,
     Fluid,
@@ -33,6 +36,7 @@ import { Toast } from 'primeng/toast';
     Panel,
     Toast,
     NgClass,
+    SumPipe,
   ],
   templateUrl: './payment-scheduler.component.html',
   providers: [MessageService],
@@ -41,15 +45,11 @@ export class PaymentSchedulerComponent {
   minDate: Date = dayjs().add(45, 'day').toDate();
   today: Date = new Date();
   schedule: Schedule[] = [];
-
-  private formBuilder = inject(FormBuilder);
-  private messageService = inject(MessageService);
-
   paymentMethods = [
     { label: 'Cash', value: 'cash' },
     { label: 'Bank/Card', value: 'bank' },
   ];
-
+  private formBuilder = inject(FormBuilder);
   form = this.formBuilder.group({
     startDate: this.formBuilder.control<Date | null>(new Date(), [
       Validators.required,
@@ -71,13 +71,14 @@ export class PaymentSchedulerComponent {
       Validators.min(20),
       Validators.max(100),
     ]),
-    monthlyStartDate: this.formBuilder.control<Date | null>(new Date()),
+    monthlyStartDate: this.formBuilder.control<Date | null>(null),
     monthlyChargePercentage: this.formBuilder.control(5, [
       Validators.required,
       Validators.min(0),
       Validators.max(100),
     ]),
   });
+  private messageService = inject(MessageService);
   private readonly dateFormat = 'MMM D, YYYY';
 
   generateSchedule(): void {
@@ -104,7 +105,7 @@ export class PaymentSchedulerComponent {
       const downPaymentPercent = value.downPaymentPercentage || 20;
       const isBank = value.paymentMethod === 'bank';
       const monthlyChargePercent = isBank
-        ? value.monthlyChargePercentage ?? 5
+        ? (value.monthlyChargePercentage ?? 5)
         : 0;
 
       // Calculate down payment based on percentage
@@ -124,10 +125,13 @@ export class PaymentSchedulerComponent {
         startDate.isSame(lastPaymentDate) ||
         startDate.isAfter(lastPaymentDate)
       ) {
+        const charge = isBank ? (totalAmount * monthlyChargePercent) / 100 : 0;
         this.schedule = [
           {
             date: startDate.format(this.dateFormat),
             amount: totalAmount.toFixed(2),
+            charge: charge.toFixed(2),
+            total: (totalAmount + charge).toFixed(2),
           },
         ];
         this.form.patchValue({
@@ -141,6 +145,8 @@ export class PaymentSchedulerComponent {
       this.schedule.push({
         date: startDate.format(this.dateFormat),
         amount: downPayment.toFixed(2),
+        charge: '0.00',
+        total: downPayment.toFixed(2),
       });
 
       const monthlyStartDate = value.monthlyStartDate
@@ -170,17 +176,28 @@ export class PaymentSchedulerComponent {
       if (remainingAmount > 0) {
         if (paymentDates.length === 0) {
           // If no monthly payments possible, add final payment
+          const baseAmount = totalAmount - downPayment;
+          const charge = isBank ? (baseAmount * monthlyChargePercent) / 100 : 0;
           this.schedule.push({
             date: lastPaymentDate.format(this.dateFormat),
-            amount: remainingAmount.toFixed(2),
+            amount: baseAmount.toFixed(2),
+            charge: charge.toFixed(2),
+            total: (baseAmount + charge).toFixed(2),
           });
         } else {
           // Add monthly payments
-          const amountPerPayment = remainingAmount / paymentDates.length;
+          const baseAmountPerPayment =
+            (totalAmount - downPayment) / paymentDates.length;
+          const chargePerPayment = isBank
+            ? (baseAmountPerPayment * monthlyChargePercent) / 100
+            : 0;
+
           this.schedule.push(
             ...paymentDates.map((date) => ({
               date: date.format(this.dateFormat),
-              amount: amountPerPayment.toFixed(2),
+              amount: baseAmountPerPayment.toFixed(2),
+              charge: chargePerPayment.toFixed(2),
+              total: (baseAmountPerPayment + chargePerPayment).toFixed(2),
             })),
           );
         }
