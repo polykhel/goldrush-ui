@@ -1,2 +1,18 @@
-<p-menubar [model]="items" />
-<router-outlet></router-outlet>
+<div class="min-h-screen flex flex-col">
+  <p-menubar [model]="items"/>
+  <main class="flex-grow">
+    <router-outlet></router-outlet>
+  </main>
+  <footer class="py-4 px-6 bg-gray-100 text-gray-600 text-sm">
+    <div class="container mx-auto flex justify-between items-center">
+      <div>
+        © 2025 Goldrush Travel and Tours. All rights reserved.
+      </div>
+      <div class="flex gap-4">
+        <a class="hover:text-gray-900" href="#">Privacy Policy</a>
+        <a class="hover:text-gray-900" href="#">Terms of Service</a>
+        <a class="hover:text-gray-900" href="#">Contact Us</a>
+      </div>
+    </div>
+  </footer>
+</div>

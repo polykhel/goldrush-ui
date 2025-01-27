@@ -26,8 +26,7 @@ import { Schedule } from '@models/schedule.model';
     ReactiveFormsModule,
     TableModule,
   ],
-  templateUrl: './payment-scheduler.component.html',
-  styleUrl: './payment-scheduler.component.css'
+  templateUrl: './payment-scheduler.component.html'
 })
 export class PaymentSchedulerComponent {
   minDate: Date = dayjs().add(45, 'day').toDate();
