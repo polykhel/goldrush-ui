@@ -5,6 +5,7 @@ import { provideRouter, withViewTransitions } from '@angular/router';
 import { authInterceptor } from '@core/auth/auth.interceptor';
 import Aura from '@primeng/themes/aura';
 import { providePrimeNG } from 'primeng/config';
+import { ToastModule } from 'primeng/toast';
 
 import { routes } from './app.routes';
 
@@ -19,5 +20,6 @@ export const appConfig: ApplicationConfig = {
         preset: Aura,
       },
     }),
+    ToastModule
   ],
 };

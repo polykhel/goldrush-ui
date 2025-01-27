@@ -1,6 +1,13 @@
-import { HttpContextToken, HttpHandlerFn, HttpRequest } from '@angular/common/http';
+import {
+  HttpContextToken,
+  HttpErrorResponse,
+  HttpHandlerFn,
+  HttpRequest,
+} from '@angular/common/http';
 import { inject } from '@angular/core';
-import { AuthService } from '../services/auth.service';
+import { throwError } from 'rxjs';
+import { catchError } from 'rxjs/operators';
+import { AuthService } from '@services/auth.service';
 
 export const SKIP_AUTH = new HttpContextToken<boolean>(() => false);
 
@@ -19,7 +26,11 @@ export function authInterceptor(
       headers: req.headers.set('Authorization', 'Bearer ' + idToken),
     });
 
-    return next(newRequest);
+    return next(newRequest).pipe(
+      catchError((error: HttpErrorResponse) => {
+        return throwError(() => error);
+      }),
+    );
   } else {
     return next(req);
   }

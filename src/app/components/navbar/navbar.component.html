@@ -1,0 +1,19 @@
+<p-menubar [model]="items">
+  <ng-template pTemplate="end">
+    <div class="flex align-items-center gap-2">
+      <p-button *ngIf="authService.isLoggedIn()"
+                label="Logout"
+                (onClick)="logout()"
+                severity="secondary"
+                size="small">
+      </p-button>
+      <p-button *ngIf="!authService.isLoggedIn()"
+                label="Login"
+                routerLink="/home"
+                [queryParams]="{loginRequired: true}"
+                severity="primary"
+                size="small">
+      </p-button>
+    </div>
+  </ng-template>
+</p-menubar>
