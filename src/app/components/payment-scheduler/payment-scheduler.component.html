@@ -1,52 +1,132 @@
 <div class="flex justify-center items-center py-8">
-  <p-card header="Create payment schedule">
-    <form [formGroup]="form">
-      <p-fluid class="grid grid-cols-1 gap-4">
-        <p-float-label variant="on">
-          <p-date-picker showIcon inputId="startDate" iconDisplay="input" formControlName="startDate" [minDate]="today" [maxDate]="minDate"/>
-          <label for="startDate">Start Date</label>
-        </p-float-label>
-        <p-float-label variant="on">
-          <p-date-picker showIcon inputId="travelDate" iconDisplay="input" formControlName="travelDate"
-                         [minDate]="minDate"/>
-          <label for="travelDate">Travel Date</label>
-        </p-float-label>
-        <p-float-label variant="on">
-          <p-input-number inputId="totalAmount" mode="currency" currency="PHP" formControlName="totalAmount"/>
-          <label for="totalAmount">Total Amount</label>
-        </p-float-label>
-        <p-divider/>
-        <p-float-label variant="on">
-          <p-input-number inputId="downPayment" mode="currency" currency="PHP" formControlName="downPayment"/>
-          <label for="downPayment">Down Payment</label>
-        </p-float-label>
-        <p-float-label variant="on">
-          <p-date-picker inputId="lastPaymentDate" formControlName="lastPaymentDate"/>
-          <label for="lastPaymentDate">Last Payment Date</label>
-        </p-float-label>
-        <p-divider/>
-        <ng-container *ngIf="schedule.length">
-          <p-table [value]="schedule">
-            <ng-template #header>
-              <tr>
-                <th id="date">Date</th>
-                <th id="amount">Amount</th>
-              </tr>
-            </ng-template>
-            <ng-template #body let-schedule>
-              <tr>
-                <td>{{schedule.date}}</td>
-                <td>&#8369; {{schedule.amount}}</td>
-              </tr>
-            </ng-template>
-          </p-table>
-          <p-divider/>
-        </ng-container>
-      </p-fluid>
-      <div class="flex gap-4 justify-center items-center">
-        <p-button label="Generate Schedule" icon="pi pi-check" (onClick)="generateSchedule()" [disabled]="!form.valid"/>
-        <p-button label="Clear" icon="pi pi-trash" severity="warn" (onClick)="clear()"/>
-      </div>
-    </form>
-  </p-card>
+  <p-toast position="top-right"></p-toast>
+
+  <div class="w-full max-w-3xl">
+    <p-panel [toggleable]="true">
+      <ng-template pTemplate="header">
+        <div class="flex align-items-center gap-2">
+          <i class="pi pi-calendar"></i>
+          <span class="font-bold">Create Payment Schedule</span>
+        </div>
+      </ng-template>
+
+      <form [formGroup]="form">
+        <p-fluid>
+          <!-- Trip Details Section -->
+          <div class="mb-4">
+            <h3 class="text-xl mb-3">Trip Details</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <p-float-label variant="on">
+                <p-date-picker showIcon inputId="travelDate" iconDisplay="input"
+                  formControlName="travelDate" [minDate]="minDate" [defaultDate]="minDate"/>
+                <label for="travelDate">Travel Date</label>
+              </p-float-label>
+              <p-float-label variant="on">
+                <p-input-number inputId="totalAmount" mode="currency" currency="PHP"
+                  formControlName="totalAmount"
+                  [ngClass]="{'ng-invalid ng-dirty': form.get('totalAmount')?.invalid && form.get('totalAmount')?.touched}"/>
+                <label for="totalAmount">Total Amount</label>
+                <small class="p-error block" *ngIf="getFieldError('totalAmount')">
+                  {{ getFieldError('totalAmount') }}
+                </small>
+              </p-float-label>
+            </div>
+          </div>
+
+          <!-- Payment Configuration Section -->
+          <div class="mb-4">
+            <h3 class="text-xl mb-3">Payment Configuration</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <p-float-label variant="on">
+                <p-select inputId="paymentMethod" [options]="paymentMethods"
+                  formControlName="paymentMethod" [style]="{'width':'100%'}"
+                  optionLabel="label" optionValue="value">
+                </p-select>
+                <label for="paymentMethod">Payment Method</label>
+                <small class="p-error block" *ngIf="getFieldError('paymentMethod')">
+                  {{ getFieldError('paymentMethod') }}
+                </small>
+              </p-float-label>
+
+              <p-float-label variant="on">
+                <p-input-number inputId="downPaymentPercentage"
+                  formControlName="downPaymentPercentage"
+                  [min]="20" [max]="100" suffix="%"
+                  [ngClass]="{'ng-invalid ng-dirty': form.get('downPaymentPercentage')?.invalid && form.get('downPaymentPercentage')?.touched}"/>
+                <label for="downPaymentPercentage">Down Payment Percentage</label>
+                <small class="p-error block" *ngIf="getFieldError('downPaymentPercentage')">
+                  {{ getFieldError('downPaymentPercentage') }}
+                </small>
+              </p-float-label>
+
+              <p-float-label variant="on" *ngIf="form.get('paymentMethod')?.value === 'bank'">
+                <p-input-number inputId="monthlyChargePercentage"
+                  formControlName="monthlyChargePercentage"
+                  [min]="0" [max]="100" suffix="%"
+                  [ngClass]="{'ng-invalid ng-dirty': form.get('monthlyChargePercentage')?.invalid && form.get('monthlyChargePercentage')?.touched}"/>
+                <label for="monthlyChargePercentage">Monthly Interest Rate</label>
+                <small class="p-error block" *ngIf="getFieldError('monthlyChargePercentage')">
+                  {{ getFieldError('monthlyChargePercentage') }}
+                </small>
+              </p-float-label>
+            </div>
+          </div>
+
+          <!-- Payment Schedule Section -->
+          <div class="mb-4">
+            <h3 class="text-xl mb-3">Payment Schedule</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <p-float-label variant="on">
+                <p-date-picker showIcon inputId="startDate" iconDisplay="input"
+                  formControlName="startDate" [minDate]="today" [maxDate]="minDate"/>
+                <label for="startDate">Down Payment Date</label>
+              </p-float-label>
+
+              <p-float-label variant="on">
+                <p-date-picker showIcon inputId="monthlyStartDate" iconDisplay="input"
+                  formControlName="monthlyStartDate"
+                  [minDate]="today" [maxDate]="minDate"/>
+                <label for="monthlyStartDate">Monthly Payments Start Date</label>
+              </p-float-label>
+            </div>
+          </div>
+
+          <!-- Add back the action buttons -->
+          <div class="flex gap-4 justify-center items-center mt-4">
+            <p-button label="Generate Schedule" icon="pi pi-check"
+              (onClick)="generateSchedule()" [disabled]="!form.valid"/>
+            <p-button label="Clear" icon="pi pi-trash" severity="warn"
+              (onClick)="clear()"/>
+          </div>
+        </p-fluid>
+      </form>
+    </p-panel>
+
+    <!-- Results Section - Always visible -->
+    <div class="mt-4" *ngIf="schedule.length">
+      <p-panel>
+        <ng-template pTemplate="header">
+          <div class="flex align-items-center gap-2">
+            <i class="pi pi-list"></i>
+            <span class="font-bold">Payment Schedule</span>
+          </div>
+        </ng-template>
+
+        <p-table [value]="schedule" styleClass="p-datatable-sm">
+          <ng-template pTemplate="header">
+            <tr>
+              <th id="date">Date</th>
+              <th id="amount">Amount</th>
+            </tr>
+          </ng-template>
+          <ng-template pTemplate="body" let-payment>
+            <tr>
+              <td headers="date">{{payment.date}}</td>
+              <td headers="amount">₱ {{payment.amount}}</td>
+            </tr>
+          </ng-template>
+        </p-table>
+      </p-panel>
+    </div>
+  </div>
 </div>
