@@ -3,30 +3,35 @@
   <div class="mb-8">
     <h2 class="text-xl font-semibold text-gray-800 mb-4">Quick Actions</h2>
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-      <button pButton
-        class="p-button-primary h-24"
-        routerLink="/inquiry-form">
+      <p-button
+        fluid
+        styleClass="h-24"
+        routerLink="/inquiries/new">
         <div class="flex flex-col items-center">
           <i class="pi pi-plus-circle text-2xl mb-2"></i>
           <span>New Inquiry</span>
         </div>
-      </button>
-      <button pButton
-        class="p-button-secondary h-24"
-        routerLink="/payment-scheduler">
+      </p-button>
+      <p-button
+        fluid
+        styleClass="h-24"
+        severity="info"
+        routerLink="/payments">
         <div class="flex flex-col items-center">
           <i class="pi pi-calendar text-2xl mb-2"></i>
           <span>Payment Scheduler</span>
         </div>
-      </button>
-      <button pButton
-        class="p-button-help h-24"
+      </p-button>
+      <p-button
+        fluid
+        styleClass="h-24"
+        severity="help"
         routerLink="/customers">
         <div class="flex flex-col items-center">
           <i class="pi pi-users text-2xl mb-2"></i>
           <span>Customer Database</span>
         </div>
-      </button>
+      </p-button>
     </div>
   </div>
 
@@ -106,10 +111,10 @@
               </span>
             </td>
             <td headers="action">
-              <button pButton type="button" icon="pi pi-eye"
+              <p-button type="button" icon="pi pi-eye"
                 class="p-button-text p-button-sm"
                 (click)="viewActivity(activity)">
-              </button>
+              </p-button>
             </td>
           </tr>
         </ng-template>
