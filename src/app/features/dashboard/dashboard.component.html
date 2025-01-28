@@ -74,25 +74,9 @@
   <div class="mb-8">
     <h2 class="text-xl font-semibold text-gray-800 mb-4">Provider Portals</h2>
     <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
-      <a href="#" class="bg-white p-4 rounded-lg shadow hover:shadow-md transition-shadow text-center">
-        <img ngSrc="images/logo.png" alt="BiyaheKo" class="h-8 mx-auto mb-2">
-        <span class="text-sm text-gray-600">BiyaheKo Portal</span>
-      </a>
-      <a href="#" class="bg-white p-4 rounded-lg shadow hover:shadow-md transition-shadow text-center">
-        <img src="assets/via-logo.png" alt="Via" class="h-8 mx-auto mb-2">
-        <span class="text-sm text-gray-600">Via Portal</span>
-      </a>
-      <a href="#" class="bg-white p-4 rounded-lg shadow hover:shadow-md transition-shadow text-center">
-        <img src="assets/uos-logo.png" alt="UOS" class="h-8 mx-auto mb-2">
-        <span class="text-sm text-gray-600">UOS Portal</span>
-      </a>
-      <a href="#" class="bg-white p-4 rounded-lg shadow hover:shadow-md transition-shadow text-center">
-        <img src="assets/southwest-logo.png" alt="Southwest" class="h-8 mx-auto mb-2">
-        <span class="text-sm text-gray-600">Southwest Portal</span>
-      </a>
-      <a href="#" class="bg-white p-4 rounded-lg shadow hover:shadow-md transition-shadow text-center">
-        <i class="pi pi-envelope text-2xl text-red-500 mb-2"></i>
-        <span class="text-sm text-gray-600">Gmail</span>
+      <a *ngFor="let provider of providers" [href]="provider.trackerLink" class="bg-white p-4 rounded-lg shadow hover:shadow-md transition-shadow text-center">
+        <img [ngSrc]="provider.logo.url" [alt]="provider.name" class="h-8 mx-auto mb-2" width="32" height="32">
+        <span class="text-sm text-gray-600">{{provider.name}}</span>
       </a>
     </div>
   </div>
