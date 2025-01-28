@@ -49,13 +49,13 @@ type FlightDetail = Partial<{
     RadioButton,
     Textarea,
   ],
-  templateUrl: './quotation-form.component.html'
+  templateUrl: './quotation-form.component.html',
 })
 export class QuotationFormComponent implements OnInit {
   @Output() onFormChange: EventEmitter<Quotation> = new EventEmitter();
-  countries?: Country[];
-  providers?: Provider[];
-  packages?: Package[];
+  countries: Country[] = [];
+  providers: Provider[] = [];
+  packages: Package[] = [];
   images?: Asset[] | null;
   private baseUrl = environment.backendUrl;
   private formBuilder = inject(FormBuilder);
@@ -245,9 +245,12 @@ export class QuotationFormComponent implements OnInit {
     });
   }
 
-  fetchPackagesByCountryAndProvider(country: string, provider: string): void {
+  fetchPackagesByCountryAndProvider(
+    countryId: string,
+    providerId: string,
+  ): void {
     this.packageService
-      .getPackagesByCountryAndProvider(country, provider)
+      .getPackages({ countryId, providerId })
       .subscribe((data) => {
         this.packages = data.data;
       });

@@ -1,6 +1,7 @@
 import { DatePipe, Location, NgForOf, NgIf } from '@angular/common';
 import { Component, inject, OnInit } from '@angular/core';
 import {
+  AbstractControl,
   FormArray,
   FormBuilder,
   FormControl,
@@ -9,11 +10,13 @@ import {
   Validators,
 } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
+import { Package } from '@models/package.model';
 import { EmailService } from '@services/email.service';
 import { AuthService } from '@services/auth.service';
 import { DestroyService } from '@services/destroy.service';
 import { ExchangeRateService } from '@services/exchange-rate.service';
 import { InquiryService } from '@services/inquiry.service';
+import { PackageService } from '@services/package.service';
 import { ProviderService } from '@services/provider.service';
 import { EmailData, prepareProviderEmail } from '@core/utils/email.util';
 import {
@@ -38,7 +41,7 @@ import { InputGroupAddon } from 'primeng/inputgroupaddon';
 import { InputNumber } from 'primeng/inputnumber';
 import { InputText } from 'primeng/inputtext';
 import { RadioButton } from 'primeng/radiobutton';
-import { Select } from 'primeng/select';
+import { Select, SelectChangeEvent } from 'primeng/select';
 import { Tag } from 'primeng/tag';
 import { Textarea } from 'primeng/textarea';
 import { Toast } from 'primeng/toast';
@@ -131,13 +134,14 @@ export class InquiryFormComponent implements OnInit {
   isLoadingRate: boolean[] = [];
   exchangeRateLastUpdated: (Date | null)[] = [];
   currentInquiry: Inquiry | null = null;
-  statusConfig = InquiryStatusConfig;
+  providerPackages = new Map<string, Package[]>();
   protected readonly getInquiryStatusConfig = getInquiryStatusConfig;
   private currentUser: User | null = null;
 
   constructor(
     private providerService: ProviderService,
     private exchangeRateService: ExchangeRateService,
+    private packageService: PackageService,
     private authService: AuthService,
     private destroy$: DestroyService,
     private inquiryService: InquiryService,
@@ -215,18 +219,22 @@ export class InquiryFormComponent implements OnInit {
       this.providers.forEach((provider) => {
         const existingProvider = currentProvidersMap?.get(provider.documentId);
 
+        if (provider) {
+          this.loadPackagesForProvider(provider.documentId);
+        }
+
         this.providerQuotations.push(
           this.formBuilder.group({
             includeInEmail: [existingProvider?.includeInEmail ?? false],
             providerStatus: [existingProvider?.providerStatus ?? 'pending'],
-            price: [existingProvider?.price ?? null],
+            price: [existingProvider?.price],
             currency: [existingProvider?.currency ?? 'PHP'],
             exchangeRate: [
-              { value: existingProvider?.exchangeRate ?? null, disabled: true },
+              { value: existingProvider?.exchangeRate, disabled: true },
             ],
             phpEquivalent: [
               {
-                value: existingProvider?.phpEquivalent ?? null,
+                value: existingProvider?.phpEquivalent,
                 disabled: true,
               },
             ],
@@ -234,6 +242,7 @@ export class InquiryFormComponent implements OnInit {
             emailRemarks: [existingProvider?.emailRemarks ?? ''],
             provider: [provider.documentId],
             sent: [existingProvider?.sent ?? false],
+            package: [existingProvider?.package]
           }),
         );
       });
@@ -501,6 +510,35 @@ export class InquiryFormComponent implements OnInit {
         sender: `${this.currentUser?.firstName} ${this.currentUser?.lastName?.charAt(0)}.`,
         sent: quotation.sent,
       }));
+  }
+
+  loadPackagesForProvider(providerId: string) {
+    this.packageService.getPackages({ providerId }).subscribe({
+      next: (response) => {
+        this.providerPackages.set(providerId, response.data);
+      },
+      error: (error) => {
+        console.error('Error loading packages:', error);
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: 'Failed to load packages',
+        });
+      },
+    });
+  }
+
+  onPackageSelect(event: SelectChangeEvent, provider: AbstractControl) {
+    console.log(event);
+    const selectedPackage = this.providerPackages.get(provider.get('provider')?.value)
+      ?.find((p: Package) => p.documentId === event.value);
+
+    if (selectedPackage) {
+      provider.patchValue({
+        price: selectedPackage.price,
+        currency: selectedPackage.currency ?? 'PHP'
+      });
+    }
   }
 
   goBack() {

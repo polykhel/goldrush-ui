@@ -5,6 +5,7 @@ export interface Package extends BaseModel {
   name: string;
   duration: string;
   price: number;
+  currency?: string;
   bookingPeriod: Date;
   travelPeriod: Date;
   inclusions: List[];

@@ -14,38 +14,45 @@ export class PackageService {
 
   constructor(private http: HttpClient) {}
 
-  getPackagesByCountryAndProvider(
-    countryId: string,
-    providerId: string,
-  ): Observable<ListData<Package>> {
+  getPackages({
+    countryId,
+    providerId,
+  }: {
+    countryId?: string;
+    providerId?: string;
+  }): Observable<ListData<Package>> {
     const query = qs.stringify({
       filters: {
-        countries: {
-          documentId: {
-            $eq: countryId,
-          },
-        },
-        provider: {
-          documentId: {
-            $eq: providerId,
-          },
-        },
+        countries: countryId
+          ? {
+              documentId: {
+                $eq: countryId,
+              },
+            }
+          : undefined,
+        provider: providerId
+          ? {
+              documentId: {
+                $eq: providerId,
+              },
+            }
+          : undefined,
       },
       populate: {
         inclusions: {
-          fields: ['*']
+          fields: ['*'],
         },
         exclusions: {
-          fields: ['*']
+          fields: ['*'],
         },
         optionalTours: {
-          fields: ['*']
+          fields: ['*'],
         },
         images: {
-          fields: ['name', 'url']
-        }
+          fields: ['name', 'url'],
+        },
       },
-      sort: ['travelPeriod:desc']
+      sort: ['travelPeriod:desc'],
     });
     return this.http.get<ListData<Package>>(`${this.baseUrl}?${query}`);
   }

@@ -61,6 +61,7 @@ export interface ProviderQuotation {
   providerStatus: string;
   price: number | null;
   currency: string;
+  package?: string;
   exchangeRate?: number | null;
   phpEquivalent?: number | null;
   remarks?: string;
@@ -75,6 +76,7 @@ export interface ProviderQuotationRequest {
   travelDays: number;
   travelNights: number;
   destination: string;
+  package?: string;
   paxAdult: number;
   paxChild: number;
   paxChildAges?: string | null;
