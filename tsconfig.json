@@ -19,14 +19,12 @@
     "module": "ES2022",
     "baseUrl": "src",
     "paths": {
-      "@app/*": ["app/*"],
-      "@components/*": ["app/components/*"],
       "@core/*": ["app/core/*"],
       "@models/*": ["app/core/models/*"],
       "@services/*": ["app/core/services/*"],
       "@env/*": ["environments/*"],
       "@shared/*": ["app/shared/*"],
-      "@pipes/*": ["app/pipes/*"],
+      "@pipes/*": ["app/shared/pipes/*"],
     }
   },
   "angularCompilerOptions": {

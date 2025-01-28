@@ -1,18 +1,18 @@
 import { NgIf } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { AuthService } from '@core/services/auth.service';
+import { AuthService } from '@services/auth.service';
 import { environment } from '@env/environment';
 import { DestroyService } from '@services/destroy.service';
 import { MessageService } from 'primeng/api';
 import { Button } from 'primeng/button';
 import { Toast } from 'primeng/toast';
 import { takeUntil } from 'rxjs';
-import { PortalComponent } from '../portal/portal.component';
+import { DashboardComponent } from '../dashboard/dashboard.component';
 
 @Component({
   selector: 'app-home',
-  imports: [Button, NgIf, PortalComponent, Toast],
+  imports: [Button, NgIf, DashboardComponent, Toast],
   templateUrl: './home.component.html',
   providers: [MessageService],
 })

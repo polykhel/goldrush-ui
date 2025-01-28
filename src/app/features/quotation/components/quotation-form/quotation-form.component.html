@@ -3,33 +3,8 @@
     <p-fluid class="grid grid-cols-2 gap-4">
       <p-float-label variant="on">
         <p-select inputId="country" formControlName="country" [options]="countries" optionLabel="name">
-          <ng-template #selectedItem let-selectedOption>
-            <div class="flex items-center gap-2" *ngIf="selectedOption">
-              <img
-                src="https://primefaces.org/cdn/primeng/images/demo/flag/flag_placeholder.png" alt="Flag"
-                [class]="'flag flag-' + selectedOption.code.toLowerCase()"
-                style="width: 18px"
-              />
-              <div>{{ selectedOption.name }}</div>
-            </div>
-          </ng-template>
-          <ng-template let-country #item>
-            <div class="flex items-center gap-2">
-              <img src="https://primefaces.org/cdn/primeng/images/demo/flag/flag_placeholder.png" alt="Flag"
-                   [class]="'flag flag-' + country.code.toLowerCase()" style="width: 18px"/>
-              <div>{{ country.name }}</div>
-            </div>
-          </ng-template>
           <ng-template #dropdownicon>
             <i class="pi pi-map"></i>
-          </ng-template>
-          <ng-template #header>
-            <div class="font-medium px-3 py-2">Available Countries</div>
-          </ng-template>
-          <ng-template #footer>
-            <div class="px-3 py-3">
-              <p-button label="Add New" fluid severity="secondary" text size="small" icon="pi pi-plus"/>
-            </div>
           </ng-template>
         </p-select>
         <label for="country">Country</label>
@@ -156,7 +131,7 @@
           </div>
         </p-fluid>
       </div>
-      <p-float-label variant="on" [ngClass]="{'next-row': form.controls.modeOfTransportation.value !== 'Flight' || form.controls.flightIncluded.value}">
+      <p-float-label variant="on" [ngClass]="{'grid-cols-1': form.controls.modeOfTransportation.value !== 'Flight' || form.controls.flightIncluded.value}">
         <p-input-number inputId="totalRatePerPax" mode="currency" currency="PHP" formControlName="totalRatePerPax"/>
         <label for="totalRatePerPax">Total Rate per Pax</label>
       </p-float-label>

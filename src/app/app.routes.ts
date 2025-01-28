@@ -1,12 +1,12 @@
 import { Routes } from '@angular/router';
-import { HomeComponent } from '@components/home/home.component';
-import { InquiryFormComponent } from '@components/inquiry-form/inquiry-form.component';
-import { PaymentSchedulerComponent } from '@components/payment-scheduler/payment-scheduler.component';
-import { QuotationGeneratorComponent } from '@components/quotation-generator/quotation-generator.component';
-import { ListToJsonComponent } from '@components/tools/list-to-json/list-to-json.component';
+import { HomeComponent } from './features/home/home.component';
+import { InquiryFormComponent } from './features/inquiry/pages/inquiry-form/inquiry-form.component';
+import { PaymentSchedulerComponent } from './features/payment/payment-scheduler/payment-scheduler.component';
+import { QuotationGeneratorComponent } from './features/quotation/pages/quotation-generator/quotation-generator.component';
+import { ListToJsonComponent } from './features/tools/pages/list-to-json/list-to-json.component';
 import { AuthCallbackComponent } from '@core/auth/auth-callback.component';
-import { AuthGuard } from '@core/auth/auth.guard';
-import { InquiryListComponent } from '@components/inquiry-list/inquiry-list.component';
+import { AuthGuard } from '@core/guards/auth.guard';
+import { InquiryListComponent } from './features/inquiry/pages/inquiry-list/inquiry-list.component';
 
 export const routes: Routes = [
   {
@@ -37,17 +37,19 @@ export const routes: Routes = [
     ],
   },
   {
+    path: 'quotation',
+    component: QuotationGeneratorComponent,
+    canActivate: [AuthGuard],
+  },
+  {
+    path: 'payments',
+    component: PaymentSchedulerComponent,
+    canActivate: [AuthGuard],
+  },
+  {
     path: 'tools',
     canActivate: [AuthGuard],
     children: [
-      {
-        path: 'payment-scheduler',
-        component: PaymentSchedulerComponent,
-      },
-      {
-        path: 'quotation-generator',
-        component: QuotationGeneratorComponent,
-      },
       {
         path: 'list-to-json',
         component: ListToJsonComponent,

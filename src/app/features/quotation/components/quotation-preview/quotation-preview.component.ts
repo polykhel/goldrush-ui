@@ -8,7 +8,6 @@ import dayjs from 'dayjs';
   selector: 'app-quotation-preview',
   imports: [CommonModule],
   templateUrl: './quotation-preview.component.html',
-  styleUrl: './quotation-preview.component.css',
 })
 export class QuotationPreviewComponent {
 

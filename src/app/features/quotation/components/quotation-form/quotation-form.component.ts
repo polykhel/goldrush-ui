@@ -1,10 +1,10 @@
 import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, inject, OnInit, Output } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { CountryService } from '@core/services/country.service';
-import { DestroyService } from '@core/services/destroy.service';
-import { PackageService } from '@core/services/package.service';
-import { ProviderService } from '@core/services/provider.service';
+import { CountryService } from '@services/country.service';
+import { DestroyService } from '@services/destroy.service';
+import { PackageService } from '@services/package.service';
+import { ProviderService } from '@services/provider.service';
 import { formatPairedValues, formatValue } from '@core/utils/string.util';
 import { environment } from '@env/environment';
 import { Asset } from '@models/asset.model';
@@ -49,8 +49,7 @@ type FlightDetail = Partial<{
     RadioButton,
     Textarea,
   ],
-  templateUrl: './quotation-form.component.html',
-  styleUrl: './quotation-form.component.css',
+  templateUrl: './quotation-form.component.html'
 })
 export class QuotationFormComponent implements OnInit {
   @Output() onFormChange: EventEmitter<Quotation> = new EventEmitter();

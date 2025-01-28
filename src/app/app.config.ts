@@ -2,7 +2,7 @@ import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { ApplicationConfig, provideZoneChangeDetection } from '@angular/core';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { provideRouter, withViewTransitions } from '@angular/router';
-import { authInterceptor } from '@core/auth/auth.interceptor';
+import { authInterceptor } from '@core/interceptors/auth.interceptor';
 import Aura from '@primeng/themes/aura';
 import { providePrimeNG } from 'primeng/config';
 

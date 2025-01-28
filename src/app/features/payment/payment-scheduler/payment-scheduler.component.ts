@@ -1,7 +1,7 @@
 import { NgClass, NgIf } from '@angular/common';
 import { Component, inject } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { SumPipe } from '@pipes/sum.pipe';
+import { SumPipe } from '@shared/pipes/sum.pipe';
 import dayjs from 'dayjs';
 import { MessageService } from 'primeng/api';
 import { Button } from 'primeng/button';

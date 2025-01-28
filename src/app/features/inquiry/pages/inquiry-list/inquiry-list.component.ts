@@ -2,7 +2,7 @@ import { DatePipe, NgForOf, NgIf } from '@angular/common';
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { InquiryService } from '@core/services/inquiry.service';
+import { InquiryService } from '@services/inquiry.service';
 import {
   getInquiryStatusConfig,
   Inquiry,

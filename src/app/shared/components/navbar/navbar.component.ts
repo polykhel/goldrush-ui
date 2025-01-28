@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { RouterModule } from '@angular/router';
-import { AuthService } from '@core/services/auth.service';
+import { AuthService } from '@services/auth.service';
 import { MenuItem } from 'primeng/api';
 import { ButtonModule } from 'primeng/button';
 import { MenubarModule } from 'primeng/menubar';
@@ -41,17 +41,19 @@ export class NavbarComponent {
         visible: isLoggedIn,
       },
       {
+        label: 'Quotations',
+        routerLink: '/quotation',
+        visible: isLoggedIn,
+      },
+      {
+        label: 'Payment Scheduler',
+        routerLink: '/payments',
+        visible: isLoggedIn,
+      },
+      {
         label: 'Tools',
         visible: isLoggedIn,
         items: [
-          {
-            label: 'Payment Scheduler',
-            routerLink: '/tools/payment-scheduler',
-          },
-          {
-            label: 'Quotation Generator',
-            routerLink: '/tools/quotation-generator',
-          },
           {
             label: 'List to JSON',
             routerLink: '/tools/list-to-json',

@@ -9,12 +9,12 @@ import {
   Validators,
 } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { EmailService } from '@app/core/services/email.service';
-import { AuthService } from '@core/services/auth.service';
-import { DestroyService } from '@core/services/destroy.service';
-import { ExchangeRateService } from '@core/services/exchange-rate.service';
-import { InquiryService } from '@core/services/inquiry.service';
-import { ProviderService } from '@core/services/provider.service';
+import { EmailService } from '@services/email.service';
+import { AuthService } from '@services/auth.service';
+import { DestroyService } from '@services/destroy.service';
+import { ExchangeRateService } from '@services/exchange-rate.service';
+import { InquiryService } from '@services/inquiry.service';
+import { ProviderService } from '@services/provider.service';
 import { EmailData, prepareProviderEmail } from '@core/utils/email.util';
 import {
   getInquiryStatusConfig,
@@ -43,7 +43,7 @@ import { Tag } from 'primeng/tag';
 import { Textarea } from 'primeng/textarea';
 import { Toast } from 'primeng/toast';
 import { firstValueFrom, iif, takeUntil } from 'rxjs';
-import { EmailPreviewModalComponent } from './email-preview-modal/email-preview-modal.component';
+import { EmailPreviewModalComponent } from '../../components/email-preview-modal/email-preview-modal.component';
 
 @Component({
   selector: 'app-inquiry-form',
@@ -70,7 +70,6 @@ import { EmailPreviewModalComponent } from './email-preview-modal/email-preview-
     Tag,
   ],
   templateUrl: './inquiry-form.component.html',
-  styleUrl: './inquiry-form.component.css',
   providers: [MessageService],
 })
 export class InquiryFormComponent implements OnInit {

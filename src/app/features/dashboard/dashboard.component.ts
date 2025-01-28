@@ -1,3 +1,4 @@
+import { NgOptimizedImage } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { ButtonModule } from 'primeng/button';
@@ -12,16 +13,17 @@ interface Activity {
 }
 
 @Component({
-  selector: 'app-portal',
-  templateUrl: './portal.component.html',
+  selector: 'app-dashboard',
+  templateUrl: './dashboard.component.html',
   standalone: true,
   imports: [
     ButtonModule,
     TableModule,
-    RouterLink
+    RouterLink,
+    NgOptimizedImage
   ]
 })
-export class PortalComponent implements OnInit {
+export class DashboardComponent implements OnInit {
   recentActivities: Activity[] = [
     {
       date: '2024-03-20',

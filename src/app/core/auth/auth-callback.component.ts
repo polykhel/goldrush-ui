@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { AuthService } from '../services/auth.service';
-import { DestroyService } from '../services/destroy.service';
+import { AuthService } from '@services/auth.service';
+import { DestroyService } from '@services/destroy.service';
 import { takeUntil } from 'rxjs';
 
 @Component({

@@ -1,8 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
-import { NavbarComponent } from '@components/navbar/navbar.component';
+import { NavbarComponent } from '@shared/components/navbar/navbar.component';
 import { AuthService } from '@core/services/auth.service';
-import { Toast } from 'primeng/toast';
 
 @Component({
   selector: 'app-root',
