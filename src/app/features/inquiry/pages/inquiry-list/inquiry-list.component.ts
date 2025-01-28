@@ -186,7 +186,7 @@ export class InquiryListComponent implements OnInit, OnDestroy {
           this.totalRecords = response.total;
           this.loading = false;
         },
-        error: (error) => {
+        error: () => {
           this.messageService.add({
             severity: 'error',
             summary: 'Error',

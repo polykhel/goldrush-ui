@@ -6,7 +6,6 @@ import { Dialog } from 'primeng/dialog';
 import { TabView, TabPanel } from 'primeng/tabview';
 import { Button } from 'primeng/button';
 import { Provider } from '@models/provider.model';
-import { ProviderQuotation } from '@models/inquiry.model';
 
 @Component({
   selector: 'app-email-preview-modal',
