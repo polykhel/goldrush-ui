@@ -1,0 +1,116 @@
+<div class="mb-6 p-4 border rounded-lg bg-white" [formGroup]="group" *ngIf="provider">
+  <!-- Provider Header -->
+  <div class="flex items-center justify-between mb-2">
+    <div class="flex items-center gap-4">
+      <span class="font-medium text-lg">{{ provider.name }}</span>
+      <a [href]="provider.trackerLink" target="_blank"
+         class="text-blue-500 hover:text-blue-700 text-sm">
+        <i class="pi pi-external-link"></i> View Tracker
+      </a>
+    </div>
+    <div class="flex items-center gap-2">
+      <p-checkbox formControlName="includeInEmail" [binary]="true"
+                  inputId="includeEmail{{provider.name}}"/>
+      <label [for]="'includeEmail' + provider.name" class="text-sm text-gray-600">
+        Include in email quotation
+      </label>
+    </div>
+  </div>
+  <!-- Show full details only in edit mode -->
+  <div *ngIf="isEditMode" class="grid grid-cols-1 md:grid-cols-3 gap-2">
+    <div class="flex flex-col gap-2">
+      <div class="flex gap-2">
+        <p-select [options]="currencies"
+                  formControlName="currency"
+                  placeholder="Currency" (onChange)="onCurrencyChange()">
+        </p-select>
+        <p-float-label variant="on">
+          <p-input-number fluid [currency]="group.get('currency')?.value || 'PHP'"
+                          mode="currency"
+                          formControlName="price"
+                          [id]="'price-' + provider.name"
+                          (onInput)="onPriceInput()" class="w-full"/>
+          <label [for]="'price-' + provider.name">Price</label>
+        </p-float-label>
+      </div>
+      <div *ngIf="group.get('currency')?.value !== 'PHP'" class="mt-2 space-y-2">
+        <p-inputgroup>
+          <p-float-label variant="on" class="flex-1">
+            <p-input-number mode="decimal"
+                            [minFractionDigits]="2"
+                            [maxFractionDigits]="2"
+                            formControlName="exchangeRate"
+                            [id]="'exchangeRate-' + provider.name"
+                            class="w-full"/>
+            <label [for]="'exchangeRate-' + provider.name">Exchange Rate</label>
+          </p-float-label>
+          <p-inputgroup-addon>
+            <p-button icon="pi pi-refresh"
+                      (onClick)="fetchExchangeRate()"
+                      [loading]="isLoadingRate"
+                      [disabled]="!group.get('price')?.value"
+                      severity="secondary"
+                      [text]="true"/>
+          </p-inputgroup-addon>
+        </p-inputgroup>
+        <p-float-label variant="on">
+          <p-input-number mode="currency"
+                          currency="PHP"
+                          formControlName="phpEquivalent"
+                          [readonly]="true"
+                          [id]="'phpEquivalent-' + provider.name"
+                          class="w-full"/>
+          <label [for]="'phpEquivalent-' + provider.name">PHP Equivalent</label>
+        </p-float-label>
+        <small *ngIf="exchangeRateLastUpdated" class="text-gray-500">
+          Last updated: {{ exchangeRateLastUpdated | date:'medium' }}
+        </small>
+      </div>
+    </div>
+
+    <div>
+      <p-float-label variant="on">
+        <input type="text"
+               [id]="'remarks-' + provider.name"
+               formControlName="remarks"
+               pInputText
+               class="w-full">
+        <label [for]="'remarks-' + provider.name">Remarks</label>
+      </p-float-label>
+    </div>
+    <div>
+      <p-select formControlName="providerStatus"
+                [options]="quotationStatuses"
+                optionLabel="label"
+                optionValue="value"
+                placeholder="Select Status"
+                [styleClass]="'status-dropdown'"
+                class="w-full">
+      </p-select>
+
+      <!-- Add the Generate Quotation button -->
+      <p-button *ngIf="group.get('providerStatus')?.value === 'received'"
+                icon="pi pi-file-export"
+                label="Generate Quotation"
+                [text]="true"
+                size="small"
+                (onClick)="generateQuotation()"
+                class="mt-2"/>
+    </div>
+  </div>
+
+  <!-- Email Remarks (Conditional) -->
+  <div *ngIf="group.get('includeInEmail')?.value"
+       [class.mt-4]="isEditMode"
+       [class.pt-4]="isEditMode"
+       [class.border-t]="isEditMode">
+    <p-float-label variant="on">
+                  <textarea pTextarea
+                            [id]="'emailRemarks-' + provider.name"
+                            formControlName="emailRemarks"
+                            rows="2"
+                            class="w-full"></textarea>
+      <label [for]="'emailRemarks-' + provider.name">Remarks to include in email</label>
+    </p-float-label>
+  </div>
+</div>

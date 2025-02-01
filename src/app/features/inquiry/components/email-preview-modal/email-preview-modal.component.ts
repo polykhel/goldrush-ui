@@ -1,16 +1,17 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { EmailData } from '@core/utils/email.util';
-import { PrimeTemplate } from 'primeng/api';
-import { Dialog } from 'primeng/dialog';
-import { TabView, TabPanel } from 'primeng/tabview';
-import { Button } from 'primeng/button';
 import { Provider } from '@models/provider.model';
+import { PrimeTemplate } from 'primeng/api';
+import { Button } from 'primeng/button';
+import { Dialog } from 'primeng/dialog';
+import { Tabs } from 'primeng/tabs';
+import { TabPanel } from 'primeng/tabview';
 
 @Component({
   selector: 'app-email-preview-modal',
   standalone: true,
-  imports: [CommonModule, Dialog, TabView, TabPanel, Button, PrimeTemplate],
+  imports: [CommonModule, Dialog, TabPanel, Button, PrimeTemplate, Tabs],
   templateUrl: './email-preview-modal.component.html',
 })
 export class EmailPreviewModalComponent {
@@ -25,12 +26,12 @@ export class EmailPreviewModalComponent {
   @Output() cancel = new EventEmitter<void>();
 
   getProviderName(key: string): string {
-    return this.providers.get(key)?.name || 'Unknown Provider';
+    return this.providers.get(key)?.name ?? 'Unknown Provider';
   }
 
   isProviderSent(providerId: string): boolean {
     const quotation = this.providerQuotations.find(
-      (q) => q.provider === providerId
+      (q) => q.provider === providerId,
     );
     return quotation?.sent || false;
   }

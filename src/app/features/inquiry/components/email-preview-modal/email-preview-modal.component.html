@@ -5,7 +5,7 @@
   (onHide)="onCancel()"
   header="Email Preview"
 >
-  <p-tabView>
+  <p-tabs>
     <p-tabPanel *ngFor="let email of emailData | keyvalue" [header]="getProviderName(email.key)">
       <div class="flex justify-content-between mb-3">
             <span [class]="getStatusClass(email.key)">
@@ -15,7 +15,7 @@
       <pre class="whitespace-pre-wrap">{{ email.value.subject }}</pre>
       <div [innerHTML]="email.value.emailContent"></div>
     </p-tabPanel>
-  </p-tabView>
+  </p-tabs>
 
   <ng-template pTemplate="footer">
     <p-button

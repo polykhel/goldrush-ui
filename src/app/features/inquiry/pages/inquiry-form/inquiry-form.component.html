@@ -1,7 +1,7 @@
 <section class="container mx-auto px-4 py-8">
   <form [formGroup]="inquiryForm" class="p-6 shadow-md rounded max-w-4xl border mx-auto">
     <div class="flex justify-between align-items-center mb-3">
-      <p-button icon="pi pi-arrow-left" label="Back" (click)="goBack()" [text]="true"></p-button>
+      <p-button (click)="goBack()" [text]="true" icon="pi pi-arrow-left" label="Back"></p-button>
       <h2 class="text-2xl font-bold">{{ isEditMode ? 'Edit' : 'New' }} Inquiry</h2>
     </div>
     <!-- Basic Information Section -->
@@ -10,22 +10,22 @@
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <p-float-label variant="on">
           <p-select
-            formControlName="inquiryStatus"
             [options]="inquiryStatusOptions"
+            [styleClass]="'w-full'"
+            formControlName="inquiryStatus"
             optionLabel="label"
             optionValue="value"
-            placeholder="Select Status"
-            [styleClass]="'w-full'">
-            <ng-template pTemplate="selectedItem" let-status>
-              <p-tag [severity]="getInquiryStatusConfig(status?.value).severity"
-                     [icon]="getInquiryStatusConfig(status?.value).icon"
+            placeholder="Select Status">
+            <ng-template let-status pTemplate="selectedItem">
+              <p-tag [icon]="getInquiryStatusConfig(status?.value).icon"
+                     [severity]="getInquiryStatusConfig(status?.value).severity"
                      [value]="status?.label">
               </p-tag>
             </ng-template>
-            <ng-template pTemplate="item" let-status>
+            <ng-template let-status pTemplate="item">
               <p-fluid>
-                <p-tag [severity]="getInquiryStatusConfig(status?.value).severity"
-                       [icon]="getInquiryStatusConfig(status?.value).icon"
+                <p-tag [icon]="getInquiryStatusConfig(status?.value).icon"
+                       [severity]="getInquiryStatusConfig(status?.value).severity"
                        [value]="status?.label"></p-tag>
               </p-fluid>
             </ng-template>
@@ -34,15 +34,15 @@
         </p-float-label>
 
         <p-float-label variant="on">
-          <p-date-picker inputId="date" formControlName="date" [showIcon]="true" dateFormat="mm-dd-yy"
-                         fluid></p-date-picker>
+          <p-date-picker [showIcon]="true" dateFormat="mm-dd-yy" fluid formControlName="date"
+                         inputId="date"></p-date-picker>
           <label for="date">Date</label>
         </p-float-label>
       </div>
 
       <div class="mt-4">
         <p-float-label variant="on">
-          <input pInputText type="text" id="clientName" formControlName="clientName" class="w-full">
+          <input class="w-full" formControlName="clientName" id="clientName" pInputText type="text">
           <label for="clientName">Client Name</label>
         </p-float-label>
       </div>
@@ -51,14 +51,14 @@
         <label class="text-gray-700 font-semibold block mb-2">Contact Point</label>
         <div class="flex flex-wrap items-center gap-4">
           <div class="flex items-center">
-            <p-radio-button value="fb" formControlName="contactPoint" inputId="contactPointFB"/>
-            <label for="contactPointFB" class="ml-2">Facebook</label>
+            <p-radio-button formControlName="contactPoint" inputId="contactPointFB" value="fb"/>
+            <label class="ml-2" for="contactPointFB">Facebook</label>
           </div>
           <div class="flex items-center">
-            <p-radio-button value="pm" formControlName="contactPoint" inputId="contactPointPM"/>
-            <label for="contactPointPM" class="ml-2">Private Message</label>
+            <p-radio-button formControlName="contactPoint" inputId="contactPointPM" value="pm"/>
+            <label class="ml-2" for="contactPointPM">Private Message</label>
           </div>
-          <input pInputText type="text" placeholder="Others" formControlName="contactPointOther" class="w-48">
+          <input class="w-48" formControlName="contactPointOther" pInputText placeholder="Others" type="text">
         </div>
       </div>
     </section>
@@ -66,20 +66,29 @@
     <!-- Travel Details Section -->
     <section class="mb-6">
       <h3 class="text-lg font-bold mb-4 text-gray-700 border-b pb-2">Travel Details</h3>
-      <p-fluid class="grid grid-cols-2 md:grid-cols-3 gap-4 mb-4">
+      <p-fluid class="grid grid-cols-2 gap-4 mb-4">
         <p-float-label variant="on">
-          <p-input-number inputId="days" formControlName="travelDays" [showButtons]="true"/>
+          <p-select [options]="countries" formControlName="country" inputId="country" optionLabel="name">
+            <ng-template pTemplate="dropdownicon">
+              <i class="pi pi-map"></i>
+            </ng-template>
+          </p-select>
+          <label for="country">Country</label>
+        </p-float-label>
+
+        <p-float-label variant="on">
+          <input class="w-full" formControlName="destination" id="destination" pInputText type="text">
+          <label for="destination">Destination</label>
+        </p-float-label>
+
+        <p-float-label variant="on">
+          <p-input-number [showButtons]="true" formControlName="travelDays" inputId="days"/>
           <label for="days">Days</label>
         </p-float-label>
 
         <p-float-label variant="on">
-          <p-input-number inputId="nights" formControlName="travelNights" [showButtons]="true"/>
+          <p-input-number [showButtons]="true" formControlName="travelNights" inputId="nights"/>
           <label for="nights">Nights</label>
-        </p-float-label>
-
-        <p-float-label variant="on">
-          <input pInputText class="w-full" type="text" formControlName="destination" id="destination">
-          <label for="destination">Destination</label>
         </p-float-label>
       </p-fluid>
 
@@ -89,26 +98,26 @@
           <div *ngFor="let _ of dateRanges.controls; let i = index" [formGroupName]="i"
                class="mb-2 grid gap-1 grid-cols-[40%_40%_10%]">
             <p-float-label variant="on">
-              <p-date-picker formControlName="start" [showIcon]="true" iconDisplay="input"
-                             dateFormat="mm/dd/y" [inputId]="'startDate' + i"/>
+              <p-date-picker [inputId]="'startDate' + i" [showIcon]="true" dateFormat="mm/dd/y"
+                             formControlName="start" iconDisplay="input"/>
               <label for="'startDate' + i">Start Date</label>
             </p-float-label>
             <p-float-label variant="on">
-              <p-date-picker formControlName="end" [showIcon]="true" iconDisplay="input"
-                             dateFormat="mm/dd/y" [inputId]="'endDate' + i"/>
+              <p-date-picker [inputId]="'endDate' + i" [showIcon]="true" dateFormat="mm/dd/y"
+                             formControlName="end" iconDisplay="input"/>
               <label [for]="'endDate' + i">End Date</label>
             </p-float-label>
-            <p-button *ngIf="dateRanges.length > 1" icon="pi pi-times" (click)="removeDateRange(i)"
-                      severity="danger"
-                      [text]="true" size="small"/>
+            <p-button (click)="removeDateRange(i)" *ngIf="dateRanges.length > 1" [text]="true"
+                      icon="pi pi-times"
+                      severity="danger" size="small"/>
           </div>
-          <p-button icon="pi pi-plus" (click)="addDateRange()" [text]="true" label="Add Date Range"
+          <p-button (click)="addDateRange()" [text]="true" icon="pi pi-plus" label="Add Date Range"
                     size="small"/>
         </div>
         <div>
           <label class="text-gray-700 font-semibold block mb-2">Preferred Hotel(s)</label>
           <div class="flex items-center">
-            <input pInputText type="text" formControlName="preferredHotel" id="preferredHotel" fluid>
+            <input fluid formControlName="preferredHotel" id="preferredHotel" pInputText type="text">
           </div>
         </div>
       </div>
@@ -117,15 +126,15 @@
         <label class="text-gray-700 font-semibold block mb-2">Number of Travelers</label>
         <p-fluid class="grid grid-cols-2 md:grid-cols-3 gap-4">
           <p-float-label variant="on">
-            <p-input-number inputId="paxAdult" formControlName="paxAdult" [showButtons]="true"/>
+            <p-input-number [showButtons]="true" formControlName="paxAdult" inputId="paxAdult"/>
             <label for="paxAdult">Adults</label>
           </p-float-label>
           <p-float-label variant="on">
-            <p-input-number formControlName="paxChild" inputId="paxChild" [showButtons]="true"/>
+            <p-input-number [showButtons]="true" formControlName="paxChild" inputId="paxChild"/>
             <label for="paxChild">Child</label>
           </p-float-label>
-          <p-float-label variant="on" *ngIf="inquiryForm.controls.paxChild.value">
-            <input pInputText type="text" formControlName="paxChildAges" id="paxChildAges">
+          <p-float-label *ngIf="inquiryForm.controls.paxChild.value" variant="on">
+            <input formControlName="paxChildAges" id="paxChildAges" pInputText type="text">
             <label for="paxChildAges">Child Ages</label>
           </p-float-label>
         </p-fluid>
@@ -140,20 +149,20 @@
           <label class="text-gray-700 font-semibold block mb-2">Package Type</label>
           <div class="grid grid-cols-1 gap-2">
             <div class="flex items-center gap-2">
-              <p-radio-button value="allIn" formControlName="packageType" inputId="allIn"/>
+              <p-radio-button formControlName="packageType" inputId="allIn" value="allIn"/>
               <label for="allIn">All-Inclusive Package</label>
             </div>
             <div class="flex items-center gap-2">
-              <p-radio-button value="landArrangement" formControlName="packageType"
-                              inputId="landArrangement"/>
+              <p-radio-button formControlName="packageType" inputId="landArrangement"
+                              value="landArrangement"/>
               <label for="landArrangement">Land Arrangement Only</label>
             </div>
             <div class="flex items-center gap-2">
-              <p-radio-button value="tourOnly" formControlName="packageType" inputId="tourOnly"/>
+              <p-radio-button formControlName="packageType" inputId="tourOnly" value="tourOnly"/>
               <label for="tourOnly">Tour Only</label>
             </div>
             <div class="flex items-center gap-2">
-              <p-radio-button value="flightOnly" formControlName="packageType" inputId="flightOnly"/>
+              <p-radio-button formControlName="packageType" inputId="flightOnly" value="flightOnly"/>
               <label for="flightOnly">Flight Only</label>
             </div>
           </div>
@@ -161,7 +170,7 @@
 
         <div>
           <label class="text-gray-700 font-semibold block mb-2">Other Services</label>
-          <textarea pTextarea formControlName="otherServices" rows="5" class="w-full"></textarea>
+          <textarea class="w-full" formControlName="otherServices" pTextarea rows="5"></textarea>
         </div>
       </div>
     </section>
@@ -175,134 +184,9 @@
         <div formArrayName="providerQuotations">
           <label class="text-gray-700 font-semibold block mb-2">Provider Quotations</label>
 
-          <div *ngFor="let provider of providerQuotations.controls; let i = index" [formGroupName]="i"
-               class="mb-6 p-4 border rounded-lg bg-white">
-            <!-- Provider Header -->
-            <div class="flex items-center justify-between mb-2">
-              <div class="flex items-center gap-4">
-                <span class="font-medium text-lg">{{ providerMap.get(provider.value.provider)?.name }}</span>
-                <a [href]="providerMap.get(provider.value.provider)?.trackerLink" target="_blank"
-                   class="text-blue-500 hover:text-blue-700 text-sm">
-                  <i class="pi pi-external-link"></i> View Tracker
-                </a>
-              </div>
-              <div class="flex items-center gap-2">
-                <p-checkbox formControlName="includeInEmail" [binary]="true"
-                            inputId="includeEmail{{i}}"/>
-                <label [for]="'includeEmail' + i" class="text-sm text-gray-600">
-                  Include in email quotation
-                </label>
-              </div>
-            </div>
-            <!-- Show full details only in edit mode -->
-            <div *ngIf="isEditMode" class="grid grid-cols-1 md:grid-cols-4 gap-2">
-              <div>
-                <p-float-label variant="on">
-                  <p-select
-                    formControlName="package"
-                    [options]="providerPackages.get(provider.value.provider)"
-                    optionLabel="name"
-                    optionValue="documentId"
-                    [styleClass]="'w-full'"
-                    showClear
-                    (onChange)="onPackageSelect($event, provider)">
-                  </p-select>
-                  <label>Package</label>
-                </p-float-label>
-              </div>
-              <div class="flex flex-col gap-2">
-                <div class="flex gap-2">
-                  <p-select [options]="currencies"
-                            formControlName="currency"
-                            placeholder="Currency" (onChange)="onCurrencyChange(i)">
-                  </p-select>
-                  <p-float-label variant="on">
-                    <p-input-number fluid [currency]="provider.get('currency')?.value || 'PHP'"
-                                    mode="currency"
-                                    formControlName="price"
-                                    [id]="'price-' + i"
-                                    (onInput)="onPriceInput(i)" class="w-full"/>
-                    <label [for]="'price-' + i">Price</label>
-                  </p-float-label>
-                </div>
-                <div *ngIf="provider.get('currency')?.value !== 'PHP'" class="mt-2 space-y-2">
-                  <p-inputgroup>
-                    <p-float-label variant="on" class="flex-1">
-                      <p-input-number mode="decimal"
-                                      [minFractionDigits]="2"
-                                      [maxFractionDigits]="2"
-                                      formControlName="exchangeRate"
-                                      [id]="'exchangeRate-' + i"
-                                      class="w-full"/>
-                      <label [for]="'exchangeRate-' + i">Exchange Rate</label>
-                    </p-float-label>
-                    <p-inputgroup-addon>
-                      <p-button icon="pi pi-refresh"
-                                (onClick)="fetchExchangeRate(i)"
-                                [loading]="isLoadingRate[i]"
-                                [disabled]="!provider.get('price')?.value"
-                                severity="secondary"
-                                [text]="true"/>
-                    </p-inputgroup-addon>
-                  </p-inputgroup>
-                  <p-float-label variant="on">
-                    <p-input-number mode="currency"
-                                    currency="PHP"
-                                    formControlName="phpEquivalent"
-                                    [readonly]="true"
-                                    [id]="'phpEquivalent-' + i"
-                                    class="w-full"/>
-                    <label [for]="'phpEquivalent-' + i">PHP Equivalent</label>
-                  </p-float-label>
-                  <small *ngIf="exchangeRateLastUpdated[i]" class="text-gray-500">
-                    Last updated: {{ exchangeRateLastUpdated[i] | date:'medium' }}
-                  </small>
-                </div>
-              </div>
-
-              <div>
-                <p-float-label variant="on">
-                  <input type="text"
-                         [id]="'remarks-' + i"
-                         formControlName="remarks"
-                         pInputText
-                         class="w-full">
-                  <label [for]="'remarks-' + i">Remarks</label>
-                </p-float-label>
-              </div>
-              <div>
-                <p-select formControlName="providerStatus"
-                          [options]="quotationStatuses"
-                          optionLabel="label"
-                          optionValue="value"
-                          placeholder="Select Status"
-                          [styleClass]="'status-dropdown'"
-                          class="w-full">
-                  <ng-template pTemplate="selectedItem" let-providerStatus>
-                    <span [class]="getStatusClass(providerStatus?.value)">{{ providerStatus?.label }}</span>
-                  </ng-template>
-                  <ng-template pTemplate="item" let-providerStatus>
-                    <span [class]="providerStatus.class">{{ providerStatus.label }}</span>
-                  </ng-template>
-                </p-select>
-              </div>
-            </div>
-
-            <!-- Email Remarks (Conditional) -->
-            <div *ngIf="providerQuotations.at(i).get('includeInEmail')?.value"
-                 [class.mt-4]="isEditMode"
-                 [class.pt-4]="isEditMode"
-                 [class.border-t]="isEditMode">
-              <p-float-label variant="on">
-                  <textarea pTextarea
-                            [id]="'emailRemarks-' + i"
-                            formControlName="emailRemarks"
-                            rows="2"
-                            class="w-full"></textarea>
-                <label [for]="'emailRemarks-' + i">Remarks to include in email</label>
-              </p-float-label>
-            </div>
-          </div>
+          <app-provider-quotation *ngFor="let provider of providers" [existingProviderQuotation]="getProviderQuotation(provider.documentId)" [isEditMode]="isEditMode"
+                                  [provider]="provider" [formArray]="providerQuotations">
+          </app-provider-quotation>
         </div>
       </div>
     </section>
@@ -310,14 +194,14 @@
     <!-- Remarks Section -->
     <section class="mb-6">
       <h3 class="text-lg font-bold mb-4 text-gray-700 border-b pb-2">Remarks</h3>
-      <textarea pTextarea id="remarks" formControlName="remarks" rows="4" class="w-full"></textarea>
+      <textarea class="w-full" formControlName="remarks" id="remarks" pTextarea rows="4"></textarea>
     </section>
 
     <div class="flex justify-center gap-2">
-      <p-button type="button" [rounded]="true" severity="info" label="Save" icon="pi pi-save"
-                (onClick)="saveInquiry()"/>
-      <p-button type="button" [rounded]="true" severity="success" label="Send" icon="pi pi-send"
-                (onClick)="sendQuotations()"/>
+      <p-button (onClick)="saveInquiry()" [rounded]="true" icon="pi pi-save" label="Save" severity="info"
+                type="button"/>
+      <p-button (onClick)="sendQuotations()" [rounded]="true" icon="pi pi-send" label="Send" severity="success"
+                type="button"/>
     </div>
 
     <!-- Audit Information -->
@@ -329,13 +213,13 @@
     </div>
 
     <app-email-preview-modal
+      (cancel)="showEmailPreview = false"
+      (send)="handleSendEmails()"
       [(visible)]="showEmailPreview"
       [emailData]="emailData"
-      [providers]="providerMap"
-      [providerQuotations]="providerQuotations.value"
       [isSending]="isSending"
-      (send)="handleSendEmails()"
-      (cancel)="showEmailPreview = false"
+      [providerQuotations]="providerQuotations.value"
+      [providers]="providerMap"
     ></app-email-preview-modal>
   </form>
   <p-toast></p-toast>

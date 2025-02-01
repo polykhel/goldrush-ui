@@ -63,6 +63,7 @@ export interface ProviderQuotation {
   currency: string;
   package?: string;
   exchangeRate?: number | null;
+  exchangeRateLastUpdated?: Date | null;
   phpEquivalent?: number | null;
   remarks?: string;
   emailRemarks?: string | null;

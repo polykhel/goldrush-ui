@@ -18,8 +18,8 @@ export class PackageService {
     countryId,
     providerId,
   }: {
-    countryId?: string;
-    providerId?: string;
+    countryId?: string | null;
+    providerId?: string | null;
   }): Observable<ListData<Package>> {
     const query = qs.stringify({
       filters: {

@@ -1,7 +1,6 @@
 import { DatePipe, Location, NgForOf, NgIf } from '@angular/common';
 import { Component, inject, OnInit } from '@angular/core';
 import {
-  AbstractControl,
   FormArray,
   FormBuilder,
   FormControl,
@@ -10,49 +9,44 @@ import {
   Validators,
 } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Package } from '@models/package.model';
-import { EmailService } from '@services/email.service';
-import { AuthService } from '@services/auth.service';
-import { DestroyService } from '@services/destroy.service';
-import { ExchangeRateService } from '@services/exchange-rate.service';
-import { InquiryService } from '@services/inquiry.service';
-import { PackageService } from '@services/package.service';
-import { ProviderService } from '@services/provider.service';
 import { EmailData, prepareProviderEmail } from '@core/utils/email.util';
+import { Country } from '@models/country.model';
 import {
   getInquiryStatusConfig,
   Inquiry,
   InquiryStatus,
-  InquiryStatusConfig,
   ProviderQuotation,
   ProviderQuotationRequest,
 } from '@models/inquiry.model';
 import { Provider } from '@models/provider.model';
 import { User } from '@models/user.model';
+import { AuthService } from '@services/auth.service';
+import { CountryService } from '@services/country.service';
+import { DestroyService } from '@services/destroy.service';
+import { EmailService } from '@services/email.service';
+import { InquiryService } from '@services/inquiry.service';
+import { ProviderService } from '@services/provider.service';
 import { MessageService } from 'primeng/api';
 import { Button } from 'primeng/button';
-import { Checkbox } from 'primeng/checkbox';
 import { DatePicker } from 'primeng/datepicker';
 import { DropdownModule } from 'primeng/dropdown';
 import { FloatLabel } from 'primeng/floatlabel';
 import { Fluid } from 'primeng/fluid';
-import { InputGroup } from 'primeng/inputgroup';
-import { InputGroupAddon } from 'primeng/inputgroupaddon';
 import { InputNumber } from 'primeng/inputnumber';
 import { InputText } from 'primeng/inputtext';
 import { RadioButton } from 'primeng/radiobutton';
-import { Select, SelectChangeEvent } from 'primeng/select';
+import { Select } from 'primeng/select';
 import { Tag } from 'primeng/tag';
 import { Textarea } from 'primeng/textarea';
 import { Toast } from 'primeng/toast';
-import { firstValueFrom, iif, takeUntil } from 'rxjs';
+import { firstValueFrom, takeUntil } from 'rxjs';
 import { EmailPreviewModalComponent } from '../../components/email-preview-modal/email-preview-modal.component';
+import { ProviderQuotationComponent } from '../../components/provider-quotation/provider-quotation.component';
 
 @Component({
   selector: 'app-inquiry-form',
   imports: [
     ReactiveFormsModule,
-    Checkbox,
     RadioButton,
     DatePicker,
     FloatLabel,
@@ -64,19 +58,17 @@ import { EmailPreviewModalComponent } from '../../components/email-preview-modal
     Textarea,
     DropdownModule,
     Select,
-    InputGroup,
-    InputGroupAddon,
     Fluid,
     DatePipe,
     Toast,
     EmailPreviewModalComponent,
     Tag,
+    ProviderQuotationComponent,
   ],
   templateUrl: './inquiry-form.component.html',
   providers: [MessageService],
 })
 export class InquiryFormComponent implements OnInit {
-  currencies = ['PHP', 'USD'];
   formBuilder = inject(FormBuilder);
   isEditMode = false;
   showEmailPreview = false;
@@ -84,12 +76,14 @@ export class InquiryFormComponent implements OnInit {
   isSending = false;
 
   inquiryForm = this.formBuilder.group({
+    id: [null],
     clientName: ['', [Validators.required]],
     date: [new Date(), [Validators.required]],
     contactPoint: this.formBuilder.control<string | null>(null),
     contactPointOther: [''],
     travelDays: [null, [Validators.required]],
     travelNights: [null, [Validators.required]],
+    country: [null, [Validators.required]],
     destination: [null, [Validators.required]],
     dateRanges: this.formBuilder.array<{ start: Date; end: Date }[]>([]),
     preferredHotel: [null],
@@ -118,30 +112,22 @@ export class InquiryFormComponent implements OnInit {
       disabled: true,
     }),
   });
+  countries: Country[] = [];
   providers: Provider[] = [];
   providerMap = new Map<string, Provider>();
-  quotationStatuses = [
-    { label: 'Pending', value: 'pending', class: 'text-yellow-600' },
-    { label: 'Received', value: 'received', class: 'text-green-600' },
-    { label: 'Not Available', value: 'not_available', class: 'text-red-600' },
-    { label: 'No Response', value: 'no_response', class: 'text-gray-600' },
-  ];
   inquiryStatusOptions = [
     { label: 'New', value: 'NEW', class: 'text-blue-600' },
     { label: 'Pending', value: 'PENDING', class: 'text-yellow-600' },
     { label: 'Quoted', value: 'QUOTED', class: 'text-green-600' },
   ];
-  isLoadingRate: boolean[] = [];
-  exchangeRateLastUpdated: (Date | null)[] = [];
   currentInquiry: Inquiry | null = null;
-  providerPackages = new Map<string, Package[]>();
   protected readonly getInquiryStatusConfig = getInquiryStatusConfig;
   private currentUser: User | null = null;
+  private currentProvidersMap = new Map<string, ProviderQuotation>();
 
   constructor(
     private providerService: ProviderService,
-    private exchangeRateService: ExchangeRateService,
-    private packageService: PackageService,
+    private countryService: CountryService,
     private authService: AuthService,
     private destroy$: DestroyService,
     private inquiryService: InquiryService,
@@ -188,12 +174,18 @@ export class InquiryFormComponent implements OnInit {
       );
       this.inquiryForm.patchValue({
         ...this.currentInquiry,
+        modifier: this.currentUser?.username ?? null,
         date: new Date(this.currentInquiry.date),
         dateRanges: this.currentInquiry.dateRanges.map((dateRange) => ({
           start: new Date(dateRange.start),
           end: new Date(dateRange.end),
         })),
       } as any);
+    } else {
+      this.inquiryForm.patchValue({
+        creator: this.currentUser?.username ?? null,
+        modifier: this.currentUser?.username ?? null,
+      });
     }
 
     const providerListData = await firstValueFrom(
@@ -207,45 +199,16 @@ export class InquiryFormComponent implements OnInit {
         return acc;
       }, new Map<string, Provider>());
 
-      const currentProvidersMap =
-        this.currentInquiry?.providerQuotations.reduce(
-          (acc, providerQuotation) => {
-            acc.set(providerQuotation.provider.documentId, providerQuotation);
-            return acc;
-          },
-          new Map<string, ProviderQuotation>(),
-        );
-
-      this.providers.forEach((provider) => {
-        const existingProvider = currentProvidersMap?.get(provider.documentId);
-
-        if (provider) {
-          this.loadPackagesForProvider(provider.documentId);
-        }
-
-        this.providerQuotations.push(
-          this.formBuilder.group({
-            includeInEmail: [existingProvider?.includeInEmail ?? false],
-            providerStatus: [existingProvider?.providerStatus ?? 'pending'],
-            price: [existingProvider?.price],
-            currency: [existingProvider?.currency ?? 'PHP'],
-            exchangeRate: [
-              { value: existingProvider?.exchangeRate, disabled: true },
-            ],
-            phpEquivalent: [
-              {
-                value: existingProvider?.phpEquivalent,
-                disabled: true,
-              },
-            ],
-            remarks: [existingProvider?.remarks ?? ''],
-            emailRemarks: [existingProvider?.emailRemarks ?? ''],
-            provider: [provider.documentId],
-            sent: [existingProvider?.sent ?? false],
-            package: [existingProvider?.package]
-          }),
-        );
-      });
+      if (this.currentInquiry?.providerQuotations) {
+        this.currentProvidersMap =
+          this.currentInquiry?.providerQuotations.reduce(
+            (acc, providerQuotation) => {
+              acc.set(providerQuotation.provider.documentId, providerQuotation);
+              return acc;
+            },
+            new Map<string, ProviderQuotation>(),
+          );
+      }
     }
   }
 
@@ -256,6 +219,9 @@ export class InquiryFormComponent implements OnInit {
         this.currentUser = user;
       });
 
+    this.countryService.getCountries().subscribe((response) => {
+      this.countries = response.data;
+    });
     this.initForm();
   }
 
@@ -274,98 +240,11 @@ export class InquiryFormComponent implements OnInit {
     this.dateRanges.removeAt(index);
   }
 
-  onPriceInput(index: number) {
-    const quotationGroup = this.providerQuotations.at(index);
-    const exchangeRateControl = quotationGroup.get('exchangeRate');
-    const price = quotationGroup.get('price')?.value;
-
-    if (price) {
-      quotationGroup.get('status')?.setValue('received');
-    }
-
-    if (price && quotationGroup.get('currency')?.value !== 'PHP') {
-      exchangeRateControl?.enable();
-    } else {
-      exchangeRateControl?.disable();
-      exchangeRateControl?.setValue(null);
-      quotationGroup.get('phpEquivalent')?.setValue(null);
-    }
-  }
-
-  onCurrencyChange(index: number) {
-    const control = this.providerQuotations.at(index);
-    const currency = control.get('currency')?.value;
-    const price = control.get('price')?.value;
-    const exchangeRateControl = control.get('exchangeRate');
-
-    if (currency === 'PHP') {
-      exchangeRateControl?.disable();
-      exchangeRateControl?.setValue(null);
-      control.get('phpEquivalent')?.setValue(null);
-    } else if (price) {
-      exchangeRateControl?.enable();
-    }
-  }
-
-  fetchExchangeRate(index: number) {
-    const control = this.providerQuotations.at(index);
-    const currency = control.get('currency')?.value;
-
-    if (currency === 'PHP') return;
-
-    this.isLoadingRate[index] = true;
-
-    this.exchangeRateService.getExchangeRate(currency).subscribe({
-      next: (rate) => {
-        control.patchValue({ exchangeRate: rate });
-        this.exchangeRateLastUpdated[index] = new Date();
-        this.calculatePhpEquivalent(index);
-      },
-      error: () => {
-        this.messageService.add({
-          severity: 'error',
-          summary: 'Error',
-          detail: 'Failed to fetch exchange rate',
-        });
-      },
-      complete: () => {
-        this.isLoadingRate[index] = false;
-      },
-    });
-  }
-
-  calculatePhpEquivalent(index: number) {
-    const control = this.providerQuotations.at(index);
-    const price = control.get('price')?.value;
-    const rate = control.get('exchangeRate')?.value;
-
-    if (price && rate) {
-      const phpEquivalent = price * rate;
-      control.get('phpEquivalent')?.setValue(phpEquivalent);
-    } else {
-      control.get('phpEquivalent')?.setValue(null);
-    }
-  }
-
-  getStatusClass(status: string): string {
-    return (
-      this.quotationStatuses.find((s) => s.value === status)?.class ||
-      'text-gray-600'
-    );
-  }
-
   saveInquiry() {
     if (this.inquiryForm.valid) {
       const formValue = this.inquiryForm.getRawValue();
 
-      iif(
-        () => this.isEditMode,
-        this.inquiryService.updateInquiry(
-          this.currentInquiry?.documentId!,
-          this.mapFormToModel(formValue),
-        ),
-        this.inquiryService.saveInquiry(this.mapFormToModel(formValue)),
-      ).subscribe({
+      this.inquiryService.saveInquiry(formValue).subscribe({
         next: () => {
           this.messageService.add({
             severity: 'success',
@@ -476,21 +355,6 @@ export class InquiryFormComponent implements OnInit {
     }
   }
 
-  mapFormToModel(formValue: any): Inquiry {
-    return {
-      ...formValue,
-      providerQuotations: formValue.providerQuotations.map(
-        (quotation: any) => ({
-          ...quotation,
-        }),
-      ),
-      creator: this.isEditMode
-        ? this.currentInquiry?.creator
-        : (this.currentUser?.username ?? null),
-      modifier: this.currentUser?.username ?? null,
-    };
-  }
-
   mapProviderQuotations(inquiry: any): ProviderQuotationRequest[] {
     return inquiry.providerQuotations
       .filter((quotation: any) => quotation.includeInEmail && !quotation.sent)
@@ -512,36 +376,13 @@ export class InquiryFormComponent implements OnInit {
       }));
   }
 
-  loadPackagesForProvider(providerId: string) {
-    this.packageService.getPackages({ providerId }).subscribe({
-      next: (response) => {
-        this.providerPackages.set(providerId, response.data);
-      },
-      error: (error) => {
-        console.error('Error loading packages:', error);
-        this.messageService.add({
-          severity: 'error',
-          summary: 'Error',
-          detail: 'Failed to load packages',
-        });
-      },
-    });
-  }
-
-  onPackageSelect(event: SelectChangeEvent, provider: AbstractControl) {
-    console.log(event);
-    const selectedPackage = this.providerPackages.get(provider.get('provider')?.value)
-      ?.find((p: Package) => p.documentId === event.value);
-
-    if (selectedPackage) {
-      provider.patchValue({
-        price: selectedPackage.price,
-        currency: selectedPackage.currency ?? 'PHP'
-      });
-    }
-  }
-
   goBack() {
     this.location.back();
+  }
+
+  getProviderQuotation(providerId: string) {
+    return (
+      this.currentProvidersMap.get(providerId) ?? ({} as ProviderQuotation)
+    );
   }
 }

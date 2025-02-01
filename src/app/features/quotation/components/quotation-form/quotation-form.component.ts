@@ -1,10 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, inject, OnInit, Output } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { CountryService } from '@services/country.service';
-import { DestroyService } from '@services/destroy.service';
-import { PackageService } from '@services/package.service';
-import { ProviderService } from '@services/provider.service';
+import { ActivatedRoute } from '@angular/router';
 import { formatPairedValues, formatValue } from '@core/utils/string.util';
 import { environment } from '@env/environment';
 import { Asset } from '@models/asset.model';
@@ -12,6 +9,10 @@ import { Country } from '@models/country.model';
 import { Package } from '@models/package.model';
 import { Provider } from '@models/provider.model';
 import { Quotation } from '@models/quotation.model';
+import { CountryService } from '@services/country.service';
+import { DestroyService } from '@services/destroy.service';
+import { PackageService } from '@services/package.service';
+import { ProviderService } from '@services/provider.service';
 import dayjs from 'dayjs';
 import { Button } from 'primeng/button';
 import { Checkbox } from 'primeng/checkbox';
@@ -125,6 +126,7 @@ export class QuotationFormComponent implements OnInit {
     private providerService: ProviderService,
     private packageService: PackageService,
     private destroy$: DestroyService,
+    private route: ActivatedRoute,
   ) {}
 
   get country() {
@@ -235,6 +237,51 @@ export class QuotationFormComponent implements OnInit {
         } else {
           this.form.controls.departure.controls.date.setValue(null);
           this.form.controls.arrival.controls.date.setValue(null);
+        }
+      });
+
+    this.route.queryParams
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((params) => {
+        if (params['data']) {
+          try {
+            const quotationData = JSON.parse(atob(params['data']));
+
+            console.log(quotationData);
+
+            if (quotationData.packageId) {
+              this.country.setValue(quotationData.country);
+              this.fetchProvidersByCountry(quotationData.country);
+
+             /* setTimeout(() => {
+                this.provider.setValue(
+                  this.providers.find(
+                    (p) => p.documentId === quotationData.providerId,
+                  )!,
+                );
+
+                setTimeout(() => {
+                  this.package.setValue(
+                    this.packages.find(
+                      (p) => p.documentId === quotationData.packageId,
+                    )!,
+                  );
+                }, 500);
+              }, 500);*/
+            } else {
+              this.form.patchValue({
+                title: quotationData.title,
+                travelDates: quotationData.travelDates.map((range: any) => [
+                  new Date(range.start),
+                  new Date(range.end),
+                ])[0],
+                ratePerPax: quotationData.ratePerPax,
+                noOfPax: quotationData.noOfPax,
+              });
+            }
+          } catch (e) {
+            console.error('Error parsing quotation data:', e);
+          }
         }
       });
   }

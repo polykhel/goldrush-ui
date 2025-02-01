@@ -2,10 +2,10 @@ import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { environment } from '@env/environment';
 import { ListData, SingleData } from '@models/base.model';
-import { Inquiry, InquiryStatus } from '@models/inquiry.model';
+import { Inquiry } from '@models/inquiry.model';
 import qs from 'qs';
 import { Observable } from 'rxjs';
-import { map, tap } from 'rxjs/operators';
+import { map } from 'rxjs/operators';
 
 interface InquiryParams {
   page: number;
@@ -84,36 +84,34 @@ export class InquiryService {
       .pipe(map((data) => data.data));
   }
 
-  saveInquiry(inquiry: Partial<Inquiry>): Observable<Inquiry> {
+  saveInquiry(inquiry: any): Observable<Inquiry> {
     this.deleteCreatorFields(inquiry as Inquiry);
-    return this.http
-      .post<SingleData<Inquiry>>(this.baseUrl, {
-        data: inquiry,
-      })
-      .pipe(map((data) => data.data));
-  }
 
-  updateInquiry(id: string, inquiry: Partial<Inquiry>): Observable<Inquiry> {
-    this.deleteCreatorFields(inquiry as Inquiry);
-    return this.http
-      .put<SingleData<Inquiry>>(`${this.baseUrl}/${id}`, {
+    let observable;
+    if (inquiry.id) {
+      delete inquiry.id;
+      observable = this.http.put<SingleData<Inquiry>>(
+        `${this.baseUrl}/${inquiry.id}`,
+        {
+          data: inquiry,
+        },
+      );
+    } else {
+      observable = this.http.post<SingleData<Inquiry>>(this.baseUrl, {
         data: inquiry,
-      })
-      .pipe(map((data) => data.data));
-  }
+      });
+    }
 
-  private deleteCreatorFields(inquiry: Inquiry) {
-    delete inquiry['createdAt'];
-    delete inquiry['updatedAt'];
-    return inquiry;
+    return observable.pipe(map((data) => data.data));
   }
 
   deleteInquiry(id: string): Observable<SingleData<Inquiry>> {
     return this.http.delete<SingleData<Inquiry>>(`${this.baseUrl}/${id}`);
   }
 
-  checkQuotationReadiness(inquiry: Inquiry): boolean {
-    const hasQuotations = inquiry.providerQuotations?.some(pq => pq.price);
-    return hasQuotations && inquiry.status === InquiryStatus.READY;
+  private deleteCreatorFields(inquiry: Inquiry) {
+    delete inquiry['createdAt'];
+    delete inquiry['updatedAt'];
+    return inquiry;
   }
 }
