@@ -17,7 +17,6 @@ export class CountryService {
   getCountries(): Observable<ListData<Country>> {
     const query = qs.stringify({
       sort: ['name'],
-      populate: ['iataCodes']
     })
     return this.http.get<ListData<Country>>(`${this.baseUrl}?${query}`);
   }

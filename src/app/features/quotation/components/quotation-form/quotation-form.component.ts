@@ -249,36 +249,28 @@ export class QuotationFormComponent implements OnInit {
 
             console.log(quotationData);
 
-            if (quotationData.packageId) {
+            if (quotationData.country) {
               this.country.setValue(quotationData.country);
-              this.fetchProvidersByCountry(quotationData.country);
+              this.fetchProvidersByCountry(quotationData.country.documentId);
 
-             /* setTimeout(() => {
+              setTimeout(() => {
                 this.provider.setValue(
                   this.providers.find(
-                    (p) => p.documentId === quotationData.providerId,
+                    (p) => p.documentId === quotationData.provider.documentId,
                   )!,
                 );
-
-                setTimeout(() => {
-                  this.package.setValue(
-                    this.packages.find(
-                      (p) => p.documentId === quotationData.packageId,
-                    )!,
-                  );
-                }, 500);
-              }, 500);*/
-            } else {
-              this.form.patchValue({
-                title: quotationData.title,
-                travelDates: quotationData.travelDates.map((range: any) => [
-                  new Date(range.start),
-                  new Date(range.end),
-                ])[0],
-                ratePerPax: quotationData.ratePerPax,
-                noOfPax: quotationData.noOfPax,
-              });
+              }, 500);
             }
+
+            this.form.patchValue({
+              title: quotationData.title,
+              travelDates: quotationData.travelDates.map((range: any) => [
+                new Date(range.start),
+                new Date(range.end),
+              ])[0],
+              ratePerPax: quotationData.ratePerPax,
+              noOfPax: quotationData.noOfPax,
+            });
           } catch (e) {
             console.error('Error parsing quotation data:', e);
           }

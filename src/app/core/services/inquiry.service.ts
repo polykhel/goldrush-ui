@@ -6,6 +6,7 @@ import { Inquiry } from '@models/inquiry.model';
 import qs from 'qs';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
+import { transformBody } from '@core/utils/form.util';
 
 interface InquiryParams {
   page: number;
@@ -77,6 +78,7 @@ export class InquiryService {
         'providerQuotations',
         'providerQuotations.provider',
         'dateRanges',
+        'country'
       ],
     });
     return this.http
@@ -89,16 +91,16 @@ export class InquiryService {
 
     let observable;
     if (inquiry.id) {
-      delete inquiry.id;
+      const { id, ...rest } = inquiry;
       observable = this.http.put<SingleData<Inquiry>>(
         `${this.baseUrl}/${inquiry.id}`,
         {
-          data: inquiry,
+          data: transformBody(rest),
         },
       );
     } else {
       observable = this.http.post<SingleData<Inquiry>>(this.baseUrl, {
-        data: inquiry,
+        data: transformBody(inquiry),
       });
     }
 

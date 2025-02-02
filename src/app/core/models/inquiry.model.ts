@@ -1,5 +1,6 @@
 import { AuditedBaseModel } from './base.model';
 import { Provider } from './provider.model';
+import { Country } from '@models/country.model';
 
 export enum InquiryStatus {
   NEW = 'NEW',
@@ -34,6 +35,7 @@ export function getInquiryStatusConfig(key: string): { severity: SeverityType; i
 export interface Inquiry extends AuditedBaseModel {
   clientName: string;
   date: Date;
+  country: Country;
   contactPoint: string;
   contactPointOther?: string;
   travelDays: number;
@@ -61,7 +63,6 @@ export interface ProviderQuotation {
   providerStatus: string;
   price: number | null;
   currency: string;
-  package?: string;
   exchangeRate?: number | null;
   exchangeRateLastUpdated?: Date | null;
   phpEquivalent?: number | null;

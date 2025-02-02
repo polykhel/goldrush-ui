@@ -1,10 +1,7 @@
 import { DatePipe, NgIf } from '@angular/common';
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { FormArray, FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
-import {
-  CURRENCIES,
-  PROVIDER_QUOTATION_STATUSES,
-} from '@core/utils/constants.util';
+import { CURRENCIES, PROVIDER_QUOTATION_STATUSES } from '@core/utils/constants.util';
 import { ProviderQuotation } from '@models/inquiry.model';
 import { Provider } from '@models/provider.model';
 import { ExchangeRateService } from '@services/exchange-rate.service';
@@ -34,9 +31,9 @@ import { Textarea } from 'primeng/textarea';
     NgIf,
     ReactiveFormsModule,
     Select,
-    Textarea,
+    Textarea
   ],
-  providers: [MessageService],
+  providers: [MessageService]
 })
 export class ProviderQuotationComponent implements OnInit {
   currencies = CURRENCIES;
@@ -45,6 +42,8 @@ export class ProviderQuotationComponent implements OnInit {
   @Input({ required: true }) formArray!: FormArray;
   @Input() isEditMode = false;
   @Input() existingProviderQuotation: ProviderQuotation | null = null;
+
+  @Output() onGenerateQuotation = new EventEmitter<ProviderQuotation>();
 
   isLoadingRate = false;
   exchangeRateLastUpdated: Date | null = null;
@@ -55,7 +54,7 @@ export class ProviderQuotationComponent implements OnInit {
   constructor(
     private formBuilder: FormBuilder,
     private exchangeRateService: ExchangeRateService,
-    private messageService: MessageService,
+    private messageService: MessageService
   ) {
     this.group = this.formBuilder.group({
       includeInEmail: [false],
@@ -70,7 +69,7 @@ export class ProviderQuotationComponent implements OnInit {
       provider: [''],
       sent: [false]
     });
-}
+  }
 
   ngOnInit() {
     if (this.existingProviderQuotation) {
@@ -127,12 +126,12 @@ export class ProviderQuotationComponent implements OnInit {
         this.messageService.add({
           severity: 'error',
           summary: 'Error',
-          detail: 'Failed to fetch exchange rate',
+          detail: 'Failed to fetch exchange rate'
         });
       },
       complete: () => {
         this.isLoadingRate = false;
-      },
+      }
     });
   }
 
@@ -149,29 +148,7 @@ export class ProviderQuotationComponent implements OnInit {
   }
 
   generateQuotation() {
-    const providerQuotation = this.group.getRawValue();
-
-    // Prepare the quotation data
-    /*const quotationData = {
-      title: providerQuotation.package
-        ? undefined
-        : `${inquiryData.travelDays}D${inquiryData.travelNights}N ${inquiryData.destination} Package`,
-      travelDates: inquiryData.dateRanges,
-      ratePerPax:
-        providerQuotation.currency === 'PHP'
-          ? providerQuotation.price
-          : providerQuotation.phpEquivalent,
-      noOfPax: (inquiryData.paxAdult || 0) + (inquiryData.paxChild || 0),
-      packageId: providerQuotation.package,
-      country: this.inquiryForm.get('destination')?.value,
-      providerId: this.provider.documentId,
-    };*/
-
-    // Navigate to quotation generator with data
-    /*this.router.navigate(['/quotation'], {
-      queryParams: {
-        data: btoa(JSON.stringify(quotationData))
-      }
-    });*/
+    this.onGenerateQuotation.emit(this.group.getRawValue());
   }
+
 }

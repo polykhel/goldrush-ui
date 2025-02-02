@@ -121,6 +121,7 @@ export class InquiryFormComponent implements OnInit {
     { label: 'Quoted', value: 'QUOTED', class: 'text-green-600' },
   ];
   currentInquiry: Inquiry | null = null;
+  currentFormValue: any = {};
   protected readonly getInquiryStatusConfig = getInquiryStatusConfig;
   private currentUser: User | null = null;
   private currentProvidersMap = new Map<string, ProviderQuotation>();
@@ -167,6 +168,15 @@ export class InquiryFormComponent implements OnInit {
   async initForm() {
     const params = await firstValueFrom(this.route.params);
 
+    this.countryService.getCountries().subscribe((response) => {
+      this.countries = response.data;
+    });
+
+    let countriesListData = await firstValueFrom(this.countryService.getCountries());
+    if (countriesListData) {
+      this.countries = countriesListData.data;
+    }
+
     if (params['id']) {
       this.isEditMode = true;
       this.currentInquiry = await firstValueFrom(
@@ -174,6 +184,7 @@ export class InquiryFormComponent implements OnInit {
       );
       this.inquiryForm.patchValue({
         ...this.currentInquiry,
+        id: this.currentInquiry.documentId,
         modifier: this.currentUser?.username ?? null,
         date: new Date(this.currentInquiry.date),
         dateRanges: this.currentInquiry.dateRanges.map((dateRange) => ({
@@ -189,7 +200,7 @@ export class InquiryFormComponent implements OnInit {
     }
 
     const providerListData = await firstValueFrom(
-      this.providerService.getProviders(),
+      this.providerService.getProviders()
     );
     if (providerListData) {
       this.providers = providerListData.data;
@@ -218,11 +229,11 @@ export class InquiryFormComponent implements OnInit {
       .subscribe((user) => {
         this.currentUser = user;
       });
-
-    this.countryService.getCountries().subscribe((response) => {
-      this.countries = response.data;
-    });
     this.initForm();
+  }
+
+  updateFormValue() {
+    this.currentFormValue = { ...this.inquiryForm.getRawValue()};
   }
 
   newDateRange(): FormGroup {
@@ -384,5 +395,31 @@ export class InquiryFormComponent implements OnInit {
     return (
       this.currentProvidersMap.get(providerId) ?? ({} as ProviderQuotation)
     );
+  }
+
+  generateQuotation(providerQuotation: ProviderQuotation) {
+    const inquiryData = this.inquiryForm.getRawValue();
+
+    // Prepare the quotation data
+    const quotationData = {
+      title: `${inquiryData?.travelDays}D${inquiryData?.travelNights}N ${inquiryData?.destination} Package`,
+      travelDates: inquiryData?.dateRanges,
+      ratePerPax:
+        providerQuotation.currency === 'PHP'
+          ? providerQuotation.price
+          : providerQuotation.phpEquivalent,
+      noOfPax: (inquiryData?.paxAdult ?? 0) + (inquiryData?.paxChild ?? 0),
+      country: inquiryData?.country,
+      provider: providerQuotation.provider,
+    };
+    console.log(providerQuotation);
+
+    console.log(quotationData);
+
+    this.router.navigate(['/quotation'], {
+      queryParams: {
+        data: btoa(JSON.stringify(quotationData))
+      }
+    });
   }
 }
