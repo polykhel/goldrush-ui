@@ -24,7 +24,10 @@ import { InputText } from 'primeng/inputtext';
 import { RadioButton } from 'primeng/radiobutton';
 import { Select } from 'primeng/select';
 import { Textarea } from 'primeng/textarea';
-import { merge, takeUntil } from 'rxjs';
+import { finalize, merge, takeUntil } from 'rxjs';
+import { QuotationService } from '@services/quotation.service';
+import { MessageService } from 'primeng/api';
+import { ToastModule } from 'primeng/toast';
 
 type FlightDetail = Partial<{
   flightNumber: string | null;
@@ -49,41 +52,48 @@ type FlightDetail = Partial<{
     InputText,
     RadioButton,
     Textarea,
+    ToastModule
   ],
   templateUrl: './quotation-form.component.html',
+  providers: [MessageService]
 })
 export class QuotationFormComponent implements OnInit {
-  @Output() onFormChange: EventEmitter<Quotation> = new EventEmitter();
+  @Output() onFormChange: EventEmitter<any> = new EventEmitter();
   countries: Country[] = [];
   providers: Provider[] = [];
   packages: Package[] = [];
   images?: Asset[] | null;
+  saving = false;
+  editMode = false;
+  quotationId?: string;
   private baseUrl = environment.backendUrl;
   private formBuilder = inject(FormBuilder);
   form = this.formBuilder.group({
+    clientName: this.formBuilder.control<string | null>(null),
+    destination: this.formBuilder.control<string | null>(null),
     country: this.formBuilder.control<Country | null>(null, [
-      Validators.required,
+      Validators.required
     ]),
     provider: this.formBuilder.control<Provider | null>({
       value: null,
-      disabled: true,
+      disabled: true
     }),
     package: this.formBuilder.control<Package | null>({
       value: null,
-      disabled: true,
+      disabled: true
     }),
     title: this.formBuilder.control<string | null>(null, [Validators.required]),
     travelDates: this.formBuilder.control<Date[] | null>(null, [
-      Validators.required,
+      Validators.required
     ]),
     noOfPax: this.formBuilder.control<number | null>(null, [
-      Validators.required,
+      Validators.required
     ]),
     modeOfTransportation: this.formBuilder.control<string | null>('Flight', [
-      Validators.required,
+      Validators.required
     ]),
     flightIncluded: this.formBuilder.control<boolean>(true, [
-      Validators.required,
+      Validators.required
     ]),
     airline: this.formBuilder.control<string | null>(null),
     departure: this.formBuilder.group({
@@ -91,43 +101,46 @@ export class QuotationFormComponent implements OnInit {
       iataCode: this.formBuilder.control<string | null>('MNL'),
       date: this.formBuilder.control<Date | null>(null),
       startTime: this.formBuilder.control<Date | null>(null),
-      endTime: this.formBuilder.control<Date | null>(null),
+      endTime: this.formBuilder.control<Date | null>(null)
     }),
     arrival: this.formBuilder.group({
       flightNumber: this.formBuilder.control<string | null>(null),
       iataCode: this.formBuilder.control<string | null>('MNL'),
       date: this.formBuilder.control<Date | null>(null),
       startTime: this.formBuilder.control<Date | null>(null),
-      endTime: this.formBuilder.control<Date | null>(null),
+      endTime: this.formBuilder.control<Date | null>(null)
     }),
     arrivalPrice: this.formBuilder.control<number | null>(null),
     departurePrice: this.formBuilder.control<number | null>(null),
     totalFlightPrice: this.formBuilder.control<number | null>({
       value: null,
-      disabled: true,
+      disabled: true
     }),
     ratePerPax: this.formBuilder.control<number | null>(null, [
-      Validators.required,
+      Validators.required
     ]),
     totalRatePerPax: this.formBuilder.control<number | null>(
       { value: null, disabled: true },
-      [Validators.required],
+      [Validators.required]
     ),
     suggestedRatePerPax: this.formBuilder.control<number | null>(null, [
-      Validators.required,
+      Validators.required
     ]),
     inclusions: this.formBuilder.control<string | null>(null),
     exclusions: this.formBuilder.control<string | null>(null),
-    optionalTours: this.formBuilder.control<string | null>(null),
+    optionalTours: this.formBuilder.control<string | null>(null)
   });
 
   constructor(
     private countryService: CountryService,
     private providerService: ProviderService,
     private packageService: PackageService,
+    private quotationService: QuotationService,
+    private messageService: MessageService,
     private destroy$: DestroyService,
-    private route: ActivatedRoute,
-  ) {}
+    private route: ActivatedRoute
+  ) {
+  }
 
   get country() {
     return this.form.controls.country;
@@ -162,120 +175,184 @@ export class QuotationFormComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    this.route.params.pipe(takeUntil(this.destroy$)).subscribe(params => {
+      if (params['id']) {
+        this.editMode = true;
+        this.quotationId = params['id'];
+        this.loadQuotation(params['id']);
+      }
+    });
+
     this.country.valueChanges
-      .pipe(takeUntil(this.destroy$))
-      .subscribe((country) => {
-        this.provider.reset();
-        this.package.reset();
-        if (country) {
-          this.fetchProvidersByCountry(country.documentId);
-          this.provider.enable();
-        } else {
-          this.provider.disable();
-          this.package.disable();
-        }
-      });
+    .pipe(takeUntil(this.destroy$))
+    .subscribe((country) => {
+      this.provider.reset();
+      this.package.reset();
+      if (country?.documentId) {
+        this.fetchProvidersByCountry(country.documentId);
+        this.provider.enable();
+      } else {
+        this.provider.disable();
+        this.package.disable();
+      }
+    });
 
     this.provider.valueChanges
-      .pipe(takeUntil(this.destroy$))
-      .subscribe((provider) => {
-        this.package.reset();
-        if (provider && this.country.value) {
-          this.fetchPackagesByCountryAndProvider(
-            this.country.value.documentId,
-            provider.documentId,
-          );
-          this.package.enable();
-        } else {
-          this.package.disable();
-        }
-      });
+    .pipe(takeUntil(this.destroy$))
+    .subscribe((provider) => {
+      this.package.reset();
+      if (provider?.documentId && this.country.value?.documentId) {
+        this.fetchPackagesByCountryAndProvider(
+          this.country.value.documentId,
+          provider.documentId
+        );
+        this.package.enable();
+      } else {
+        this.package.disable();
+      }
+    });
 
     merge(this.departurePrice.valueChanges, this.arrivalPrice.valueChanges)
-      .pipe(takeUntil(this.destroy$))
-      .subscribe(() => {
-        this.calculateTotalFlightPrice();
-      });
+    .pipe(takeUntil(this.destroy$))
+    .subscribe(() => {
+      this.calculateTotalFlightPrice();
+    });
 
     merge(
       this.ratePerPax.valueChanges,
       this.totalFlightPrice.valueChanges,
-      this.flightIncluded.valueChanges,
+      this.flightIncluded.valueChanges
     )
-      .pipe(takeUntil(this.destroy$))
-      .subscribe(() => {
-        this.calculateTotalRatePerPax();
-      });
+    .pipe(takeUntil(this.destroy$))
+    .subscribe(() => {
+      this.calculateTotalRatePerPax();
+    });
 
     this.countryService.getCountries().subscribe((data) => {
       this.countries = data.data;
     });
 
     this.package.valueChanges
-      .pipe(takeUntil(this.destroy$))
-      .subscribe((data) => {
-        if (data) {
-          this.updateDetails(data);
-        }
-      });
+    .pipe(takeUntil(this.destroy$))
+    .subscribe((data) => {
+      if (data) {
+        this.updateDetails(data);
+      }
+    });
 
     this.form.controls.travelDates.valueChanges
-      .pipe(takeUntil(this.destroy$))
-      .subscribe((travelDates) => {
-        if (travelDates) {
-          if (travelDates[0]) {
-            this.form.controls.departure.controls.date.setValue(travelDates[0]);
-          } else {
-            this.form.controls.departure.controls.date.setValue(null);
-          }
-
-          if (travelDates[1]) {
-            this.form.controls.arrival.controls.date.setValue(travelDates[1]);
-          } else {
-            this.form.controls.arrival.controls.date.setValue(null);
-          }
+    .pipe(takeUntil(this.destroy$))
+    .subscribe((travelDates) => {
+      if (travelDates) {
+        if (travelDates[0]) {
+          this.form.controls.departure.controls.date.setValue(travelDates[0]);
         } else {
           this.form.controls.departure.controls.date.setValue(null);
+        }
+
+        if (travelDates[1]) {
+          this.form.controls.arrival.controls.date.setValue(travelDates[1]);
+        } else {
           this.form.controls.arrival.controls.date.setValue(null);
         }
-      });
+      } else {
+        this.form.controls.departure.controls.date.setValue(null);
+        this.form.controls.arrival.controls.date.setValue(null);
+      }
+    });
 
     this.route.queryParams
-      .pipe(takeUntil(this.destroy$))
-      .subscribe((params) => {
-        if (params['data']) {
-          try {
-            const quotationData = JSON.parse(atob(params['data']));
+    .pipe(takeUntil(this.destroy$))
+    .subscribe((params) => {
+      if (params['data']) {
+        try {
+          const quotationData = JSON.parse(atob(params['data']));
 
-            console.log(quotationData);
+          if (quotationData.country) {
+            this.country.setValue(quotationData.country);
+            this.fetchProvidersByCountry(quotationData.country.documentId);
 
-            if (quotationData.country) {
-              this.country.setValue(quotationData.country);
-              this.fetchProvidersByCountry(quotationData.country.documentId);
-
-              setTimeout(() => {
-                this.provider.setValue(
-                  this.providers.find(
-                    (p) => p.documentId === quotationData.provider.documentId,
-                  )!,
-                );
-              }, 500);
-            }
-
-            this.form.patchValue({
-              title: quotationData.title,
-              travelDates: quotationData.travelDates.map((range: any) => [
-                new Date(range.start),
-                new Date(range.end),
-              ])[0],
-              ratePerPax: quotationData.ratePerPax,
-              noOfPax: quotationData.noOfPax,
-            });
-          } catch (e) {
-            console.error('Error parsing quotation data:', e);
+            setTimeout(() => {
+              this.provider.setValue(
+                this.providers.find(
+                  (p) => p.documentId === quotationData.provider.documentId
+                )!
+              );
+            }, 500);
           }
+
+          this.form.patchValue({
+            clientName: quotationData.clientName,
+            destination: quotationData.destination,
+            title: quotationData.title,
+            travelDates: quotationData.travelDates.map((range: any) => [
+              new Date(range.start),
+              new Date(range.end)
+            ])[0],
+            ratePerPax: quotationData.ratePerPax,
+            noOfPax: quotationData.noOfPax
+          });
+        } catch (e) {
+          console.error('Error parsing quotation data:', e);
         }
-      });
+      }
+    });
+  }
+
+  loadQuotation(id: string) {
+    this.quotationService.getQuotation(id).subscribe({
+      next: (response) => {
+        const quotation = response.data;
+
+        if (quotation.country) {
+          this.country.setValue(quotation.country);
+        }
+
+        console.log(quotation);
+        if (quotation.provider) {
+          this.provider.setValue(quotation.provider);
+        }
+
+        const travelDates = quotation.travelDates ? [
+          new Date(quotation.travelDates.start),
+          new Date(quotation.travelDates.end)
+        ] : null;
+
+        this.form.patchValue({
+          clientName: quotation.clientName,
+          destination: quotation.destination,
+          title: quotation.title,
+          travelDates,
+          noOfPax: quotation.noOfPax,
+          modeOfTransportation: quotation.modeOfTransportation,
+          flightIncluded: quotation.flightIncluded,
+          airline: quotation.airline,
+          departure: {
+            ...quotation.departure,
+            date: quotation.departure?.date ? new Date(quotation.departure?.date) : null,
+            startTime: quotation.departure?.startTime ? new Date(quotation.departure?.startTime) : null,
+            endTime: quotation.departure?.endTime ? new Date(quotation.departure?.endTime) : null
+          },
+          arrival: { ...quotation.arrival },
+          departurePrice: quotation.departurePrice,
+          arrivalPrice: quotation.arrivalPrice,
+          ratePerPax: quotation.ratePerPax,
+          suggestedRatePerPax: quotation.suggestedRatePerPax,
+          inclusions: quotation.inclusions?.map(i => i.title).join('\n'),
+          exclusions: quotation.exclusions?.map(i => i.title).join('\n'),
+          optionalTours: quotation.optionalTours?.map(i => i.title).join('\n')
+        });
+
+        console.log(this.form.value);
+      },
+      error: () => {
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: 'Failed to load quotation'
+        });
+      }
+    });
   }
 
   fetchProvidersByCountry(country: string): void {
@@ -286,13 +363,13 @@ export class QuotationFormComponent implements OnInit {
 
   fetchPackagesByCountryAndProvider(
     countryId: string,
-    providerId: string,
+    providerId: string
   ): void {
     this.packageService
-      .getPackages({ countryId, providerId })
-      .subscribe((data) => {
-        this.packages = data.data;
-      });
+    .getPackages({ countryId, providerId })
+    .subscribe((data) => {
+      this.packages = data.data;
+    });
   }
 
   calculateTotalFlightPrice(): void {
@@ -354,7 +431,7 @@ export class QuotationFormComponent implements OnInit {
     }
 
     this.form.controls.title.setValue(
-      `${pkg.duration} ${pkg.name} All-in Package`,
+      `${pkg.duration} ${pkg.name} All-in Package`
     );
   }
 
@@ -375,10 +452,10 @@ export class QuotationFormComponent implements OnInit {
       formatValue(flightDetail.flightNumber),
       route,
       formatValue(date),
-      timeRange,
+      timeRange
     ]
-      .filter(Boolean)
-      .join(' ');
+    .filter(Boolean)
+    .join(' ');
   }
 
   generate() {
@@ -388,14 +465,14 @@ export class QuotationFormComponent implements OnInit {
     if (value.departure) {
       const departureDetails = this.getFlightDetails(
         value.departure,
-        value.arrival?.iataCode,
+        value.arrival?.iataCode
       );
       if (departureDetails) flightDetails.push(departureDetails);
     }
     if (value.arrival) {
       const arrivalDetails = this.getFlightDetails(
         value.arrival,
-        value.departure?.iataCode,
+        value.departure?.iataCode
       );
       if (arrivalDetails) flightDetails.push(arrivalDetails);
     }
@@ -410,7 +487,77 @@ export class QuotationFormComponent implements OnInit {
       optionalActivities: value.optionalTours?.split('\n'),
       airline: value.airline,
       flightDetails: flightDetails,
-      images: this.images,
+      images: this.images
+    });
+  }
+
+  save() {
+    if (this.form.invalid) {
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Validation Error',
+        detail: 'Please fill in all required fields'
+      });
+      return;
+    }
+
+    this.saving = true;
+    const formValue = this.form.value;
+    const travelDates = formValue.travelDates ? {
+      start: dayjs(formValue.travelDates[0]).toDate(),
+      end: dayjs(formValue.travelDates[1]).toDate()
+    } : undefined;
+
+    const quotation: Quotation = {
+      clientName: formValue.clientName,
+      destination: formValue.destination,
+      country: formValue.country,
+      provider: formValue.provider,
+      package: formValue.package,
+      title: formValue.title,
+      travelDates,
+      noOfPax: formValue.noOfPax,
+      modeOfTransportation: formValue.modeOfTransportation,
+      flightIncluded: formValue.flightIncluded,
+      airline: formValue.airline,
+      departure: { ...formValue.departure },
+      arrival: { ...formValue.arrival },
+      departurePrice: formValue.departurePrice,
+      arrivalPrice: formValue.arrivalPrice,
+      totalFlightPrice: this.totalFlightPrice.value,
+      ratePerPax: formValue.ratePerPax,
+      totalRatePerPax: this.form.controls.totalRatePerPax.value,
+      suggestedRatePerPax: formValue.suggestedRatePerPax,
+      inclusions: formValue.inclusions?.split('\n').map(i => ({ title: i })),
+      exclusions: formValue.exclusions?.split('\n').map(i => ({ title: i })),
+      optionalTours: formValue.optionalTours?.split('\n').map(i => ({ title: i })),
+      images: this.images
+    };
+
+    const request = this.editMode
+      ? this.quotationService.updateQuotation(this.quotationId!, quotation)
+      : this.quotationService.createQuotation(quotation);
+
+    request
+    .pipe(
+      finalize(() => this.saving = false),
+      takeUntil(this.destroy$)
+    )
+    .subscribe({
+      next: () => {
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Success',
+          detail: `Quotation ${this.editMode ? 'updated' : 'created'} successfully`
+        });
+      },
+      error: () => {
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: `Failed to ${this.editMode ? 'update' : 'create'} quotation`
+        });
+      }
     });
   }
 }

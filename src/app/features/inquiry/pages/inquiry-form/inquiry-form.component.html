@@ -184,7 +184,7 @@
         <div formArrayName="providerQuotations">
           <label class="text-gray-700 font-semibold block mb-2">Provider Quotations</label>
 
-          <app-provider-quotation *ngFor="let provider of providers" [existingProviderQuotation]="getProviderQuotation(provider.documentId)" [isEditMode]="isEditMode"
+          <app-provider-quotation *ngFor="let provider of providers" [existingProviderQuotation]="getProviderQuotation(provider.documentId!)" [isEditMode]="isEditMode"
                                   [provider]="provider" [formArray]="providerQuotations" (onGenerateQuotation)="generateQuotation($event)">
           </app-provider-quotation>
         </div>

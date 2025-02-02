@@ -42,7 +42,7 @@ export class NavbarComponent {
       },
       {
         label: 'Quotations',
-        routerLink: '/quotation',
+        routerLink: '/quotations',
         visible: isLoggedIn,
       },
       {

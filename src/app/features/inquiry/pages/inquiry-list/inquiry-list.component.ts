@@ -129,7 +129,7 @@ export class InquiryListComponent implements OnInit, OnDestroy {
   async deleteInquiry(inquiry: Inquiry) {
     try {
       await firstValueFrom(
-        this.inquiryService.deleteInquiry(inquiry.documentId),
+        this.inquiryService.deleteInquiry(inquiry.documentId!),
       );
       this.messageService.add({
         severity: 'success',

@@ -121,7 +121,6 @@ export class InquiryFormComponent implements OnInit {
     { label: 'Quoted', value: 'QUOTED', class: 'text-green-600' },
   ];
   currentInquiry: Inquiry | null = null;
-  currentFormValue: any = {};
   protected readonly getInquiryStatusConfig = getInquiryStatusConfig;
   private currentUser: User | null = null;
   private currentProvidersMap = new Map<string, ProviderQuotation>();
@@ -206,7 +205,7 @@ export class InquiryFormComponent implements OnInit {
       this.providers = providerListData.data;
 
       this.providerMap = providerListData.data.reduce((acc, provider) => {
-        acc.set(provider.documentId, provider);
+        acc.set(provider.documentId!, provider);
         return acc;
       }, new Map<string, Provider>());
 
@@ -214,7 +213,7 @@ export class InquiryFormComponent implements OnInit {
         this.currentProvidersMap =
           this.currentInquiry?.providerQuotations.reduce(
             (acc, providerQuotation) => {
-              acc.set(providerQuotation.provider.documentId, providerQuotation);
+              acc.set(providerQuotation.provider.documentId!, providerQuotation);
               return acc;
             },
             new Map<string, ProviderQuotation>(),
@@ -230,10 +229,6 @@ export class InquiryFormComponent implements OnInit {
         this.currentUser = user;
       });
     this.initForm();
-  }
-
-  updateFormValue() {
-    this.currentFormValue = { ...this.inquiryForm.getRawValue()};
   }
 
   newDateRange(): FormGroup {
@@ -402,6 +397,8 @@ export class InquiryFormComponent implements OnInit {
 
     // Prepare the quotation data
     const quotationData = {
+      clientName: inquiryData.clientName,
+      destination: inquiryData.destination,
       title: `${inquiryData?.travelDays}D${inquiryData?.travelNights}N ${inquiryData?.destination} Package`,
       travelDates: inquiryData?.dateRanges,
       ratePerPax:
@@ -412,11 +409,8 @@ export class InquiryFormComponent implements OnInit {
       country: inquiryData?.country,
       provider: providerQuotation.provider,
     };
-    console.log(providerQuotation);
 
-    console.log(quotationData);
-
-    this.router.navigate(['/quotation'], {
+    this.router.navigate(['/quotations/new'], {
       queryParams: {
         data: btoa(JSON.stringify(quotationData))
       }

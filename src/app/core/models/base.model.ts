@@ -15,8 +15,8 @@ export interface ListData<T extends BaseModel> {
 }
 
 export interface BaseModel {
-  id: number;
-  documentId: string;
+  id?: number;
+  documentId?: string;
   createdAt?: Date | null;
   updatedAt?: Date | null;
   publishedAt?: Date | null;
@@ -28,6 +28,6 @@ export interface AuditedBaseModel extends BaseModel {
 }
 
 export interface List {
-  id: number;
+  id?: number;
   title: string;
 }

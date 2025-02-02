@@ -7,6 +7,9 @@ import { ListToJsonComponent } from './features/tools/pages/list-to-json/list-to
 import { AuthCallbackComponent } from '@core/auth/auth-callback.component';
 import { AuthGuard } from '@core/guards/auth.guard';
 import { InquiryListComponent } from './features/inquiry/pages/inquiry-list/inquiry-list.component';
+import {
+  QuotationListComponent
+} from './features/quotation/pages/quotation-list/quotation-list.component';
 
 export const routes: Routes = [
   {
@@ -37,9 +40,22 @@ export const routes: Routes = [
     ],
   },
   {
-    path: 'quotation',
-    component: QuotationGeneratorComponent,
+    path: 'quotations',
     canActivate: [AuthGuard],
+    children: [
+      {
+        path: '',
+        component: QuotationListComponent,
+      },
+      {
+        path: 'new',
+        component: QuotationGeneratorComponent,
+      },
+      {
+        path: ':id',
+        component: QuotationGeneratorComponent,
+      }
+    ],
   },
   {
     path: 'payments',
