@@ -1,87 +1,106 @@
-<div class="grid grid-cols-1 gap-4 p-4">
-  <form [formGroup]="form">
-    <p-fluid class="grid grid-cols-2 gap-4">
-      <p-float-label variant="on">
-        <input type="text" pInputText id="clientName" formControlName="clientName">
-        <label for="clientName">Client Name</label>
-      </p-float-label>
-      <p-float-label variant="on">
-        <input type="text" pInputText id="destination" formControlName="destination">
-        <label for="destination">Destination</label>
-      </p-float-label>
-      <p-float-label variant="on">
-        <p-select inputId="country" formControlName="country" [options]="countries" optionLabel="name">
-          <ng-template #dropdownicon>
-            <i class="pi pi-map"></i>
-          </ng-template>
-        </p-select>
-        <label for="country">Country</label>
-      </p-float-label>
-      <p-float-label variant="on">
-        <p-select inputId="provider" [options]="providers" formControlName="provider" optionLabel="name"></p-select>
-        <label for="provider">Providers</label>
-      </p-float-label>
-      <p-float-label variant="on">
-        <p-date-picker showIcon inputId="travelDates" iconDisplay="input" selectionMode="range" formControlName="travelDates"/>
-        <label for="travelDates">Travel Dates</label>
-      </p-float-label>
-      <p-float-label variant="on">
-        <p-select [options]="packages" formControlName="package">
-          <ng-template let-pkg #selectedItem>
-            <span *ngIf="pkg">{{ pkg.name }} <span class="font-semibold">{{ pkg.duration }}</span></span>
-          </ng-template>
-          <ng-template let-pkg #item>
-            <span>{{ pkg.name }} <span class="font-semibold">{{ pkg.duration }}</span></span>
-          </ng-template>
-        </p-select>
-        <label for="package">Packages</label>
-      </p-float-label>
-      <p-float-label variant="on" class="col-span-2">
-        <input type="text" pInputText id="title" formControlName="title">
-        <label for="title">Title</label>
-      </p-float-label>
-      <p-float-label variant="on">
-        <p-input-number inputId="noOfPax" formControlName="noOfPax"/>
-        <label for="noOfPax">No. of Pax</label>
-      </p-float-label>
-      <p-float-label variant="on">
-        <p-input-number inputId="ratePerPax" mode="currency" currency="PHP" formControlName="ratePerPax"/>
-        <label for="ratePerPax">Rate per Pax</label>
-      </p-float-label>
-      <div class="flex flex-wrap gap-4 col-span-2">
-        <span class="w-full font-semibold">Package Type</span>
-        <div class="flex items-center">
-          <p-radio-button value="all-inclusive" formControlName="packageType" inputId="allInclusive"/>
-          <label for="allInclusive" class="ml-2">All-Inclusive Package</label>
-        </div>
-        <div class="flex flex-col gap-2">
+<div class="flex flex-col gap-4 p-4">
+  <form [formGroup]="form" class="flex flex-col gap-4">
+    <!-- Client Information Card -->
+    <p-card header="Client Information">
+      <p-fluid class="grid grid-cols-2 gap-4">
+        <p-float-label variant="on">
+          <input type="text" pInputText id="clientName" formControlName="clientName">
+          <label for="clientName">Client Name</label>
+        </p-float-label>
+        <p-float-label variant="on">
+          <input type="text" pInputText id="title" formControlName="title">
+          <label for="title">Title</label>
+        </p-float-label>
+      </p-fluid>
+    </p-card>
+
+    <!-- Trip Details Card -->
+    <p-card header="Trip Details">
+      <p-fluid class="grid grid-cols-2 gap-4">
+        <p-float-label variant="on">
+          <input type="text" pInputText id="destination" formControlName="destination">
+          <label for="destination">Destination</label>
+        </p-float-label>
+        <p-float-label variant="on">
+          <p-select inputId="country" formControlName="country" [options]="countries" optionLabel="name">
+            <ng-template #dropdownicon>
+              <i class="pi pi-map"></i>
+            </ng-template>
+          </p-select>
+          <label for="country">Country</label>
+        </p-float-label>
+        <p-float-label variant="on">
+          <p-date-picker showIcon inputId="travelDates" iconDisplay="input" selectionMode="range" formControlName="travelDates"/>
+          <label for="travelDates">Travel Dates</label>
+        </p-float-label>
+        <p-float-label variant="on">
+          <p-input-number inputId="noOfPax" formControlName="noOfPax"/>
+          <label for="noOfPax">No. of Pax</label>
+        </p-float-label>
+      </p-fluid>
+    </p-card>
+
+    <!-- Package Details Card -->
+    <p-card header="Package Details">
+      <p-fluid class="grid grid-cols-2 gap-4">
+        <p-float-label variant="on">
+          <p-select inputId="provider" [options]="providers" formControlName="provider" optionLabel="name"></p-select>
+          <label for="provider">Providers</label>
+        </p-float-label>
+        <p-float-label variant="on">
+          <p-select [options]="packages" formControlName="package">
+            <ng-template let-pkg #selectedItem>
+              <span *ngIf="pkg">{{ pkg.name }} <span class="font-semibold">{{ pkg.duration }}</span></span>
+            </ng-template>
+            <ng-template let-pkg #item>
+              <span>{{ pkg.name }} <span class="font-semibold">{{ pkg.duration }}</span></span>
+            </ng-template>
+          </p-select>
+          <label for="package">Packages</label>
+        </p-float-label>
+
+        <!-- Package Type Section -->
+        <div class="flex flex-wrap gap-4 col-span-2">
+          <span class="w-full font-semibold">Package Type</span>
           <div class="flex items-center">
-            <p-radio-button value="custom" formControlName="packageType" inputId="custom"/>
-            <label for="custom" class="ml-2">Custom Package</label>
+            <p-radio-button value="all-inclusive" formControlName="packageType" inputId="allInclusive"/>
+            <label for="allInclusive" class="ml-2">All-Inclusive Package</label>
           </div>
-          <div class="ml-6 flex flex-wrap gap-4" *ngIf="form.controls.packageType.value === 'custom'">
-            <div class="flex items-center gap-2" *ngFor="let option of packageOptions">
-              <p-checkbox 
-                [inputId]="option.id"
-                [value]="option.id"
-                [formControlName]="'customPackageOptions'">
-              </p-checkbox>
-              <label [for]="option.id" class="ml-2"> {{ option.label }} </label>
+          <div class="flex flex-col gap-2">
+            <div class="flex items-center">
+              <p-radio-button value="custom" formControlName="packageType" inputId="custom"/>
+              <label for="custom" class="ml-2">Custom Package</label>
+            </div>
+            <div class="ml-6 flex flex-wrap gap-4" *ngIf="form.controls.packageType.value === 'custom'">
+              <div class="flex items-center gap-2" *ngFor="let option of packageOptions">
+                <p-checkbox [inputId]="option.id" [value]="option.id" [formControlName]="'customPackageOptions'"></p-checkbox>
+                <label [for]="option.id" class="ml-2">{{ option.label }}</label>
+              </div>
             </div>
           </div>
         </div>
-      </div>
-      <div class="flex flex-wrap gap-4 col-span-2">
-        <span class="w-full font-semibold">Mode of Transportation</span>
-        <div class="flex items-center">
-          <p-radio-button value="Flight" formControlName="modeOfTransportation" inputId="flight"/>
-          <label for="flight" class="ml-2">Flight</label>
+      </p-fluid>
+    </p-card>
+
+    <!-- Transportation Card -->
+    <p-card header="Transportation Details">
+      <p-fluid class="grid grid-cols-2 gap-4">
+        <div class="flex flex-wrap gap-4 col-span-2">
+          <span class="w-full font-semibold">Mode of Transportation</span>
+          <div class="flex items-center gap-4">
+            <div class="flex items-center">
+              <p-radio-button value="Flight" formControlName="modeOfTransportation" inputId="flight"/>
+              <label for="flight" class="ml-2">Flight</label>
+            </div>
+            <div class="flex items-center">
+              <p-radio-button value="Bus" formControlName="modeOfTransportation" inputId="bus"/>
+              <label for="bus" class="ml-2">Bus</label>
+            </div>
+          </div>
         </div>
-        <div class="flex items-center">
-          <p-radio-button value="Bus" formControlName="modeOfTransportation" inputId="bus"/>
-          <label for="bus" class="ml-2">Bus</label>
-        </div>
-        <p-fluid class="grid grid-cols-2 gap-2" *ngIf="form.controls.modeOfTransportation.value === 'Flight'">
+
+        <!-- Flight Details Section -->
+        <ng-container *ngIf="form.controls.modeOfTransportation.value === 'Flight'">
           <div class="grid grid-cols-2 gap-2">
             <div formGroupName="departure" class="flex flex-col gap-2">
               <span class="font-semibold">Departure</span>
@@ -160,31 +179,47 @@
               </p-float-label>
             </ng-container>
           </div>
-        </p-fluid>
-      </div>
-      <p-float-label variant="on" [ngClass]="{'grid-cols-1': form.controls.modeOfTransportation.value !== 'Flight' || form.controls.flightIncluded.value}">
-        <p-input-number inputId="totalRatePerPax" mode="currency" currency="PHP" formControlName="totalRatePerPax"/>
-        <label for="totalRatePerPax">Total Rate per Pax</label>
-      </p-float-label>
-      <p-float-label variant="on">
-        <p-input-number inputId="suggestedRatePerPax" mode="currency" currency="PHP"
-                        formControlName="suggestedRatePerPax"/>
-        <label for="suggestedRatePerPax">Suggested Rate per Pax</label>
-      </p-float-label>
-      <p-float-label class="col-span-2" variant="on">
-        <textarea pTextarea formControlName="inclusions" id="inclusions"></textarea>
-        <label for="inclusions">Inclusions</label>
-      </p-float-label>
-      <p-float-label class="col-span-2" variant="on">
-        <textarea pTextarea formControlName="exclusions" id="exclusions"></textarea>
-        <label for="exclusions">Exclusions</label>
-      </p-float-label>
-      <p-float-label class="col-span-2" variant="on">
-        <textarea pTextarea formControlName="optionalTours" id="optionalTours"></textarea>
-        <label for="optionalTours">Optional Tours</label>
-      </p-float-label>
-    </p-fluid>
+        </ng-container>
+      </p-fluid>
+    </p-card>
+
+    <!-- Pricing Card -->
+    <p-card header="Pricing Details">
+      <p-fluid class="grid grid-cols-2 gap-4">
+        <p-float-label variant="on">
+          <p-input-number inputId="ratePerPax" mode="currency" currency="PHP" formControlName="ratePerPax"/>
+          <label for="ratePerPax">Rate per Pax</label>
+        </p-float-label>
+        <p-float-label variant="on" [ngClass]="{'grid-cols-1': form.controls.modeOfTransportation.value !== 'Flight' || form.controls.flightIncluded.value}">
+          <p-input-number inputId="totalRatePerPax" mode="currency" currency="PHP" formControlName="totalRatePerPax"/>
+          <label for="totalRatePerPax">Total Rate per Pax</label>
+        </p-float-label>
+        <p-float-label variant="on">
+          <p-input-number inputId="suggestedRatePerPax" mode="currency" currency="PHP" formControlName="suggestedRatePerPax"/>
+          <label for="suggestedRatePerPax">Suggested Rate per Pax</label>
+        </p-float-label>
+      </p-fluid>
+    </p-card>
+
+    <!-- Additional Information Card -->
+    <p-card header="Additional Information">
+      <p-fluid class="grid grid-cols-1 gap-4">
+        <p-float-label variant="on">
+          <textarea pTextarea formControlName="inclusions" id="inclusions"></textarea>
+          <label for="inclusions">Inclusions</label>
+        </p-float-label>
+        <p-float-label variant="on">
+          <textarea pTextarea formControlName="exclusions" id="exclusions"></textarea>
+          <label for="exclusions">Exclusions</label>
+        </p-float-label>
+        <p-float-label variant="on">
+          <textarea pTextarea formControlName="optionalTours" id="optionalTours"></textarea>
+          <label for="optionalTours">Optional Tours</label>
+        </p-float-label>
+      </p-fluid>
+    </p-card>
   </form>
+
   <div class="flex gap-4 justify-center items-center">
     <p-button label="Save" icon="pi pi-save" (onClick)="save()" [loading]="saving"/>
     <p-button label="Preview" icon="pi pi-eye" (onClick)="generate()"/>

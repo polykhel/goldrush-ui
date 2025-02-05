@@ -29,6 +29,7 @@ import { QuotationService } from '@services/quotation.service';
 import { MessageService } from 'primeng/api';
 import { ToastModule } from 'primeng/toast';
 import { PACKAGE_OPTIONS } from '@utils/package.util';
+import { Card } from 'primeng/card';
 
 type FlightDetail = Partial<{
   flightNumber: string | null;
@@ -54,6 +55,7 @@ type FlightDetail = Partial<{
     RadioButton,
     Textarea,
     ToastModule,
+    Card,
   ],
   templateUrl: './quotation-form.component.html',
   providers: [MessageService],
