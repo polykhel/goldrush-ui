@@ -3,8 +3,8 @@ import { Quotation } from '@models/quotation.model';
 import html2canvas from 'html2canvas';
 import { NgxPrintModule, NgxPrintService, PrintOptions } from 'ngx-print';
 import { Button } from 'primeng/button';
-import { QuotationFormComponent } from '../../components/quotation-form/quotation-form.component';
-import { QuotationPreviewComponent } from '../../components/quotation-preview/quotation-preview.component';
+import { QuotationPreviewComponent } from './quotation-preview/quotation-preview.component';
+import { QuotationFormComponent } from './quotation-form/quotation-form.component';
 
 @Component({
   selector: 'app-quotation-generator',
@@ -19,8 +19,7 @@ import { QuotationPreviewComponent } from '../../components/quotation-preview/qu
 export class QuotationGeneratorComponent {
   quotation: Quotation | null = null;
 
-  constructor(private printService: NgxPrintService) {
-  }
+  constructor(private printService: NgxPrintService) {}
 
   updatePreview(formValue: Quotation) {
     this.quotation = formValue;
@@ -32,20 +31,18 @@ export class QuotationGeneratorComponent {
       if (type === 'img') {
         html2canvas(element, {
           allowTaint: true,
-          useCORS: true
-        }).then(
-          (canvas) => {
-            const imgData = canvas.toDataURL('image/png');
-            const link = document.createElement('a');
-            link.href = imgData;
-            link.download = this.quotation?.title + '.png';
-            link.click();
-          },
-        );
+          useCORS: true,
+        }).then((canvas) => {
+          const imgData = canvas.toDataURL('image/png');
+          const link = document.createElement('a');
+          link.href = imgData;
+          link.download = this.quotation?.title + '.png';
+          link.click();
+        });
       } else if (type === 'pdf') {
         const printOptions = new PrintOptions({
           printSectionId: 'preview',
-          useExistingCss: true
+          useExistingCss: true,
         });
         this.printService.print(printOptions);
       }

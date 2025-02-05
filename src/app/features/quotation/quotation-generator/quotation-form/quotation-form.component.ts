@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, inject, OnInit, Output } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
-import { formatPairedValues, formatValue } from '@core/utils/string.util';
+import { formatPairedValues, formatValue } from '@utils/string.util';
 import { environment } from '@env/environment';
 import { Asset } from '@models/asset.model';
 import { Country } from '@models/country.model';
@@ -28,7 +28,7 @@ import { finalize, merge, takeUntil } from 'rxjs';
 import { QuotationService } from '@services/quotation.service';
 import { MessageService } from 'primeng/api';
 import { ToastModule } from 'primeng/toast';
-import { PACKAGE_OPTIONS } from '@core/utils/package.util';
+import { PACKAGE_OPTIONS } from '@utils/package.util';
 
 type FlightDetail = Partial<{
   flightNumber: string | null;
@@ -53,10 +53,10 @@ type FlightDetail = Partial<{
     InputText,
     RadioButton,
     Textarea,
-    ToastModule
+    ToastModule,
   ],
   templateUrl: './quotation-form.component.html',
-  providers: [MessageService]
+  providers: [MessageService],
 })
 export class QuotationFormComponent implements OnInit {
   @Output() onFormChange: EventEmitter<any> = new EventEmitter();
@@ -67,34 +67,35 @@ export class QuotationFormComponent implements OnInit {
   saving = false;
   editMode = false;
   quotationId?: string;
+  packageOptions = PACKAGE_OPTIONS;
   private baseUrl = environment.backendUrl;
   private formBuilder = inject(FormBuilder);
   form = this.formBuilder.group({
     clientName: this.formBuilder.control<string | null>(null),
     destination: this.formBuilder.control<string | null>(null),
     country: this.formBuilder.control<Country | null>(null, [
-      Validators.required
+      Validators.required,
     ]),
     provider: this.formBuilder.control<Provider | null>({
       value: null,
-      disabled: true
+      disabled: true,
     }),
     package: this.formBuilder.control<Package | null>({
       value: null,
-      disabled: true
+      disabled: true,
     }),
     title: this.formBuilder.control<string | null>(null, [Validators.required]),
     travelDates: this.formBuilder.control<Date[] | null>(null, [
-      Validators.required
+      Validators.required,
     ]),
     noOfPax: this.formBuilder.control<number | null>(null, [
-      Validators.required
+      Validators.required,
     ]),
     modeOfTransportation: this.formBuilder.control<string | null>('Flight', [
-      Validators.required
+      Validators.required,
     ]),
     flightIncluded: this.formBuilder.control<boolean>(true, [
-      Validators.required
+      Validators.required,
     ]),
     airline: this.formBuilder.control<string | null>(null),
     departure: this.formBuilder.group({
@@ -102,30 +103,30 @@ export class QuotationFormComponent implements OnInit {
       iataCode: this.formBuilder.control<string | null>('MNL'),
       date: this.formBuilder.control<Date | null>(null),
       startTime: this.formBuilder.control<Date | null>(null),
-      endTime: this.formBuilder.control<Date | null>(null)
+      endTime: this.formBuilder.control<Date | null>(null),
     }),
     arrival: this.formBuilder.group({
       flightNumber: this.formBuilder.control<string | null>(null),
       iataCode: this.formBuilder.control<string | null>('MNL'),
       date: this.formBuilder.control<Date | null>(null),
       startTime: this.formBuilder.control<Date | null>(null),
-      endTime: this.formBuilder.control<Date | null>(null)
+      endTime: this.formBuilder.control<Date | null>(null),
     }),
     arrivalPrice: this.formBuilder.control<number | null>(null),
     departurePrice: this.formBuilder.control<number | null>(null),
     totalFlightPrice: this.formBuilder.control<number | null>({
       value: null,
-      disabled: true
+      disabled: true,
     }),
     ratePerPax: this.formBuilder.control<number | null>(null, [
-      Validators.required
+      Validators.required,
     ]),
     totalRatePerPax: this.formBuilder.control<number | null>(
       { value: null, disabled: true },
-      [Validators.required]
+      [Validators.required],
     ),
     suggestedRatePerPax: this.formBuilder.control<number | null>(null, [
-      Validators.required
+      Validators.required,
     ]),
     inclusions: this.formBuilder.control<string | null>(null),
     exclusions: this.formBuilder.control<string | null>(null),
@@ -133,7 +134,6 @@ export class QuotationFormComponent implements OnInit {
     packageType: ['all-inclusive'],
     customPackageOptions: [[] as string[]],
   });
-  packageOptions = PACKAGE_OPTIONS;
 
   constructor(
     private countryService: CountryService,
@@ -142,9 +142,8 @@ export class QuotationFormComponent implements OnInit {
     private quotationService: QuotationService,
     private messageService: MessageService,
     private destroy$: DestroyService,
-    private route: ActivatedRoute
-  ) {
-  }
+    private route: ActivatedRoute,
+  ) {}
 
   get country() {
     return this.form.controls.country;
@@ -179,7 +178,7 @@ export class QuotationFormComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.route.params.pipe(takeUntil(this.destroy$)).subscribe(params => {
+    this.route.params.pipe(takeUntil(this.destroy$)).subscribe((params) => {
       if (params['id']) {
         this.editMode = true;
         this.quotationId = params['id'];
@@ -188,124 +187,120 @@ export class QuotationFormComponent implements OnInit {
     });
 
     this.country.valueChanges
-    .pipe(takeUntil(this.destroy$))
-    .subscribe((country) => {
-      this.provider.reset();
-      this.package.reset();
-      if (country?.documentId) {
-        this.fetchProvidersByCountry(country.documentId);
-        this.provider.enable();
-      } else {
-        this.provider.disable();
-        this.package.disable();
-      }
-    });
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((country) => {
+        this.provider.reset();
+        this.package.reset();
+        if (country?.documentId) {
+          this.fetchProvidersByCountry(country.documentId);
+          this.provider.enable();
+        } else {
+          this.provider.disable();
+          this.package.disable();
+        }
+      });
 
     this.provider.valueChanges
-    .pipe(takeUntil(this.destroy$))
-    .subscribe((provider) => {
-      this.package.reset();
-      if (provider?.documentId && this.country.value?.documentId) {
-        this.fetchPackagesByCountryAndProvider(
-          this.country.value.documentId,
-          provider.documentId
-        );
-        this.package.enable();
-      } else {
-        this.package.disable();
-      }
-    });
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((provider) => {
+        this.package.reset();
+        if (provider?.documentId && this.country.value?.documentId) {
+          this.fetchPackagesByCountryAndProvider(
+            this.country.value.documentId,
+            provider.documentId,
+          );
+          this.package.enable();
+        } else {
+          this.package.disable();
+        }
+      });
 
     merge(this.departurePrice.valueChanges, this.arrivalPrice.valueChanges)
-    .pipe(takeUntil(this.destroy$))
-    .subscribe(() => {
-      this.calculateTotalFlightPrice();
-    });
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(() => {
+        this.calculateTotalFlightPrice();
+      });
 
     merge(
       this.ratePerPax.valueChanges,
       this.totalFlightPrice.valueChanges,
-      this.flightIncluded.valueChanges
+      this.flightIncluded.valueChanges,
     )
-    .pipe(takeUntil(this.destroy$))
-    .subscribe(() => {
-      this.calculateTotalRatePerPax();
-    });
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(() => {
+        this.calculateTotalRatePerPax();
+      });
 
     this.countryService.getCountries().subscribe((data) => {
       this.countries = data.data;
     });
 
     this.package.valueChanges
-    .pipe(takeUntil(this.destroy$))
-    .subscribe((data) => {
-      if (data) {
-        this.updateDetails(data);
-      }
-    });
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((data) => {
+        if (data) {
+          this.updateDetails(data);
+        }
+      });
 
     this.form.controls.travelDates.valueChanges
-    .pipe(takeUntil(this.destroy$))
-    .subscribe((travelDates) => {
-      if (travelDates) {
-        if (travelDates[0]) {
-          this.form.controls.departure.controls.date.setValue(travelDates[0]);
-        } else {
-          this.form.controls.departure.controls.date.setValue(null);
-        }
-
-        if (travelDates[1]) {
-          this.form.controls.arrival.controls.date.setValue(travelDates[1]);
-        } else {
-          this.form.controls.arrival.controls.date.setValue(null);
-        }
-      } else {
-        this.form.controls.departure.controls.date.setValue(null);
-        this.form.controls.arrival.controls.date.setValue(null);
-      }
-    });
-
-    this.route.queryParams
-    .pipe(takeUntil(this.destroy$))
-    .subscribe((params) => {
-      if (params['data']) {
-        try {
-          const quotationData = JSON.parse(atob(params['data']));
-
-          if (quotationData.country) {
-            this.country.setValue(quotationData.country);
-            this.fetchProvidersByCountry(quotationData.country.documentId);
-
-            setTimeout(() => {
-              this.provider.setValue(
-                this.providers.find(
-                  (p) => p.documentId === quotationData.provider.documentId
-                )!
-              );
-            }, 500);
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((travelDates) => {
+        if (travelDates) {
+          if (travelDates[0]) {
+            this.form.controls.departure.controls.date.setValue(travelDates[0]);
+          } else {
+            this.form.controls.departure.controls.date.setValue(null);
           }
 
-          console.log(quotationData);
-          
-
-          this.form.patchValue({
-            clientName: quotationData.clientName,
-            destination: quotationData.destination,
-            title: quotationData.title,
-            travelDates: quotationData.travelDates.map((range: any) => [
-              new Date(range.start),
-              new Date(range.end)
-            ])[0],
-            ratePerPax: quotationData.ratePerPax,
-            noOfPax: quotationData.noOfPax,
-            packageType: quotationData.packageType,
-            customPackageOptions: quotationData.customPackageOptions
-          });
-        } catch (e) {
-          console.error('Error parsing quotation data:', e);
+          if (travelDates[1]) {
+            this.form.controls.arrival.controls.date.setValue(travelDates[1]);
+          } else {
+            this.form.controls.arrival.controls.date.setValue(null);
+          }
+        } else {
+          this.form.controls.departure.controls.date.setValue(null);
+          this.form.controls.arrival.controls.date.setValue(null);
         }
-      }
-    });
+      });
+
+    this.route.queryParams
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((params) => {
+        if (params['data']) {
+          try {
+            const quotationData = JSON.parse(atob(params['data']));
+
+            if (quotationData.country) {
+              this.country.setValue(quotationData.country);
+              this.fetchProvidersByCountry(quotationData.country.documentId);
+
+              setTimeout(() => {
+                const provider = this.providers.find(
+                  (p) => p.documentId === quotationData.provider.documentId,
+                );
+                this.provider.setValue(provider ?? null);
+              }, 500);
+            }
+
+            this.form.patchValue({
+              clientName: quotationData.clientName,
+              destination: quotationData.destination,
+              title: quotationData.title,
+              travelDates: quotationData.travelDates.map((range: any) => [
+                new Date(range.start),
+                new Date(range.end),
+              ])[0],
+              ratePerPax: quotationData.ratePerPax,
+              noOfPax: quotationData.noOfPax,
+              packageType: quotationData.packageType,
+              customPackageOptions: quotationData.customPackageOptions,
+            });
+          } catch (e) {
+            console.error('Error parsing quotation data:', e);
+          }
+        }
+      });
   }
 
   loadQuotation(id: string) {
@@ -321,10 +316,12 @@ export class QuotationFormComponent implements OnInit {
           this.provider.setValue(quotation.provider);
         }
 
-        const travelDates = quotation.travelDates ? [
-          new Date(quotation.travelDates.start),
-          new Date(quotation.travelDates.end)
-        ] : null;
+        const travelDates = quotation.travelDates
+          ? [
+              new Date(quotation.travelDates.start),
+              new Date(quotation.travelDates.end),
+            ]
+          : null;
 
         this.form.patchValue({
           clientName: quotation.clientName,
@@ -337,9 +334,15 @@ export class QuotationFormComponent implements OnInit {
           airline: quotation.airline,
           departure: {
             ...quotation.departure,
-            date: quotation.departure?.date ? new Date(quotation.departure?.date) : null,
-            startTime: quotation.departure?.startTime ? new Date(quotation.departure?.startTime) : null,
-            endTime: quotation.departure?.endTime ? new Date(quotation.departure?.endTime) : null
+            date: quotation.departure?.date
+              ? new Date(quotation.departure?.date)
+              : null,
+            startTime: quotation.departure?.startTime
+              ? new Date(quotation.departure?.startTime)
+              : null,
+            endTime: quotation.departure?.endTime
+              ? new Date(quotation.departure?.endTime)
+              : null,
           },
           arrival: { ...quotation.arrival },
           departurePrice: quotation.departurePrice,
@@ -350,19 +353,17 @@ export class QuotationFormComponent implements OnInit {
           exclusions: quotation.exclusions,
           optionalTours: quotation.optionalTours,
           packageType: quotation.packageType,
-          customPackageOptions: quotation.customPackageOptions?.split(';') || []
+          customPackageOptions:
+            quotation.customPackageOptions?.split(';') || [],
         });
-        
-
-        console.log(this.form.value);
       },
       error: () => {
         this.messageService.add({
           severity: 'error',
           summary: 'Error',
-          detail: 'Failed to load quotation'
+          detail: 'Failed to load quotation',
         });
-      }
+      },
     });
   }
 
@@ -374,13 +375,13 @@ export class QuotationFormComponent implements OnInit {
 
   fetchPackagesByCountryAndProvider(
     countryId: string,
-    providerId: string
+    providerId: string,
   ): void {
     this.packageService
-    .getPackages({ countryId, providerId })
-    .subscribe((data) => {
-      this.packages = data.data;
-    });
+      .getPackages({ countryId, providerId })
+      .subscribe((data) => {
+        this.packages = data.data;
+      });
   }
 
   calculateTotalFlightPrice(): void {
@@ -442,7 +443,7 @@ export class QuotationFormComponent implements OnInit {
     }
 
     this.form.controls.title.setValue(
-      `${pkg.duration} ${pkg.name} All-in Package`
+      `${pkg.duration} ${pkg.name} All-in Package`,
     );
   }
 
@@ -463,10 +464,10 @@ export class QuotationFormComponent implements OnInit {
       formatValue(flightDetail.flightNumber),
       route,
       formatValue(date),
-      timeRange
+      timeRange,
     ]
-    .filter(Boolean)
-    .join(' ');
+      .filter(Boolean)
+      .join(' ');
   }
 
   generate() {
@@ -474,7 +475,7 @@ export class QuotationFormComponent implements OnInit {
       this.messageService.add({
         severity: 'error',
         summary: 'Validation Error',
-        detail: 'Please fill in all required fields before previewing'
+        detail: 'Please fill in all required fields before previewing',
       });
       return;
     }
@@ -485,14 +486,14 @@ export class QuotationFormComponent implements OnInit {
     if (value.departure) {
       const departureDetails = this.getFlightDetails(
         value.departure,
-        value.arrival?.iataCode
+        value.arrival?.iataCode,
       );
       if (departureDetails) flightDetails.push(departureDetails);
     }
     if (value.arrival) {
       const arrivalDetails = this.getFlightDetails(
         value.arrival,
-        value.departure?.iataCode
+        value.departure?.iataCode,
       );
       if (arrivalDetails) flightDetails.push(arrivalDetails);
     }
@@ -500,7 +501,7 @@ export class QuotationFormComponent implements OnInit {
     this.messageService.add({
       severity: 'info',
       summary: 'Preview Generated',
-      detail: 'Generating preview of the quotation'
+      detail: 'Generating preview of the quotation',
     });
 
     this.onFormChange.emit({
@@ -513,7 +514,7 @@ export class QuotationFormComponent implements OnInit {
       optionalTours: value.optionalTours,
       airline: value.airline,
       flightDetails: flightDetails,
-      images: this.images
+      images: this.images,
     });
   }
 
@@ -522,7 +523,7 @@ export class QuotationFormComponent implements OnInit {
       this.messageService.add({
         severity: 'error',
         summary: 'Validation Error',
-        detail: 'Please fill in all required fields'
+        detail: 'Please fill in all required fields',
       });
       return;
     }
@@ -531,14 +532,16 @@ export class QuotationFormComponent implements OnInit {
     this.messageService.add({
       severity: 'info',
       summary: 'Saving',
-      detail: `${this.editMode ? 'Updating' : 'Creating'} quotation...`
+      detail: `${this.editMode ? 'Updating' : 'Creating'} quotation...`,
     });
 
     const formValue = this.form.value;
-    const travelDates = formValue.travelDates ? {
-      start: dayjs(formValue.travelDates[0]).toDate(),
-      end: dayjs(formValue.travelDates[1]).toDate()
-    } : undefined;
+    const travelDates = formValue.travelDates
+      ? {
+          start: dayjs(formValue.travelDates[0]).toDate(),
+          end: dayjs(formValue.travelDates[1]).toDate(),
+        }
+      : undefined;
 
     const quotation: Quotation = {
       clientName: formValue.clientName,
@@ -565,7 +568,7 @@ export class QuotationFormComponent implements OnInit {
       optionalTours: formValue.optionalTours,
       images: this.images,
       packageType: formValue.packageType,
-      customPackageOptions: formValue.customPackageOptions?.join(';')
+      customPackageOptions: formValue.customPackageOptions?.join(';'),
     };
 
     const request = this.editMode
@@ -573,25 +576,25 @@ export class QuotationFormComponent implements OnInit {
       : this.quotationService.createQuotation(quotation);
 
     request
-    .pipe(
-      finalize(() => this.saving = false),
-      takeUntil(this.destroy$)
-    )
-    .subscribe({
-      next: () => {
-        this.messageService.add({
-          severity: 'success',
-          summary: 'Success',
-          detail: `Quotation ${this.editMode ? 'updated' : 'created'} successfully`
-        });
-      },
-      error: (error) => {
-        this.messageService.add({
-          severity: 'error',
-          summary: 'Error',
-          detail: `Failed to ${this.editMode ? 'update' : 'create'} quotation: ${error.message || 'Unknown error occurred'}`
-        });
-      }
-    });
+      .pipe(
+        finalize(() => (this.saving = false)),
+        takeUntil(this.destroy$),
+      )
+      .subscribe({
+        next: () => {
+          this.messageService.add({
+            severity: 'success',
+            summary: 'Success',
+            detail: `Quotation ${this.editMode ? 'updated' : 'created'} successfully`,
+          });
+        },
+        error: (error) => {
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: `Failed to ${this.editMode ? 'update' : 'create'} quotation: ${error.message || 'Unknown error occurred'}`,
+          });
+        },
+      });
   }
 }

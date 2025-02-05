@@ -6,7 +6,7 @@ import { Auth } from '@models/auth.model';
 import { User } from '@models/user.model';
 import dayjs from 'dayjs';
 import { BehaviorSubject, Observable, tap } from 'rxjs';
-import { SKIP_AUTH } from '../interceptors/auth.interceptor';
+import { SKIP_AUTH } from '@core/interceptors/auth.interceptor';
 
 @Injectable({
   providedIn: 'root',

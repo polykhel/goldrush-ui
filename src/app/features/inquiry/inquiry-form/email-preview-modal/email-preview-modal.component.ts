@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { EmailData } from '@core/utils/email.util';
+import { EmailData } from '@utils/email.util';
 import { Provider } from '@models/provider.model';
 import { PrimeTemplate } from 'primeng/api';
 import { Button } from 'primeng/button';

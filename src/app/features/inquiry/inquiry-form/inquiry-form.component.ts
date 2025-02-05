@@ -9,7 +9,7 @@ import {
   Validators,
 } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { EmailData, prepareProviderEmail } from '@core/utils/email.util';
+import { EmailData, prepareProviderEmail } from '@utils/email.util';
 import { Country } from '@models/country.model';
 import {
   getInquiryStatusConfig,
@@ -40,10 +40,10 @@ import { Tag } from 'primeng/tag';
 import { Textarea } from 'primeng/textarea';
 import { Toast } from 'primeng/toast';
 import { firstValueFrom, takeUntil } from 'rxjs';
-import { EmailPreviewModalComponent } from '../../components/email-preview-modal/email-preview-modal.component';
-import { ProviderQuotationComponent } from '../../components/provider-quotation/provider-quotation.component';
 import { Checkbox } from 'primeng/checkbox';
-import { PACKAGE_OPTIONS } from '@core/utils/package.util';
+import { PACKAGE_OPTIONS } from '@utils/package.util';
+import { EmailPreviewModalComponent } from './email-preview-modal/email-preview-modal.component';
+import { ProviderQuotationComponent } from './provider-quotation/provider-quotation.component';
 
 @Component({
   selector: 'app-inquiry-form',
@@ -176,7 +176,9 @@ export class InquiryFormComponent implements OnInit {
       this.countries = response.data;
     });
 
-    let countriesListData = await firstValueFrom(this.countryService.getCountries());
+    let countriesListData = await firstValueFrom(
+      this.countryService.getCountries(),
+    );
     if (countriesListData) {
       this.countries = countriesListData.data;
     }
@@ -195,7 +197,8 @@ export class InquiryFormComponent implements OnInit {
           start: new Date(dateRange.start),
           end: new Date(dateRange.end),
         })),
-        customPackageOptions: this.currentInquiry.customPackageOptions?.split(';') || [],
+        customPackageOptions:
+          this.currentInquiry.customPackageOptions?.split(';') || [],
       } as any);
     } else {
       this.inquiryForm.patchValue({
@@ -205,7 +208,7 @@ export class InquiryFormComponent implements OnInit {
     }
 
     const providerListData = await firstValueFrom(
-      this.providerService.getProviders()
+      this.providerService.getProviders(),
     );
     if (providerListData) {
       this.providers = providerListData.data;
@@ -219,7 +222,10 @@ export class InquiryFormComponent implements OnInit {
         this.currentProvidersMap =
           this.currentInquiry?.providerQuotations.reduce(
             (acc, providerQuotation) => {
-              acc.set(providerQuotation.provider.documentId!, providerQuotation);
+              acc.set(
+                providerQuotation.provider.documentId!,
+                providerQuotation,
+              );
               return acc;
             },
             new Map<string, ProviderQuotation>(),
@@ -258,7 +264,7 @@ export class InquiryFormComponent implements OnInit {
       const toSave = {
         ...formValue,
         customPackageOptions: formValue.customPackageOptions?.join(';'),
-      }
+      };
 
       this.inquiryService.saveInquiry(toSave).subscribe({
         next: () => {
@@ -425,8 +431,8 @@ export class InquiryFormComponent implements OnInit {
 
     this.router.navigate(['/quotations/new'], {
       queryParams: {
-        data: btoa(JSON.stringify(quotationData))
-      }
+        data: btoa(JSON.stringify(quotationData)),
+      },
     });
   }
 

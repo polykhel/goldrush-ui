@@ -1,7 +1,7 @@
 import { DatePipe, NgIf } from '@angular/common';
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
-import { CURRENCIES, PROVIDER_QUOTATION_STATUSES } from '@core/utils/constants.util';
+import { CURRENCIES, PROVIDER_QUOTATION_STATUSES } from '@utils/constants.util';
 import { ProviderQuotation } from '@models/inquiry.model';
 import { Provider } from '@models/provider.model';
 import { ExchangeRateService } from '@services/exchange-rate.service';
@@ -31,9 +31,9 @@ import { Textarea } from 'primeng/textarea';
     NgIf,
     ReactiveFormsModule,
     Select,
-    Textarea
+    Textarea,
   ],
-  providers: [MessageService]
+  providers: [MessageService],
 })
 export class ProviderQuotationComponent implements OnInit {
   currencies = CURRENCIES;
@@ -54,7 +54,7 @@ export class ProviderQuotationComponent implements OnInit {
   constructor(
     private formBuilder: FormBuilder,
     private exchangeRateService: ExchangeRateService,
-    private messageService: MessageService
+    private messageService: MessageService,
   ) {
     this.group = this.formBuilder.group({
       includeInEmail: [false],
@@ -67,7 +67,7 @@ export class ProviderQuotationComponent implements OnInit {
       remarks: [''],
       emailRemarks: [''],
       provider: [''],
-      sent: [false]
+      sent: [false],
     });
   }
 
@@ -126,12 +126,12 @@ export class ProviderQuotationComponent implements OnInit {
         this.messageService.add({
           severity: 'error',
           summary: 'Error',
-          detail: 'Failed to fetch exchange rate'
+          detail: 'Failed to fetch exchange rate',
         });
       },
       complete: () => {
         this.isLoadingRate = false;
-      }
+      },
     });
   }
 
@@ -150,5 +150,4 @@ export class ProviderQuotationComponent implements OnInit {
   generateQuotation() {
     this.onGenerateQuotation.emit(this.group.getRawValue());
   }
-
 }

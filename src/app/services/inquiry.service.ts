@@ -6,7 +6,7 @@ import { Inquiry } from '@models/inquiry.model';
 import qs from 'qs';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { transformBody } from '@core/utils/form.util';
+import { transformBody } from '@utils/form.util';
 
 interface InquiryParams {
   page: number;

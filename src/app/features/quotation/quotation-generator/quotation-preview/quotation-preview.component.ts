@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, Input } from '@angular/core';
-import { formatDateRange } from '@core/utils/date.util';
+import { formatDateRange } from '@utils/date.util';
 import { Quotation } from '@models/quotation.model';
 import dayjs from 'dayjs';
 import { DateRange } from '@models/inquiry.model';

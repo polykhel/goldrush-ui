@@ -20,11 +20,12 @@
     "baseUrl": "src",
     "paths": {
       "@core/*": ["app/core/*"],
-      "@models/*": ["app/core/models/*"],
-      "@services/*": ["app/core/services/*"],
+      "@models/*": ["app/models/*"],
+      "@services/*": ["app/services/*"],
       "@env/*": ["environments/*"],
       "@shared/*": ["app/shared/*"],
       "@pipes/*": ["app/shared/pipes/*"],
+      "@utils/*": ["app/shared/utils/*"],
     }
   },
   "angularCompilerOptions": {
