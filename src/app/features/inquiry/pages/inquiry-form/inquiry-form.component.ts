@@ -416,4 +416,8 @@ export class InquiryFormComponent implements OnInit {
       }
     });
   }
+
+  addGroupToFormArray(group: FormGroup) {
+    this.providerQuotations.push(group);
+  }
 }

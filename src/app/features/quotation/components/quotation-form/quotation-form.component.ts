@@ -308,7 +308,6 @@ export class QuotationFormComponent implements OnInit {
           this.country.setValue(quotation.country);
         }
 
-        console.log(quotation);
         if (quotation.provider) {
           this.provider.setValue(quotation.provider);
         }
@@ -484,7 +483,7 @@ export class QuotationFormComponent implements OnInit {
       noOfPax: value.noOfPax,
       inclusions: value.inclusions?.split('\n'),
       exclusions: value.exclusions?.split('\n'),
-      optionalActivities: value.optionalTours?.split('\n'),
+      optionalTours: value.optionalTours?.split('\n'),
       airline: value.airline,
       flightDetails: flightDetails,
       images: this.images

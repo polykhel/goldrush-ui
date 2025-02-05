@@ -3,6 +3,7 @@ import { Component, Input } from '@angular/core';
 import { formatDateRange } from '@core/utils/date.util';
 import { Quotation } from '@models/quotation.model';
 import dayjs from 'dayjs';
+import { DateRange } from '@models/inquiry.model';
 
 @Component({
   selector: 'app-quotation-preview',
@@ -15,7 +16,7 @@ export class QuotationPreviewComponent {
 
   today = dayjs().format('MMM DD, YYYY');
 
-  formatTravelDates(travelDates?: Date[] | null): string {
+  formatTravelDates(travelDates?: DateRange | null): string {
     return formatDateRange(travelDates);
   }
 }

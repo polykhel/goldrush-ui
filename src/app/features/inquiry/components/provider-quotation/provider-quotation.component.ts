@@ -1,6 +1,6 @@
 import { DatePipe, NgIf } from '@angular/common';
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
-import { FormArray, FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
+import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { CURRENCIES, PROVIDER_QUOTATION_STATUSES } from '@core/utils/constants.util';
 import { ProviderQuotation } from '@models/inquiry.model';
 import { Provider } from '@models/provider.model';
@@ -39,11 +39,11 @@ export class ProviderQuotationComponent implements OnInit {
   currencies = CURRENCIES;
 
   @Input({ required: true }) provider!: Provider;
-  @Input({ required: true }) formArray!: FormArray;
   @Input() isEditMode = false;
   @Input() existingProviderQuotation: ProviderQuotation | null = null;
 
   @Output() onGenerateQuotation = new EventEmitter<ProviderQuotation>();
+  @Output() onAddGroup = new EventEmitter<FormGroup>();
 
   isLoadingRate = false;
   exchangeRateLastUpdated: Date | null = null;
@@ -75,7 +75,7 @@ export class ProviderQuotationComponent implements OnInit {
     if (this.existingProviderQuotation) {
       this.group.patchValue(this.existingProviderQuotation);
     }
-    this.formArray.push(this.group);
+    this.onAddGroup.emit(this.group);
   }
 
   onPriceInput() {
