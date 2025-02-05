@@ -47,6 +47,7 @@ export interface Inquiry extends AuditedBaseModel {
   paxChild: number;
   paxChildAges?: string;
   packageType: string;
+  customPackageOptions?: string;
   otherServices?: string;
   providerQuotations: ProviderQuotation[];
   remarks?: string;
@@ -83,6 +84,7 @@ export interface ProviderQuotationRequest {
   paxChild: number;
   paxChildAges?: string | null;
   packageType: string;
+  customPackageOptions?: string;
   preferredHotel: string | null;
   otherServices?: string | null;
   sender: string;

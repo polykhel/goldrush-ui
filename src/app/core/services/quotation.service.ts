@@ -23,17 +23,8 @@ export class QuotationService {
   getQuotation(id: string): Observable<SingleData<Quotation>> {
     const query = qs.stringify({
       populate: {
-        inclusions: {
-          fields: ['*']
-        },
-        exclusions: {
-          fields: ['*']
-        },
-        optionalTours: {
-          fields: ['*']
-        },
         travelDates: {
-          fields: ['*']
+          fields: ['start', 'end']
         },
         country: {
           fields: ['*']
@@ -49,8 +40,9 @@ export class QuotationService {
         }
       }
     });
-    return this.http.get<SingleData<Quotation>>(`${this.baseUrl}/${id}?query=${query}`);
+    return this.http.get<SingleData<Quotation>>(`${this.baseUrl}/${id}?${query}`);
   }
+
 
   createQuotation(quotation: Quotation): Observable<SingleData<Quotation>> {
     return this.http.post<SingleData<Quotation>>(this.baseUrl, { data: transformBody(quotation) });

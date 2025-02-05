@@ -42,6 +42,8 @@ import { Toast } from 'primeng/toast';
 import { firstValueFrom, takeUntil } from 'rxjs';
 import { EmailPreviewModalComponent } from '../../components/email-preview-modal/email-preview-modal.component';
 import { ProviderQuotationComponent } from '../../components/provider-quotation/provider-quotation.component';
+import { Checkbox } from 'primeng/checkbox';
+import { PACKAGE_OPTIONS } from '@core/utils/package.util';
 
 @Component({
   selector: 'app-inquiry-form',
@@ -64,6 +66,7 @@ import { ProviderQuotationComponent } from '../../components/provider-quotation/
     EmailPreviewModalComponent,
     Tag,
     ProviderQuotationComponent,
+    Checkbox,
   ],
   templateUrl: './inquiry-form.component.html',
   providers: [MessageService],
@@ -74,6 +77,7 @@ export class InquiryFormComponent implements OnInit {
   showEmailPreview = false;
   emailData = new Map<string, EmailData>();
   isSending = false;
+  packageOptions = PACKAGE_OPTIONS;
 
   inquiryForm = this.formBuilder.group({
     id: [null],
@@ -90,7 +94,8 @@ export class InquiryFormComponent implements OnInit {
     paxAdult: [null, [Validators.required]],
     paxChild: [null, [Validators.required]],
     paxChildAges: [''],
-    packageType: this.formBuilder.control<string>('allIn'),
+    packageType: ['all-inclusive'],
+    customPackageOptions: [[] as string[]],
     otherServices: [''],
     providerQuotations: this.formBuilder.array<ProviderQuotation>([]),
     remarks: [''],
@@ -190,6 +195,7 @@ export class InquiryFormComponent implements OnInit {
           start: new Date(dateRange.start),
           end: new Date(dateRange.end),
         })),
+        customPackageOptions: this.currentInquiry.customPackageOptions?.split(';') || [],
       } as any);
     } else {
       this.inquiryForm.patchValue({
@@ -249,8 +255,12 @@ export class InquiryFormComponent implements OnInit {
   saveInquiry() {
     if (this.inquiryForm.valid) {
       const formValue = this.inquiryForm.getRawValue();
+      const toSave = {
+        ...formValue,
+        customPackageOptions: formValue.customPackageOptions?.join(';'),
+      }
 
-      this.inquiryService.saveInquiry(formValue).subscribe({
+      this.inquiryService.saveInquiry(toSave).subscribe({
         next: () => {
           this.messageService.add({
             severity: 'success',
@@ -283,7 +293,7 @@ export class InquiryFormComponent implements OnInit {
   sendQuotations() {
     if (this.inquiryForm.valid) {
       this.emailData = prepareProviderEmail(
-        this.mapProviderQuotations(this.inquiryForm.getRawValue()),
+        this.mapFormToEmailContent(this.inquiryForm.getRawValue()),
       );
 
       if (this.emailData.size === 0) {
@@ -361,7 +371,7 @@ export class InquiryFormComponent implements OnInit {
     }
   }
 
-  mapProviderQuotations(inquiry: any): ProviderQuotationRequest[] {
+  mapFormToEmailContent(inquiry: any): ProviderQuotationRequest[] {
     return inquiry.providerQuotations
       .filter((quotation: any) => quotation.includeInEmail && !quotation.sent)
       .map((quotation: any) => ({
@@ -374,6 +384,7 @@ export class InquiryFormComponent implements OnInit {
         paxChild: inquiry.paxChild,
         paxChildAges: inquiry.paxChildAges,
         packageType: inquiry.packageType,
+        customPackageOptions: inquiry.customPackageOptions.join(';'),
         preferredHotel: inquiry.preferredHotel,
         otherServices: inquiry.otherServices,
         emailRemarks: quotation.emailRemarks,
@@ -408,6 +419,8 @@ export class InquiryFormComponent implements OnInit {
       noOfPax: (inquiryData?.paxAdult ?? 0) + (inquiryData?.paxChild ?? 0),
       country: inquiryData?.country,
       provider: providerQuotation.provider,
+      packageType: inquiryData?.packageType,
+      customPackageOptions: inquiryData?.customPackageOptions,
     };
 
     this.router.navigate(['/quotations/new'], {

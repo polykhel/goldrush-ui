@@ -2,7 +2,7 @@ import { Asset } from './asset.model';
 import { Country } from './country.model';
 import { Package } from './package.model';
 import { Provider } from './provider.model';
-import { BaseModel, List } from './base.model';
+import { BaseModel } from './base.model';
 
 export interface Quotation extends BaseModel {
   clientName?: string | null;
@@ -25,11 +25,14 @@ export interface Quotation extends BaseModel {
   ratePerPax?: number | null;
   totalRatePerPax?: number | null;
   suggestedRatePerPax?: number | null;
-  inclusions?: List[] | null;
-  exclusions?: List[] | null;
-  optionalTours?: List[] | null;
+  inclusions?: string | null;
+  exclusions?: string | null;
+  optionalTours?: string | null;
   images?: Asset[] | null;
+  packageType?: string | null;
+  customPackageOptions?: string | null;
 }
+
 
 export interface Flight extends BaseModel {
   flightNumber?: string | null;

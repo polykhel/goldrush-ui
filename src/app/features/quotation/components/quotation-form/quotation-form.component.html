@@ -22,8 +22,7 @@
         <label for="provider">Providers</label>
       </p-float-label>
       <p-float-label variant="on">
-        <p-date-picker showIcon inputId="travelDates" iconDisplay="input" selectionMode="range"
-                       formControlName="travelDates"/>
+        <p-date-picker showIcon inputId="travelDates" iconDisplay="input" selectionMode="range" formControlName="travelDates"/>
         <label for="travelDates">Travel Dates</label>
       </p-float-label>
       <p-float-label variant="on">
@@ -50,6 +49,30 @@
         <label for="ratePerPax">Rate per Pax</label>
       </p-float-label>
       <div class="flex flex-wrap gap-4 col-span-2">
+        <span class="w-full font-semibold">Package Type</span>
+        <div class="flex items-center">
+          <p-radio-button value="all-inclusive" formControlName="packageType" inputId="allInclusive"/>
+          <label for="allInclusive" class="ml-2">All-Inclusive Package</label>
+        </div>
+        <div class="flex flex-col gap-2">
+          <div class="flex items-center">
+            <p-radio-button value="custom" formControlName="packageType" inputId="custom"/>
+            <label for="custom" class="ml-2">Custom Package</label>
+          </div>
+          <div class="ml-6 flex flex-wrap gap-4" *ngIf="form.controls.packageType.value === 'custom'">
+            <div class="flex items-center gap-2" *ngFor="let option of packageOptions">
+              <p-checkbox 
+                [inputId]="option.id"
+                [value]="option.id"
+                [formControlName]="'customPackageOptions'">
+              </p-checkbox>
+              <label [for]="option.id" class="ml-2"> {{ option.label }} </label>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="flex flex-wrap gap-4 col-span-2">
+        <span class="w-full font-semibold">Mode of Transportation</span>
         <div class="flex items-center">
           <p-radio-button value="Flight" formControlName="modeOfTransportation" inputId="flight"/>
           <label for="flight" class="ml-2">Flight</label>
@@ -167,3 +190,4 @@
     <p-button label="Preview" icon="pi pi-eye" (onClick)="generate()"/>
   </div>
 </div>
+<p-toast></p-toast>

@@ -149,22 +149,26 @@
           <label class="text-gray-700 font-semibold block mb-2">Package Type</label>
           <div class="grid grid-cols-1 gap-2">
             <div class="flex items-center gap-2">
-              <p-radio-button formControlName="packageType" inputId="allIn" value="allIn"/>
-              <label for="allIn">All-Inclusive Package</label>
+              <p-radio-button formControlName="packageType" inputId="allInclusive" value="all-inclusive"/>
+              <label for="allInclusive">All-Inclusive Package</label>
             </div>
-            <div class="flex items-center gap-2">
-              <p-radio-button formControlName="packageType" inputId="landArrangement"
-                              value="landArrangement"/>
-              <label for="landArrangement">Land Arrangement Only</label>
+            <div class="flex flex-col gap-2">
+              <div class="flex items-center gap-2">
+                <p-radio-button formControlName="packageType" inputId="custom" value="custom"/>
+                <label for="custom">Custom Package</label>
+              </div>
+              <div class="ml-6 flex flex-col gap-2" *ngIf="inquiryForm.controls.packageType.value === 'custom'">
+                <div class="flex items-center gap-2" *ngFor="let option of packageOptions">
+                  <p-checkbox 
+                    [inputId]="option.id"
+                    [value]="option.id"
+                    [formControlName]="'customPackageOptions'">
+                  </p-checkbox>
+                  <label [for]="option.id" class="ml-2"> {{ option.label }} </label>
+                </div>
+              </div>
             </div>
-            <div class="flex items-center gap-2">
-              <p-radio-button formControlName="packageType" inputId="tourOnly" value="tourOnly"/>
-              <label for="tourOnly">Tour Only</label>
-            </div>
-            <div class="flex items-center gap-2">
-              <p-radio-button formControlName="packageType" inputId="flightOnly" value="flightOnly"/>
-              <label for="flightOnly">Flight Only</label>
-            </div>
+
           </div>
         </div>
 

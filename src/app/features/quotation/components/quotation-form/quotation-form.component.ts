@@ -28,6 +28,7 @@ import { finalize, merge, takeUntil } from 'rxjs';
 import { QuotationService } from '@services/quotation.service';
 import { MessageService } from 'primeng/api';
 import { ToastModule } from 'primeng/toast';
+import { PACKAGE_OPTIONS } from '@core/utils/package.util';
 
 type FlightDetail = Partial<{
   flightNumber: string | null;
@@ -128,8 +129,11 @@ export class QuotationFormComponent implements OnInit {
     ]),
     inclusions: this.formBuilder.control<string | null>(null),
     exclusions: this.formBuilder.control<string | null>(null),
-    optionalTours: this.formBuilder.control<string | null>(null)
+    optionalTours: this.formBuilder.control<string | null>(null),
+    packageType: ['all-inclusive'],
+    customPackageOptions: [[] as string[]],
   });
+  packageOptions = PACKAGE_OPTIONS;
 
   constructor(
     private countryService: CountryService,
@@ -281,6 +285,9 @@ export class QuotationFormComponent implements OnInit {
             }, 500);
           }
 
+          console.log(quotationData);
+          
+
           this.form.patchValue({
             clientName: quotationData.clientName,
             destination: quotationData.destination,
@@ -290,7 +297,9 @@ export class QuotationFormComponent implements OnInit {
               new Date(range.end)
             ])[0],
             ratePerPax: quotationData.ratePerPax,
-            noOfPax: quotationData.noOfPax
+            noOfPax: quotationData.noOfPax,
+            packageType: quotationData.packageType,
+            customPackageOptions: quotationData.customPackageOptions
           });
         } catch (e) {
           console.error('Error parsing quotation data:', e);
@@ -337,10 +346,13 @@ export class QuotationFormComponent implements OnInit {
           arrivalPrice: quotation.arrivalPrice,
           ratePerPax: quotation.ratePerPax,
           suggestedRatePerPax: quotation.suggestedRatePerPax,
-          inclusions: quotation.inclusions?.map(i => i.title).join('\n'),
-          exclusions: quotation.exclusions?.map(i => i.title).join('\n'),
-          optionalTours: quotation.optionalTours?.map(i => i.title).join('\n')
+          inclusions: quotation.inclusions,
+          exclusions: quotation.exclusions,
+          optionalTours: quotation.optionalTours,
+          packageType: quotation.packageType,
+          customPackageOptions: quotation.customPackageOptions?.split(';') || []
         });
+        
 
         console.log(this.form.value);
       },
@@ -458,6 +470,15 @@ export class QuotationFormComponent implements OnInit {
   }
 
   generate() {
+    if (this.form.invalid) {
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Validation Error',
+        detail: 'Please fill in all required fields before previewing'
+      });
+      return;
+    }
+
     const value = this.form.value;
 
     const flightDetails: string[] = [];
@@ -476,14 +497,20 @@ export class QuotationFormComponent implements OnInit {
       if (arrivalDetails) flightDetails.push(arrivalDetails);
     }
 
+    this.messageService.add({
+      severity: 'info',
+      summary: 'Preview Generated',
+      detail: 'Generating preview of the quotation'
+    });
+
     this.onFormChange.emit({
       title: value.title,
       travelDates: value.travelDates,
       ratePerPax: value.suggestedRatePerPax,
       noOfPax: value.noOfPax,
-      inclusions: value.inclusions?.split('\n'),
-      exclusions: value.exclusions?.split('\n'),
-      optionalTours: value.optionalTours?.split('\n'),
+      inclusions: value.inclusions,
+      exclusions: value.exclusions,
+      optionalTours: value.optionalTours,
       airline: value.airline,
       flightDetails: flightDetails,
       images: this.images
@@ -501,6 +528,12 @@ export class QuotationFormComponent implements OnInit {
     }
 
     this.saving = true;
+    this.messageService.add({
+      severity: 'info',
+      summary: 'Saving',
+      detail: `${this.editMode ? 'Updating' : 'Creating'} quotation...`
+    });
+
     const formValue = this.form.value;
     const travelDates = formValue.travelDates ? {
       start: dayjs(formValue.travelDates[0]).toDate(),
@@ -527,10 +560,12 @@ export class QuotationFormComponent implements OnInit {
       ratePerPax: formValue.ratePerPax,
       totalRatePerPax: this.form.controls.totalRatePerPax.value,
       suggestedRatePerPax: formValue.suggestedRatePerPax,
-      inclusions: formValue.inclusions?.split('\n').map(i => ({ title: i })),
-      exclusions: formValue.exclusions?.split('\n').map(i => ({ title: i })),
-      optionalTours: formValue.optionalTours?.split('\n').map(i => ({ title: i })),
-      images: this.images
+      inclusions: formValue.inclusions,
+      exclusions: formValue.exclusions,
+      optionalTours: formValue.optionalTours,
+      images: this.images,
+      packageType: formValue.packageType,
+      customPackageOptions: formValue.customPackageOptions?.join(';')
     };
 
     const request = this.editMode
@@ -550,11 +585,11 @@ export class QuotationFormComponent implements OnInit {
           detail: `Quotation ${this.editMode ? 'updated' : 'created'} successfully`
         });
       },
-      error: () => {
+      error: (error) => {
         this.messageService.add({
           severity: 'error',
           summary: 'Error',
-          detail: `Failed to ${this.editMode ? 'update' : 'create'} quotation`
+          detail: `Failed to ${this.editMode ? 'update' : 'create'} quotation: ${error.message || 'Unknown error occurred'}`
         });
       }
     });

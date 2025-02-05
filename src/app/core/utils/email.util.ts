@@ -1,5 +1,6 @@
-import { ProviderQuotationRequest } from '@models/inquiry.model';
+import { DateRange, ProviderQuotationRequest } from '@models/inquiry.model';
 import dayjs from 'dayjs';
+import { PACKAGE_OPTIONS } from './package.util';
 
 export interface EmailData {
   emailContent: string;
@@ -12,6 +13,7 @@ export function prepareProviderEmail(providerQuotationRequests: ProviderQuotatio
   providerQuotationRequests.forEach((request) => {
     const duration = `${request.travelDays}D${request.travelNights}N`;
     const travelDates = `${formatDateRanges(request.dateRanges)}`;
+    const packageTypeDisplay = formatPackageType(request.packageType, request.customPackageOptions);
 
     const emailContent = `
       Dear Partner,<br><br>
@@ -23,7 +25,7 @@ Duration: ${request.travelDays}D${request.travelNights}N<br>
 Destination: ${request.destination}<br>
 Pax: ${request.paxAdult} Adult(s)${request.paxChild ? `, ${request.paxChild} Child(ren)` : ''}<br>
 ${request.paxChildAges ? `Child Ages: ${request.paxChildAges} <br>` : ''}
-Package: ${formatPackageType(request.packageType)}<br>
+Package Type: ${packageTypeDisplay}<br>
 ${request.preferredHotel ? `Preferred Hotel: ${request.preferredHotel} <br>` : ''}
 ${request.otherServices ? `${request.otherServices} <br>` : ''}
 ${request.emailRemarks ? `${request.emailRemarks} <br>` : ''}
@@ -43,8 +45,8 @@ ${request.sender}
   return emailData;
 }
 
-function formatDateRanges(dateRanges: { start: Date, end: Date}[]): string {
-  if (!dateRanges || !dateRanges.length) return ''; // Handle empty input
+function formatDateRanges(dateRanges: DateRange[]): string {
+  if (!dateRanges.length) return '';
 
   return dateRanges
     .map((range) => {
@@ -65,12 +67,17 @@ function formatDateRanges(dateRanges: { start: Date, end: Date}[]): string {
     .join(', ');
 }
 
-function formatPackageType(type: string): string {
-  const types = {
-    allIn: 'All-Inclusive Package',
-    landArrangement: 'Land Arrangement Only',
-    tourOnly: 'Tour Only',
-    flightOnly: 'Flight Only'
-  };
-  return types[type as keyof typeof types] || type;
+function formatPackageType(type: string, customPackageOptions?: string): string {
+  if (type === 'all-inclusive') {
+    return 'All-Inclusive Package';
+  }
+
+  if (type === 'custom' && customPackageOptions) {
+    const selectedOptions = PACKAGE_OPTIONS
+      .filter(option => customPackageOptions.split(';').includes(option.id))
+      .map(option => option.label);
+    return selectedOptions.join(' + ') || 'Custom Package';
+  }
+
+  return 'Custom Package';
 }
