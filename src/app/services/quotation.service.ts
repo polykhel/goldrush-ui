@@ -7,6 +7,7 @@ import { ListData, SingleData } from '@models/base.model';
 import { transformBody } from '@utils/form.util';
 import qs from 'qs';
 import { map } from 'rxjs/operators';
+import { PageParams } from '@models/params.model';
 
 @Injectable({
   providedIn: 'root'
@@ -17,18 +18,28 @@ export class QuotationService {
   constructor(private http: HttpClient) {
   }
 
-  getQuotations(): Observable<Quotation[]> {
+  getQuotations(params: PageParams) {
     const query = qs.stringify({
+      pagination: {
+        page: params.page + 1, // Convert to 1-based index
+        pageSize: params.pageSize,
+      },
+      sort: params.sortField
+        ? [`${params.sortField}:${params.sortOrder === 1 ? 'asc' : 'desc'}`]
+        : ['createdAt:desc'],
       populate: {
         travelDates: {
           fields: ['start', 'end']
         },
-      },
-      sort: ['createdAt:desc'],
+      }
     })
     return this.http.get<ListData<Quotation>>(`${this.baseUrl}?${query}`).pipe(
-      map(response => response.data)
-    );
+      map(response => ({
+          items: response.data,
+            total: response.meta.pagination.total,
+        }
+      )
+    ));
   }
 
   getQuotation(id: string): Observable<Quotation> {

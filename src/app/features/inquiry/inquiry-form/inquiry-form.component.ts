@@ -34,7 +34,6 @@ import { InputNumber } from 'primeng/inputnumber';
 import { InputText } from 'primeng/inputtext';
 import { RadioButton } from 'primeng/radiobutton';
 import { Select } from 'primeng/select';
-import { Tag } from 'primeng/tag';
 import { Textarea } from 'primeng/textarea';
 import { Toast } from 'primeng/toast';
 import { finalize, firstValueFrom, takeUntil } from 'rxjs';
@@ -62,7 +61,6 @@ import { ProviderQuotationComponent } from './provider-quotation/provider-quotat
     DatePipe,
     Toast,
     EmailPreviewModalComponent,
-    Tag,
     ProviderQuotationComponent,
     Checkbox,
   ],

@@ -7,15 +7,11 @@ import qs from 'qs';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { transformBody } from '@utils/form.util';
+import { PageParams } from '@models/params.model';
 
-interface InquiryParams {
-  page: number;
-  pageSize: number;
-  sortField?: string;
-  sortOrder?: number;
-  search?: string;
+type InquiryParams = PageParams & {
   status?: string;
-}
+};
 
 @Injectable({
   providedIn: 'root',
@@ -115,7 +111,7 @@ export class InquiryService {
 
   getInquiryStatuses() {
     const query = qs.stringify({
-      sort: ['order']
+      sort: ['order'],
     });
     return this.http
       .get<ListData<InquiryStatus>>(`${this.inquiryStatusUrl}?${query}`)
