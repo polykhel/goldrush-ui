@@ -71,11 +71,9 @@ export class ProviderQuotationComponent implements OnInit {
     });
   }
 
-  ngOnInit() {
-    if (this.existingProviderQuotation) {
-      this.group.patchValue(this.existingProviderQuotation);
-    }
-    this.onAddGroup.emit(this.group);
+  get showEmailSection(): boolean {
+    const status = this.group.get('providerStatus')?.value;
+    return status === 'pending';
   }
 
   onPriceInput() {
@@ -149,5 +147,28 @@ export class ProviderQuotationComponent implements OnInit {
 
   generateQuotation() {
     this.onGenerateQuotation.emit(this.group.getRawValue());
+  }
+
+  get showPricingSection(): boolean {
+    const status = this.group.get('providerStatus')?.value;
+    return status === 'received';
+  }
+
+  ngOnInit() {
+    if (this.existingProviderQuotation) {
+      this.group.patchValue(this.existingProviderQuotation);
+    }
+    this.group.controls['provider'].setValue(this.provider.documentId);
+    this.onAddGroup.emit(this.group);
+  }
+
+  onStatusChange() {
+    const status = this.group.get('providerStatus')?.value;
+    if (status === 'sent') {
+      this.group.patchValue({
+        includeInEmail: false,
+        emailRemarks: '',
+      });
+    }
   }
 }

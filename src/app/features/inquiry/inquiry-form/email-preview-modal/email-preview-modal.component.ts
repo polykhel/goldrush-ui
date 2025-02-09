@@ -1,20 +1,26 @@
 import { CommonModule } from '@angular/common';
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import {
+  Component,
+  EventEmitter,
+  Input,
+  OnChanges,
+  Output,
+  SimpleChanges,
+} from '@angular/core';
 import { EmailData } from '@utils/email.util';
 import { Provider } from '@models/provider.model';
 import { PrimeTemplate } from 'primeng/api';
 import { Button } from 'primeng/button';
 import { Dialog } from 'primeng/dialog';
-import { Tabs } from 'primeng/tabs';
-import { TabPanel } from 'primeng/tabview';
+import { TabsModule } from 'primeng/tabs';
 
 @Component({
   selector: 'app-email-preview-modal',
   standalone: true,
-  imports: [CommonModule, Dialog, TabPanel, Button, PrimeTemplate, Tabs],
+  imports: [CommonModule, Dialog, TabsModule, Button, PrimeTemplate],
   templateUrl: './email-preview-modal.component.html',
 })
-export class EmailPreviewModalComponent {
+export class EmailPreviewModalComponent implements OnChanges {
   @Input() visible = false;
   @Input() emailData!: Map<string, EmailData>;
   @Input() providers!: Map<string, Provider>;
@@ -24,6 +30,17 @@ export class EmailPreviewModalComponent {
   @Output() visibleChange = new EventEmitter<boolean>();
   @Output() send = new EventEmitter<void>();
   @Output() cancel = new EventEmitter<void>();
+
+  selectedTab: string = '';
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['emailData']?.currentValue) {
+      const firstKey = this.emailData?.keys().next().value;
+      if (firstKey) {
+        this.selectedTab = firstKey;
+      }
+    }
+  }
 
   getProviderName(key: string): string {
     return this.providers.get(key)?.name ?? 'Unknown Provider';
@@ -48,5 +65,9 @@ export class EmailPreviewModalComponent {
     this.cancel.emit();
     this.visible = false;
     this.visibleChange.emit(false);
+  }
+
+  trackByKey(_: number, item: { key: string; value: any }): string {
+    return item.key;
   }
 }

@@ -2,7 +2,7 @@
   <form [formGroup]="inquiryForm" class="p-6 shadow-md rounded max-w-4xl border mx-auto">
     <div class="flex justify-between align-items-center mb-3">
       <p-button (click)="goBack()" [text]="true" icon="pi pi-arrow-left" label="Back"></p-button>
-      <h2 class="text-2xl font-bold">{{ isEditMode ? 'Edit' : 'New' }} Inquiry</h2>
+      <h2 class="text-2xl font-bold">{{ editMode ? 'Edit' : 'New' }} Inquiry</h2>
     </div>
     <!-- Basic Information Section -->
     <section class="mb-6">
@@ -58,7 +58,8 @@
             <p-radio-button formControlName="contactPoint" inputId="contactPointPM" value="pm"/>
             <label class="ml-2" for="contactPointPM">Private Message</label>
           </div>
-          <input class="w-48" formControlName="contactPointOther" pInputText placeholder="Others" type="text">
+          <input class="w-48" formControlName="contactPointOther" pInputText placeholder="Others"
+                 type="text">
         </div>
       </div>
     </section>
@@ -68,7 +69,8 @@
       <h3 class="text-lg font-bold mb-4 text-gray-700 border-b pb-2">Travel Details</h3>
       <p-fluid class="grid grid-cols-2 gap-4 mb-4">
         <p-float-label variant="on">
-          <p-select [options]="countries" formControlName="country" inputId="country" optionLabel="name">
+          <p-select [options]="countries" formControlName="country" inputId="country"
+                    optionLabel="name">
             <ng-template pTemplate="dropdownicon">
               <i class="pi pi-map"></i>
             </ng-template>
@@ -77,7 +79,8 @@
         </p-float-label>
 
         <p-float-label variant="on">
-          <input class="w-full" formControlName="destination" id="destination" pInputText type="text">
+          <input class="w-full" formControlName="destination" id="destination" pInputText
+                 type="text">
           <label for="destination">Destination</label>
         </p-float-label>
 
@@ -117,7 +120,8 @@
         <div>
           <label class="text-gray-700 font-semibold block mb-2">Preferred Hotel(s)</label>
           <div class="flex items-center">
-            <input fluid formControlName="preferredHotel" id="preferredHotel" pInputText type="text">
+            <input fluid formControlName="preferredHotel" id="preferredHotel" pInputText
+                   type="text">
           </div>
         </div>
       </div>
@@ -149,7 +153,8 @@
           <label class="text-gray-700 font-semibold block mb-2">Package Type</label>
           <div class="grid grid-cols-1 gap-2">
             <div class="flex items-center gap-2">
-              <p-radio-button formControlName="packageType" inputId="allInclusive" value="all-inclusive"/>
+              <p-radio-button formControlName="packageType" inputId="allInclusive"
+                              value="all-inclusive"/>
               <label for="allInclusive">All-Inclusive Package</label>
             </div>
             <div class="flex flex-col gap-2">
@@ -157,12 +162,13 @@
                 <p-radio-button formControlName="packageType" inputId="custom" value="custom"/>
                 <label for="custom">Custom Package</label>
               </div>
-              <div class="ml-6 flex flex-col gap-2" *ngIf="inquiryForm.controls.packageType.value === 'custom'">
-                <div class="flex items-center gap-2" *ngFor="let option of packageOptions">
-                  <p-checkbox 
+              <div *ngIf="inquiryForm.controls.packageType.value === 'custom'"
+                   class="ml-6 flex flex-col gap-2">
+                <div *ngFor="let option of packageOptions" class="flex items-center gap-2">
+                  <p-checkbox
+                    [formControlName]="'customPackageOptions'"
                     [inputId]="option.id"
-                    [value]="option.id"
-                    [formControlName]="'customPackageOptions'">
+                    [value]="option.id">
                   </p-checkbox>
                   <label [for]="option.id" class="ml-2"> {{ option.label }} </label>
                 </div>
@@ -188,9 +194,12 @@
         <div formArrayName="providerQuotations">
           <label class="text-gray-700 font-semibold block mb-2">Provider Quotations</label>
 
-          <app-provider-quotation *ngFor="let provider of providers" [existingProviderQuotation]="getProviderQuotation(provider.documentId!)" [isEditMode]="isEditMode"
-                                  [provider]="provider" (onGenerateQuotation)="generateQuotation($event)"
-                                  (onAddGroup)="addGroupToFormArray($event)">
+          <app-provider-quotation (onAddGroup)="addGroupToFormArray($event)"
+                                  (onGenerateQuotation)="generateQuotation($event)"
+                                  *ngFor="let provider of providers"
+                                  [existingProviderQuotation]="getProviderQuotation(provider.documentId!)"
+                                  [isEditMode]="editMode"
+                                  [provider]="provider">
           </app-provider-quotation>
         </div>
       </div>
@@ -203,17 +212,19 @@
     </section>
 
     <div class="flex justify-center gap-2">
-      <p-button (onClick)="saveInquiry()" [rounded]="true" icon="pi pi-save" label="Save" severity="info"
+      <p-button (onClick)="saveInquiry()" [loading]="saving" [rounded]="true" icon="pi pi-save"
+                label="Save" severity="info"
                 type="button"/>
-      <p-button (onClick)="sendQuotations()" [rounded]="true" icon="pi pi-send" label="Send" severity="success"
+      <p-button (onClick)="sendQuotations()" [rounded]="true" icon="pi pi-send" label="Send"
+                severity="success"
                 type="button"/>
     </div>
 
     <!-- Audit Information -->
     <div class="mt-8 text-xs text-gray-500 border-t pt-4">
       <div class="grid grid-cols-2 gap-2">
-        <div>Created by {{ creator.value }} on {{ createdAt.value | date:'medium' }}</div>
-        <div>Last updated by {{ modifier.value }} on {{ updatedAt.value | date:'medium' }}</div>
+        <div>Created by {{ creator.value }} on {{ createdAt | date:'medium' }}</div>
+        <div>Last updated by {{ modifier.value }} on {{ updatedAt | date:'medium' }}</div>
       </div>
     </div>
 

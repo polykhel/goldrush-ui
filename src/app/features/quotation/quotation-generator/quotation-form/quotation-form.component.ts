@@ -135,6 +135,7 @@ export class QuotationFormComponent implements OnInit {
     optionalTours: this.formBuilder.control<string | null>(null),
     packageType: ['all-inclusive'],
     customPackageOptions: [[] as string[]],
+    inquiry: this.formBuilder.control<string | null>(null),
   });
 
   constructor(
@@ -285,6 +286,12 @@ export class QuotationFormComponent implements OnInit {
               }, 500);
             }
 
+            if (quotationData.inquiryId) {
+              this.form.patchValue({
+                inquiry: quotationData.inqui,
+              });
+            }
+
             this.form.patchValue({
               clientName: quotationData.clientName,
               destination: quotationData.destination,
@@ -358,6 +365,8 @@ export class QuotationFormComponent implements OnInit {
           customPackageOptions:
             quotation.customPackageOptions?.split(';') || [],
         });
+
+        this.generate();
       },
       error: () => {
         this.messageService.add({
@@ -571,6 +580,7 @@ export class QuotationFormComponent implements OnInit {
       images: this.images,
       packageType: formValue.packageType,
       customPackageOptions: formValue.customPackageOptions?.join(';'),
+      inquiry: formValue.inquiry,
     };
 
     const request = this.editMode

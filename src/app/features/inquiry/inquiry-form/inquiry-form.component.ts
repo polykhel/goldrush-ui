@@ -6,7 +6,7 @@ import {
   FormControl,
   FormGroup,
   ReactiveFormsModule,
-  Validators,
+  Validators
 } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { EmailData, prepareProviderEmail } from '@utils/email.util';
@@ -16,7 +16,7 @@ import {
   Inquiry,
   InquiryStatus,
   ProviderQuotation,
-  ProviderQuotationRequest,
+  ProviderQuotationRequest
 } from '@models/inquiry.model';
 import { Provider } from '@models/provider.model';
 import { User } from '@models/user.model';
@@ -39,7 +39,7 @@ import { Select } from 'primeng/select';
 import { Tag } from 'primeng/tag';
 import { Textarea } from 'primeng/textarea';
 import { Toast } from 'primeng/toast';
-import { firstValueFrom, takeUntil } from 'rxjs';
+import { finalize, firstValueFrom, takeUntil } from 'rxjs';
 import { Checkbox } from 'primeng/checkbox';
 import { PACKAGE_OPTIONS } from '@utils/package.util';
 import { EmailPreviewModalComponent } from './email-preview-modal/email-preview-modal.component';
@@ -73,14 +73,13 @@ import { ProviderQuotationComponent } from './provider-quotation/provider-quotat
 })
 export class InquiryFormComponent implements OnInit {
   formBuilder = inject(FormBuilder);
-  isEditMode = false;
+  editMode = false;
   showEmailPreview = false;
   emailData = new Map<string, EmailData>();
   isSending = false;
   packageOptions = PACKAGE_OPTIONS;
 
   inquiryForm = this.formBuilder.group({
-    id: [null],
     clientName: ['', [Validators.required]],
     date: [new Date(), [Validators.required]],
     contactPoint: this.formBuilder.control<string | null>(null),
@@ -104,15 +103,7 @@ export class InquiryFormComponent implements OnInit {
       value: null,
       disabled: true,
     }),
-    createdAt: this.formBuilder.control<Date | null>({
-      value: null,
-      disabled: true,
-    }),
     modifier: this.formBuilder.control<string | null>({
-      value: null,
-      disabled: true,
-    }),
-    updatedAt: this.formBuilder.control<Date | null>({
       value: null,
       disabled: true,
     }),
@@ -126,6 +117,10 @@ export class InquiryFormComponent implements OnInit {
     { label: 'Quoted', value: 'QUOTED', class: 'text-green-600' },
   ];
   currentInquiry: Inquiry | null = null;
+  inquiryId?: string | null = null;
+  createdAt?: Date | null = null;
+  updatedAt?: Date | null = null;
+  saving = false;
   protected readonly getInquiryStatusConfig = getInquiryStatusConfig;
   private currentUser: User | null = null;
   private currentProvidersMap = new Map<string, ProviderQuotation>();
@@ -153,10 +148,6 @@ export class InquiryFormComponent implements OnInit {
     return this.inquiryForm.get('providerQuotations') as FormArray;
   }
 
-  get createdAt(): FormControl {
-    return this.inquiryForm.get('createdAt') as FormControl;
-  }
-
   get creator(): FormControl {
     return this.inquiryForm.get('creator') as FormControl;
   }
@@ -165,29 +156,42 @@ export class InquiryFormComponent implements OnInit {
     return this.inquiryForm.get('modifier') as FormControl;
   }
 
-  get updatedAt(): FormControl {
-    return this.inquiryForm.get('updatedAt') as FormControl;
+  async ngOnInit() {
+    this.authService.currentUser$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((user) => {
+        this.currentUser = user;
+      });
+
+    // Load initial data that we only need once
+    await this.loadInitialData();
+    await this.initForm();
   }
 
   async initForm() {
     const params = await firstValueFrom(this.route.params);
 
-    this.countryService.getCountries().subscribe((response) => {
-      this.countries = response.data;
-    });
-
-    let countriesListData = await firstValueFrom(
-      this.countryService.getCountries(),
-    );
-    if (countriesListData) {
-      this.countries = countriesListData.data;
-    }
-
-    if (params['id']) {
-      this.isEditMode = true;
+    if (params['id'] || this.inquiryId) {
+      this.editMode = true;
+      this.inquiryId = params['id'] || this.inquiryId;
       this.currentInquiry = await firstValueFrom(
-        this.inquiryService.getInquiry(params['id']),
+        this.inquiryService.getInquiry(this.inquiryId!),
       );
+
+      if (this.currentInquiry?.providerQuotations) {
+        this.currentProvidersMap =
+          this.currentInquiry.providerQuotations.reduce(
+            (acc, providerQuotation) => {
+              acc.set(
+                providerQuotation.provider.documentId!,
+                providerQuotation,
+              );
+              return acc;
+            },
+            new Map<string, ProviderQuotation>(),
+          );
+      }
+
       this.inquiryForm.patchValue({
         ...this.currentInquiry,
         id: this.currentInquiry.documentId,
@@ -200,53 +204,76 @@ export class InquiryFormComponent implements OnInit {
         customPackageOptions:
           this.currentInquiry.customPackageOptions?.split(';') || [],
       } as any);
+      this.createdAt = this.currentInquiry.createdAt;
+      this.updatedAt = this.currentInquiry.updatedAt;
     } else {
       this.inquiryForm.patchValue({
         creator: this.currentUser?.username ?? null,
         modifier: this.currentUser?.username ?? null,
       });
     }
-
-    const providerListData = await firstValueFrom(
-      this.providerService.getProviders(),
-    );
-    if (providerListData) {
-      this.providers = providerListData.data;
-
-      this.providerMap = providerListData.data.reduce((acc, provider) => {
-        acc.set(provider.documentId!, provider);
-        return acc;
-      }, new Map<string, Provider>());
-
-      if (this.currentInquiry?.providerQuotations) {
-        this.currentProvidersMap =
-          this.currentInquiry?.providerQuotations.reduce(
-            (acc, providerQuotation) => {
-              acc.set(
-                providerQuotation.provider.documentId!,
-                providerQuotation,
-              );
-              return acc;
-            },
-            new Map<string, ProviderQuotation>(),
-          );
-      }
-    }
   }
 
-  ngOnInit(): void {
-    this.authService.currentUser$
-      .pipe(takeUntil(this.destroy$))
-      .subscribe((user) => {
-        this.currentUser = user;
+  saveInquiry() {
+    if (this.inquiryForm.valid) {
+      const formValue = this.inquiryForm.getRawValue();
+      const toSave = {
+        ...formValue,
+        customPackageOptions: formValue.customPackageOptions?.join(';'),
+      };
+
+      this.saving = true;
+      this.messageService.add({
+        severity: 'info',
+        summary: 'Saving',
+        detail: `${this.editMode ? 'Updating' : 'Creating'} inquiry...`,
       });
-    this.initForm();
+
+      const request = this.editMode
+        ? this.inquiryService.updateInquiry(this.inquiryId!, toSave)
+        : this.inquiryService.createInquiry(toSave);
+
+      request
+        .pipe(
+          finalize(() => (this.saving = false)),
+          takeUntil(this.destroy$),
+        )
+        .subscribe({
+          next: (response) => {
+            this.messageService.add({
+              severity: 'success',
+              summary: 'Success',
+              detail: 'Inquiry saved successfully',
+            });
+
+            if (!this.editMode) {
+              this.inquiryId = response.data.documentId;
+              this.editMode = true;
+              this.initForm();
+            }
+          },
+          error: (error) => {
+            this.messageService.add({
+              severity: 'error',
+              summary: 'Error',
+              detail: 'Failed to save inquiry',
+            });
+            console.error('Error saving inquiry:', error);
+          },
+        });
+    } else {
+      this.messageService.add({
+        severity: 'warn',
+        summary: 'Validation Error',
+        detail: 'Please fill in all required fields',
+      });
+    }
   }
 
   newDateRange(): FormGroup {
     return this.formBuilder.group({
       start: [null],
-      end: [null],
+      end: [null]
     });
   }
 
@@ -258,45 +285,9 @@ export class InquiryFormComponent implements OnInit {
     this.dateRanges.removeAt(index);
   }
 
-  saveInquiry() {
-    if (this.inquiryForm.valid) {
-      const formValue = this.inquiryForm.getRawValue();
-      const toSave = {
-        ...formValue,
-        customPackageOptions: formValue.customPackageOptions?.join(';'),
-      };
-
-      this.inquiryService.saveInquiry(toSave).subscribe({
-        next: () => {
-          this.messageService.add({
-            severity: 'success',
-            summary: 'Success',
-            detail: 'Inquiry saved successfully',
-          });
-
-          if (!this.isEditMode) {
-            this.router.navigate(['/inquiries']);
-          }
-        },
-        error: (error) => {
-          this.messageService.add({
-            severity: 'error',
-            summary: 'Error',
-            detail: 'Failed to save inquiry',
-          });
-          console.error('Error saving inquiry:', error);
-        },
-      });
-    } else {
-      this.messageService.add({
-        severity: 'warn',
-        summary: 'Validation Error',
-        detail: 'Please fill in all required fields',
-      });
-    }
-  }
-
   sendQuotations() {
+    this.saveInquiry();
+
     if (this.inquiryForm.valid) {
       this.emailData = prepareProviderEmail(
         this.mapFormToEmailContent(this.inquiryForm.getRawValue()),
@@ -320,6 +311,28 @@ export class InquiryFormComponent implements OnInit {
         detail: 'Please fill in all required fields',
       });
     }
+  }
+
+  mapFormToEmailContent(inquiry: any): ProviderQuotationRequest[] {
+    return inquiry.providerQuotations
+      .filter((quotation: any) => quotation.includeInEmail && !quotation.sent)
+      .map((quotation: any) => ({
+        providerId: quotation.provider.documentId,
+        dateRanges: inquiry.dateRanges,
+        travelDays: inquiry.travelDays,
+        travelNights: inquiry.travelNights,
+        destination: inquiry.destination,
+        paxAdult: inquiry.paxAdult,
+        paxChild: inquiry.paxChild,
+        paxChildAges: inquiry.paxChildAges,
+        packageType: inquiry.packageType,
+        customPackageOptions: inquiry.customPackageOptions.join(';'),
+        preferredHotel: inquiry.preferredHotel,
+        otherServices: inquiry.otherServices,
+        emailRemarks: quotation.emailRemarks,
+        sender: `${this.currentUser?.firstName} ${this.currentUser?.lastName?.charAt(0)}.`,
+        sent: quotation.sent
+      }));
   }
 
   async handleSendEmails() {
@@ -377,39 +390,15 @@ export class InquiryFormComponent implements OnInit {
     }
   }
 
-  mapFormToEmailContent(inquiry: any): ProviderQuotationRequest[] {
-    return inquiry.providerQuotations
-      .filter((quotation: any) => quotation.includeInEmail && !quotation.sent)
-      .map((quotation: any) => ({
-        providerId: quotation.provider,
-        dateRanges: inquiry.dateRanges,
-        travelDays: inquiry.travelDays,
-        travelNights: inquiry.travelNights,
-        destination: inquiry.destination,
-        paxAdult: inquiry.paxAdult,
-        paxChild: inquiry.paxChild,
-        paxChildAges: inquiry.paxChildAges,
-        packageType: inquiry.packageType,
-        customPackageOptions: inquiry.customPackageOptions.join(';'),
-        preferredHotel: inquiry.preferredHotel,
-        otherServices: inquiry.otherServices,
-        emailRemarks: quotation.emailRemarks,
-        sender: `${this.currentUser?.firstName} ${this.currentUser?.lastName?.charAt(0)}.`,
-        sent: quotation.sent,
-      }));
-  }
-
-  goBack() {
-    this.location.back();
-  }
-
-  getProviderQuotation(providerId: string) {
-    return (
-      this.currentProvidersMap.get(providerId) ?? ({} as ProviderQuotation)
-    );
-  }
-
   generateQuotation(providerQuotation: ProviderQuotation) {
+    if (!this.inquiryId) {
+      this.messageService.add({
+        severity: 'warning',
+        summary: 'Inquiry not saved yet',
+        detail: 'Please save inquiry first before generating'
+      });
+    }
+
     const inquiryData = this.inquiryForm.getRawValue();
 
     // Prepare the quotation data
@@ -427,6 +416,7 @@ export class InquiryFormComponent implements OnInit {
       provider: providerQuotation.provider,
       packageType: inquiryData?.packageType,
       customPackageOptions: inquiryData?.customPackageOptions,
+      inquiryId: this.inquiryId
     };
 
     this.router.navigate(['/quotations/new'], {
@@ -434,6 +424,38 @@ export class InquiryFormComponent implements OnInit {
         data: btoa(JSON.stringify(quotationData)),
       },
     });
+  }
+
+  goBack() {
+    this.location.back();
+  }
+
+  getProviderQuotation(providerId: string) {
+    return (
+      this.currentProvidersMap.get(providerId) ?? ({} as ProviderQuotation)
+    );
+  }
+
+  private async loadInitialData() {
+    // Load countries
+    let countriesListData = await firstValueFrom(
+      this.countryService.getCountries()
+    );
+    if (countriesListData) {
+      this.countries = countriesListData.data;
+    }
+
+    // Load providers
+    const providerListData = await firstValueFrom(
+      this.providerService.getProviders()
+    );
+    if (providerListData) {
+      this.providers = providerListData.data;
+      this.providerMap = providerListData.data.reduce((acc, provider) => {
+        acc.set(provider.documentId!, provider);
+        return acc;
+      }, new Map<string, Provider>());
+    }
   }
 
   addGroupToFormArray(group: FormGroup) {

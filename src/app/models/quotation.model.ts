@@ -3,6 +3,7 @@ import { Country } from './country.model';
 import { Package } from './package.model';
 import { Provider } from './provider.model';
 import { BaseModel } from './base.model';
+import { Inquiry } from './inquiry.model';
 
 export interface Quotation extends BaseModel {
   clientName?: string | null;
@@ -11,7 +12,7 @@ export interface Quotation extends BaseModel {
   provider?: Provider | null;
   package?: Package | null;
   title?: string | null;
-  travelDates?: { start: Date, end: Date } | null;
+  travelDates?: { start: Date; end: Date } | null;
   noOfPax?: number | null;
   modeOfTransportation?: string | null;
   flightIncluded?: boolean | null;
@@ -31,8 +32,8 @@ export interface Quotation extends BaseModel {
   images?: Asset[] | null;
   packageType?: string | null;
   customPackageOptions?: string | null;
+  inquiry?: Inquiry | string | null;
 }
-
 
 export interface Flight extends BaseModel {
   flightNumber?: string | null;
@@ -41,4 +42,3 @@ export interface Flight extends BaseModel {
   startTime?: Date | null;
   endTime?: Date | null;
 }
-

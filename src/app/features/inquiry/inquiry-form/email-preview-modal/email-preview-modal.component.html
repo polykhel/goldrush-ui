@@ -5,16 +5,24 @@
   (onHide)="onCancel()"
   header="Email Preview"
 >
-  <p-tabs>
-    <p-tabPanel *ngFor="let email of emailData | keyvalue" [header]="getProviderName(email.key)">
-      <div class="flex justify-content-between mb-3">
+  <p-tabs [value]="selectedTab">
+    <p-tablist>
+      <p-tab *ngFor="let email of emailData | keyvalue; trackBy: trackByKey" [value]="email.key">
+        {{ getProviderName(email.key) }}
+      </p-tab>
+    </p-tablist>
+    <p-tabpanels>
+      <p-tabpanel *ngFor="let email of emailData | keyvalue; trackBy: trackByKey"
+                  [value]="email.key">
+        <div class="flex justify-content-between mb-3">
             <span [class]="getStatusClass(email.key)">
               {{ isProviderSent(email.key) ? 'Already Sent' : 'Not Sent' }}
             </span>
-      </div>
-      <pre class="whitespace-pre-wrap">{{ email.value.subject }}</pre>
-      <div [innerHTML]="email.value.emailContent"></div>
-    </p-tabPanel>
+        </div>
+        <pre class="whitespace-pre-wrap">{{ email.value.subject }}</pre>
+        <div [innerHTML]="email.value.emailContent"></div>
+      </p-tabpanel>
+    </p-tabpanels>
   </p-tabs>
 
   <ng-template pTemplate="footer">

@@ -148,7 +148,7 @@ export class InquiryListComponent implements OnInit, OnDestroy {
 
   canGenerateQuotation(inquiry: Inquiry): boolean {
     return (
-      inquiry.status === InquiryStatus.READY &&
+      inquiry.inquiryStatus === InquiryStatus.READY &&
       inquiry.providerQuotations?.some((pq) => pq.price)
     );
   }

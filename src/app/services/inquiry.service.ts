@@ -78,12 +78,24 @@ export class InquiryService {
         'providerQuotations',
         'providerQuotations.provider',
         'dateRanges',
-        'country'
+        'country',
       ],
     });
     return this.http
       .get<SingleData<Inquiry>>(`${this.baseUrl}/${id}?${query}`)
       .pipe(map((data) => data.data));
+  }
+
+  createInquiry(inquiry: any): Observable<SingleData<Inquiry>> {
+    return this.http.post<SingleData<Inquiry>>(this.baseUrl, {
+      data: transformBody(inquiry),
+    });
+  }
+
+  updateInquiry(id: string, inquiry: any): Observable<SingleData<Inquiry>> {
+    return this.http.put<SingleData<Inquiry>>(`${this.baseUrl}/${id}`, {
+      data: transformBody(inquiry),
+    });
   }
 
   saveInquiry(inquiry: any): Observable<Inquiry> {
