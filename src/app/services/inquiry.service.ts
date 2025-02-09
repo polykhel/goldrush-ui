@@ -2,7 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { environment } from '@env/environment';
 import { ListData, SingleData } from '@models/base.model';
-import { Inquiry } from '@models/inquiry.model';
+import { Inquiry, InquiryStatus } from '@models/inquiry.model';
 import qs from 'qs';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
@@ -23,6 +23,7 @@ interface InquiryParams {
 export class InquiryService {
   private http = inject(HttpClient);
   private baseUrl = `${environment.backendUrl}/api/inquiries`;
+  private inquiryStatusUrl = `${environment.backendUrl}/api/inquiry-statuses`;
 
   getInquiries(params: InquiryParams) {
     const query = qs.stringify(
@@ -86,46 +87,38 @@ export class InquiryService {
       .pipe(map((data) => data.data));
   }
 
-  createInquiry(inquiry: any): Observable<SingleData<Inquiry>> {
-    return this.http.post<SingleData<Inquiry>>(this.baseUrl, {
-      data: transformBody(inquiry),
-    });
-  }
-
-  updateInquiry(id: string, inquiry: any): Observable<SingleData<Inquiry>> {
-    return this.http.put<SingleData<Inquiry>>(`${this.baseUrl}/${id}`, {
-      data: transformBody(inquiry),
-    });
-  }
-
-  saveInquiry(inquiry: any): Observable<Inquiry> {
-    this.deleteCreatorFields(inquiry as Inquiry);
-
-    let observable;
-    if (inquiry.id) {
-      const { id, ...rest } = inquiry;
-      observable = this.http.put<SingleData<Inquiry>>(
-        `${this.baseUrl}/${inquiry.id}`,
-        {
-          data: transformBody(rest),
-        },
-      );
-    } else {
-      observable = this.http.post<SingleData<Inquiry>>(this.baseUrl, {
+  createInquiry(inquiry: any): Observable<Inquiry> {
+    return this.http
+      .post<SingleData<Inquiry>>(this.baseUrl, {
         data: transformBody(inquiry),
-      });
-    }
-
-    return observable.pipe(map((data) => data.data));
+      })
+      .pipe(map((data) => data.data));
   }
 
-  deleteInquiry(id: string): Observable<SingleData<Inquiry>> {
-    return this.http.delete<SingleData<Inquiry>>(`${this.baseUrl}/${id}`);
+  updateInquiry(id: string, inquiry: any): Observable<Inquiry> {
+    return this.http
+      .put<SingleData<Inquiry>>(`${this.baseUrl}/${id}`, {
+        data: transformBody(inquiry),
+      })
+      .pipe(map((data) => data.data));
   }
 
-  private deleteCreatorFields(inquiry: Inquiry) {
-    delete inquiry['createdAt'];
-    delete inquiry['updatedAt'];
-    return inquiry;
+  deleteInquiry(id: string): Observable<Inquiry> {
+    return this.http
+      .delete<SingleData<Inquiry>>(`${this.baseUrl}/${id}`)
+      .pipe(map((data) => data.data));
+  }
+
+  updateInquiryStatus(id: string, inquiryStatus: string) {
+    return this.http.put(`${this.baseUrl}/${id}`, { data: { inquiryStatus } });
+  }
+
+  getInquiryStatuses() {
+    const query = qs.stringify({
+      sort: ['order']
+    });
+    return this.http
+      .get<ListData<InquiryStatus>>(`${this.inquiryStatusUrl}?${query}`)
+      .pipe(map((response) => response.data));
   }
 }

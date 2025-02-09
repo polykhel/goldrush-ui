@@ -27,7 +27,9 @@
       [multiple]="false"
       optionLabel="label"
       optionValue="value">
-
+      <ng-template pTemplate="item" let-status>
+        <span [class]="status.color">{{status.label}}</span>
+      </ng-template>
     </p-selectButton>
   </div>
 
@@ -82,10 +84,22 @@
           </div>
         </td>
         <td>
-          <p-tag [severity]="getInquiryStatusConfig(inquiry.inquiryStatus).severity"
-                 [icon]="getInquiryStatusConfig(inquiry.inquiryStatus).icon"
-                 [value]="inquiry.inquiryStatus">
-          </p-tag>
+          <!-- Status Dropdown -->
+          <p-select
+            [options]="statusOptions"
+            optionLabel="label"
+            optionValue="value"
+            [(ngModel)]="inquiry.inquiryStatus"
+            (onChange)="updateStatus(inquiry)">
+            <ng-template let-status pTemplate="selectedItem">
+              <span [class]="status.color">{{status.label}}</span>
+            </ng-template>
+            <ng-template let-status pTemplate="item">
+              <p-fluid [class]="status.color">
+                <span [class]="status.color">{{status.label}}</span>
+              </p-fluid>
+            </ng-template>
+          </p-select>
         </td>
         <td>{{ inquiry.createdAt | date }}</td>
         <td>
@@ -95,15 +109,15 @@
               severity="secondary"
               (onClick)="editInquiry(inquiry)"
               [rounded]="true"
-              [text]="true"
-            ></p-button>
+              [text]="true">
+            </p-button>
             <p-button
               icon="pi pi-trash"
               severity="danger"
               (onClick)="confirmDelete(inquiry)"
               [rounded]="true"
-              [text]="true"
-            ></p-button>
+              [text]="true">
+            </p-button>
             <p-button
               *ngIf="canGenerateQuotation(inquiry)"
               icon="pi pi-file"

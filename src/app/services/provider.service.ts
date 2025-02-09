@@ -5,6 +5,7 @@ import { Provider } from '@models/provider.model';
 import { ListData } from '@models/base.model';
 import qs from 'qs';
 import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root',
@@ -14,7 +15,7 @@ export class ProviderService {
 
   constructor(private http: HttpClient) {}
 
-  getProvidersByCountry(countryId: string): Observable<ListData<Provider>> {
+  getProvidersByCountry(countryId: string): Observable<Provider[]> {
     const query = qs.stringify({
       filters: {
         countries: {
@@ -24,13 +25,17 @@ export class ProviderService {
         }
       },
     });
-    return this.http.get<ListData<Provider>>(`${this.baseUrl}?${query}`);
+    return this.http.get<ListData<Provider>>(`${this.baseUrl}?${query}`).pipe(
+      map(response => response.data)
+    );
   }
 
-  getProviders(populate: string[] = []): Observable<ListData<Provider>> {
+  getProviders(populate: string[] = []): Observable<Provider[]> {
     const query = qs.stringify({
       populate: ['logo'].concat(populate),
     });
-    return this.http.get<ListData<Provider>>(`${this.baseUrl}?${query}`);
+    return this.http.get<ListData<Provider>>(`${this.baseUrl}?${query}`).pipe(
+      map(response => response.data)
+    );
   }
 }

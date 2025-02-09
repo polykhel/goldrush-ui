@@ -6,6 +6,7 @@ import { ListData } from '@models/base.model';
 import { Observable } from 'rxjs';
 
 import qs from 'qs';
+import { map } from 'rxjs/operators';
 @Injectable({
   providedIn: 'root',
 })
@@ -14,10 +15,12 @@ export class CountryService {
 
   constructor(private http: HttpClient) {}
 
-  getCountries(): Observable<ListData<Country>> {
+  getCountries(): Observable<Country[]> {
     const query = qs.stringify({
       sort: ['name'],
     })
-    return this.http.get<ListData<Country>>(`${this.baseUrl}?${query}`);
+    return this.http.get<ListData<Country>>(`${this.baseUrl}?${query}`).pipe(
+      map(response => response.data)
+    );
   }
 }

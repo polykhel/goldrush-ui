@@ -5,6 +5,7 @@ import { ListData } from '@models/base.model';
 import { Package } from '@models/package.model';
 import qs from 'qs';
 import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root',
@@ -20,7 +21,7 @@ export class PackageService {
   }: {
     countryId?: string | null;
     providerId?: string | null;
-  }): Observable<ListData<Package>> {
+  }): Observable<Package[]> {
     const query = qs.stringify({
       filters: {
         countries: countryId
@@ -54,6 +55,8 @@ export class PackageService {
       },
       sort: ['travelPeriod:desc'],
     });
-    return this.http.get<ListData<Package>>(`${this.baseUrl}?${query}`);
+    return this.http.get<ListData<Package>>(`${this.baseUrl}?${query}`).pipe(
+      map(response => response.data)
+    );
   }
 }

@@ -3,11 +3,7 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { InquiryService } from '@services/inquiry.service';
-import {
-  getInquiryStatusConfig,
-  Inquiry,
-  InquiryStatus,
-} from '@models/inquiry.model';
+import { Inquiry, InquiryStatus } from '@models/inquiry.model';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { Button } from 'primeng/button';
 import { Card } from 'primeng/card';
@@ -17,7 +13,6 @@ import { InputGroupAddon } from 'primeng/inputgroupaddon';
 import { InputText } from 'primeng/inputtext';
 import { SelectButton } from 'primeng/selectbutton';
 import { TableModule } from 'primeng/table';
-import { Tag } from 'primeng/tag';
 import { Toast } from 'primeng/toast';
 import {
   debounceTime,
@@ -26,6 +21,8 @@ import {
   Subject,
   takeUntil,
 } from 'rxjs';
+import { Select } from 'primeng/select';
+import { Fluid } from 'primeng/fluid';
 
 @Component({
   selector: 'app-inquiry-list',
@@ -43,8 +40,9 @@ import {
     InputText,
     SelectButton,
     FormsModule,
-    Tag,
     NgIf,
+    Select,
+    Fluid,
   ],
   providers: [MessageService, ConfirmationService],
   templateUrl: './inquiry-list.component.html',
@@ -58,15 +56,8 @@ export class InquiryListComponent implements OnInit, OnDestroy {
   sortField: string = 'createdAt';
   sortOrder: number = -1;
   searchTerm: string = '';
-  statusOptions = [
-    { label: 'ALL', value: '' },
-    { label: 'NEW', value: 'NEW' },
-    { label: 'PENDING', value: 'PENDING' },
-    { label: 'QUOTED', value: 'QUOTED' },
-    { label: 'CLOSED', value: 'CLOSED' },
-  ];
+  statusOptions: InquiryStatus[] = [];
   selectedStatus = '';
-  protected readonly getInquiryStatusConfig = getInquiryStatusConfig;
   private searchSubject = new Subject<string>();
   private currentPage = 0;
   private pageSize = 10;
@@ -81,6 +72,10 @@ export class InquiryListComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
+    this.inquiryService
+      .getInquiryStatuses()
+      .subscribe((data) => (this.statusOptions = data));
+
     this.loadInquiries();
   }
 
@@ -147,16 +142,35 @@ export class InquiryListComponent implements OnInit, OnDestroy {
   }
 
   canGenerateQuotation(inquiry: Inquiry): boolean {
-    return (
-      inquiry.inquiryStatus === InquiryStatus.READY &&
-      inquiry.providerQuotations?.some((pq) => pq.price)
-    );
+    return inquiry.providerQuotations?.some((pq) => pq.price);
   }
 
   navigateToQuotationGenerator(inquiry: Inquiry) {
     this.router.navigate(['/quotation-generator'], {
       queryParams: { inquiryId: inquiry.id },
     });
+  }
+
+  updateStatus(inquiry: Inquiry) {
+    if (!inquiry.documentId) return;
+    this.inquiryService
+      .updateInquiryStatus(inquiry.documentId, inquiry.inquiryStatus)
+      .subscribe({
+        next: () => {
+          this.messageService.add({
+            severity: 'success',
+            summary: 'Status Updated',
+            detail: `The status of ${inquiry.clientName} has been updated to ${inquiry.inquiryStatus}.`,
+          });
+        },
+        error: () => {
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: 'Failed to update the inquiry status.',
+          });
+        },
+      });
   }
 
   private setupSearch() {

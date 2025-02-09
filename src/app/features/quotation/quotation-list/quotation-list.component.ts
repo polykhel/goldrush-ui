@@ -28,8 +28,8 @@ export class QuotationListComponent implements OnInit {
   loadQuotations() {
     this.loading = true;
     this.quotationService.getQuotations().subscribe({
-      next: (response) => {
-        this.quotations = response.data;
+      next: (data) => {
+        this.quotations = data;
         this.loading = false;
       },
       error: () => {

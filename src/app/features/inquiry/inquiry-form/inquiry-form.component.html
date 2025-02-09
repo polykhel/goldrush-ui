@@ -10,23 +10,18 @@
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <p-float-label variant="on">
           <p-select
-            [options]="inquiryStatusOptions"
+            [options]="statusOptions"
             [styleClass]="'w-full'"
             formControlName="inquiryStatus"
             optionLabel="label"
             optionValue="value"
             placeholder="Select Status">
             <ng-template let-status pTemplate="selectedItem">
-              <p-tag [icon]="getInquiryStatusConfig(status?.value).icon"
-                     [severity]="getInquiryStatusConfig(status?.value).severity"
-                     [value]="status?.label">
-              </p-tag>
+              <span [class]="status.color">{{status.label}}</span>
             </ng-template>
             <ng-template let-status pTemplate="item">
               <p-fluid>
-                <p-tag [icon]="getInquiryStatusConfig(status?.value).icon"
-                       [severity]="getInquiryStatusConfig(status?.value).severity"
-                       [value]="status?.label"></p-tag>
+                <span [class]="status.color">{{status.label}}</span>
               </p-fluid>
             </ng-template>
           </p-select>

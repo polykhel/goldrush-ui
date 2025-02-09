@@ -235,7 +235,7 @@ export class QuotationFormComponent implements OnInit {
       });
 
     this.countryService.getCountries().subscribe((data) => {
-      this.countries = data.data;
+      this.countries = data;
     });
 
     this.package.valueChanges
@@ -314,8 +314,8 @@ export class QuotationFormComponent implements OnInit {
 
   loadQuotation(id: string) {
     this.quotationService.getQuotation(id).subscribe({
-      next: (response) => {
-        const quotation = response.data;
+      next: (data) => {
+        const quotation = data;
 
         if (quotation.country) {
           this.country.setValue(quotation.country);
@@ -380,7 +380,7 @@ export class QuotationFormComponent implements OnInit {
 
   fetchProvidersByCountry(country: string): void {
     this.providerService.getProvidersByCountry(country).subscribe((data) => {
-      this.providers = data.data;
+      this.providers = data;
     });
   }
 
@@ -391,7 +391,7 @@ export class QuotationFormComponent implements OnInit {
     this.packageService
       .getPackages({ countryId, providerId })
       .subscribe((data) => {
-        this.packages = data.data;
+        this.packages = data;
       });
   }
 

@@ -12,9 +12,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { EmailData, prepareProviderEmail } from '@utils/email.util';
 import { Country } from '@models/country.model';
 import {
-  getInquiryStatusConfig,
-  Inquiry,
-  InquiryStatus,
+  Inquiry, InquiryStatus,
   ProviderQuotation,
   ProviderQuotationRequest
 } from '@models/inquiry.model';
@@ -98,7 +96,7 @@ export class InquiryFormComponent implements OnInit {
     otherServices: [''],
     providerQuotations: this.formBuilder.array<ProviderQuotation>([]),
     remarks: [''],
-    inquiryStatus: this.formBuilder.control<InquiryStatus>(InquiryStatus.NEW),
+    inquiryStatus: this.formBuilder.control<string>('NEW'),
     creator: this.formBuilder.control<string | null>({
       value: null,
       disabled: true,
@@ -111,17 +109,12 @@ export class InquiryFormComponent implements OnInit {
   countries: Country[] = [];
   providers: Provider[] = [];
   providerMap = new Map<string, Provider>();
-  inquiryStatusOptions = [
-    { label: 'New', value: 'NEW', class: 'text-blue-600' },
-    { label: 'Pending', value: 'PENDING', class: 'text-yellow-600' },
-    { label: 'Quoted', value: 'QUOTED', class: 'text-green-600' },
-  ];
+  statusOptions: InquiryStatus[] = [];
   currentInquiry: Inquiry | null = null;
   inquiryId?: string | null = null;
   createdAt?: Date | null = null;
   updatedAt?: Date | null = null;
   saving = false;
-  protected readonly getInquiryStatusConfig = getInquiryStatusConfig;
   private currentUser: User | null = null;
   private currentProvidersMap = new Map<string, ProviderQuotation>();
 
@@ -164,6 +157,9 @@ export class InquiryFormComponent implements OnInit {
       });
 
     // Load initial data that we only need once
+    this.inquiryService.getInquiryStatuses().subscribe((statuses) => {
+      this.statusOptions = statuses;
+    });
     await this.loadInitialData();
     await this.initForm();
   }
@@ -247,7 +243,7 @@ export class InquiryFormComponent implements OnInit {
             });
 
             if (!this.editMode) {
-              this.inquiryId = response.data.documentId;
+              this.inquiryId = response.documentId;
               this.editMode = true;
               this.initForm();
             }
@@ -273,7 +269,7 @@ export class InquiryFormComponent implements OnInit {
   newDateRange(): FormGroup {
     return this.formBuilder.group({
       start: [null],
-      end: [null]
+      end: [null],
     });
   }
 
@@ -331,7 +327,7 @@ export class InquiryFormComponent implements OnInit {
         otherServices: inquiry.otherServices,
         emailRemarks: quotation.emailRemarks,
         sender: `${this.currentUser?.firstName} ${this.currentUser?.lastName?.charAt(0)}.`,
-        sent: quotation.sent
+        sent: quotation.sent,
       }));
   }
 
@@ -395,7 +391,7 @@ export class InquiryFormComponent implements OnInit {
       this.messageService.add({
         severity: 'warning',
         summary: 'Inquiry not saved yet',
-        detail: 'Please save inquiry first before generating'
+        detail: 'Please save inquiry first before generating',
       });
     }
 
@@ -416,7 +412,7 @@ export class InquiryFormComponent implements OnInit {
       provider: providerQuotation.provider,
       packageType: inquiryData?.packageType,
       customPackageOptions: inquiryData?.customPackageOptions,
-      inquiryId: this.inquiryId
+      inquiryId: this.inquiryId,
     };
 
     this.router.navigate(['/quotations/new'], {
@@ -439,19 +435,19 @@ export class InquiryFormComponent implements OnInit {
   private async loadInitialData() {
     // Load countries
     let countriesListData = await firstValueFrom(
-      this.countryService.getCountries()
+      this.countryService.getCountries(),
     );
     if (countriesListData) {
-      this.countries = countriesListData.data;
+      this.countries = countriesListData;
     }
 
     // Load providers
     const providerListData = await firstValueFrom(
-      this.providerService.getProviders()
+      this.providerService.getProviders(),
     );
     if (providerListData) {
-      this.providers = providerListData.data;
-      this.providerMap = providerListData.data.reduce((acc, provider) => {
+      this.providers = providerListData;
+      this.providerMap = providerListData.reduce((acc, provider) => {
         acc.set(provider.documentId!, provider);
         return acc;
       }, new Map<string, Provider>());

@@ -39,7 +39,7 @@ export class DashboardComponent implements OnInit {
 
   ngOnInit(): void {
     this.providerService.getProviders().subscribe((providers) => {
-      this.providers = providers.data.map(provider => {
+      this.providers = providers.map(provider => {
         console.log(provider.logo.url);
         return {
           ...provider,

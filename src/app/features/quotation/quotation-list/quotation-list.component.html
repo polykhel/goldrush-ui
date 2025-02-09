@@ -14,11 +14,20 @@
     <ng-template pTemplate="header">
       <tr>
         <th id="title">Title</th>
-        <th id="client">Client</th>
-        <th id="destination">Destination</th>
+        <th id="client" pSortableColumn="clientName">
+          Client Name
+          <p-sortIcon field="clientName"></p-sortIcon>
+        </th>
+        <th id="destination" pSortableColumn="destination">
+          Destination
+          <p-sortIcon field="destination"></p-sortIcon>
+        </th>
         <th id="travelDates">Travel Dates</th>
         <th id="ratePerPax">Rate/Pax</th>
-        <th id="created">Created</th>
+        <th id="created" pSortableColumn="createdAt">
+          Created At
+          <p-sortIcon field="createdAt"></p-sortIcon>
+        </th>
         <th id="actions">Actions</th>
       </tr>
     </ng-template>
@@ -28,9 +37,9 @@
         <td headers="client">{{ quotation.clientName }}</td>
         <td headers="destination">{{ quotation.destination }}</td>
         <td headers="travelDates">
-          <ng-container *ngIf="quotation.travelDates?.length">
-            {{ formatDate(quotation.travelDates[0]) }} -
-            {{ formatDate(quotation.travelDates[1]) }}
+          <ng-container *ngIf="quotation.travelDates">
+            {{ formatDate(quotation.travelDates.start) }} -
+            {{ formatDate(quotation.travelDates.end) }}
           </ng-container>
         </td>
         <td headers="ratePerPax">₱{{ quotation.ratePerPax?.toLocaleString() }}</td>
