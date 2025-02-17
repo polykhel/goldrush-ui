@@ -555,6 +555,7 @@ export class QuotationFormComponent implements OnInit {
       : undefined;
 
     const quotation: Quotation = {
+      id: this.quotationId ?? null,
       clientName: formValue.clientName,
       destination: formValue.destination,
       country: formValue.country,

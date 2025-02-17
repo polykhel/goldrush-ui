@@ -16,6 +16,12 @@ export interface ListData<T extends BaseModel> {
     pageSize: number,
     paged: boolean,
   },
+  page: {
+    number: number,
+    size: number,
+    totalElements: number,
+    totalPages: boolean,
+  },
   size: number,
   sort: {
     empty: boolean,
@@ -27,16 +33,23 @@ export interface ListData<T extends BaseModel> {
 }
 
 export interface BaseModel {
-  id?: number;
+  id: string | null;
+  //TODO: Delete
   documentId?: string;
   createdAt?: Date | null;
   updatedAt?: Date | null;
-  publishedAt?: Date | null;
 }
 
 export interface AuditedBaseModel extends BaseModel {
-  creator?: string | null;
-  modifier?: string | null;
+  createdBy?: string | null;
+  updatedBy?: string | null;
+}
+
+export interface AuditFields {
+  createdAt?: Date | null;
+  createdBy?: string | null;
+  updatedAt?: Date | null;
+  updatedBy?: string | null;
 }
 
 export interface List {

@@ -6,7 +6,6 @@ import { Inquiry, InquiryStatus } from '@models/inquiry.model';
 import qs from 'qs';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { transformBody } from '@utils/form.util';
 import { PageParams } from '@models/params.model';
 
 type InquiryParams = PageParams & {
@@ -35,39 +34,17 @@ export class InquiryService {
     return this.http.get<ListData<Inquiry>>(`${this.baseUrl}?${query}`).pipe(
       map((response) => ({
         items: response.content,
-        total: response.totalElements,
+        total: response.page.totalElements,
       })),
     );
   }
 
   getInquiry(id: string): Observable<Inquiry> {
-    const query = qs.stringify({
-      populate: [
-        'providerQuotations',
-        'providerQuotations.provider',
-        'dateRanges',
-        'country',
-      ],
-    });
-    return this.http
-      .get<SingleData<Inquiry>>(`${this.baseUrl}/${id}?${query}`)
-      .pipe(map((data) => data.data));
+    return this.http.get<Inquiry>(`${this.baseUrl}/${id}`);
   }
 
-  createInquiry(inquiry: any): Observable<Inquiry> {
-    return this.http
-      .post<SingleData<Inquiry>>(this.baseUrl, {
-        data: transformBody(inquiry),
-      })
-      .pipe(map((data) => data.data));
-  }
-
-  updateInquiry(id: string, inquiry: any): Observable<Inquiry> {
-    return this.http
-      .put<SingleData<Inquiry>>(`${this.baseUrl}/${id}`, {
-        data: transformBody(inquiry),
-      })
-      .pipe(map((data) => data.data));
+  saveInquiry(inquiry: Inquiry): Observable<Inquiry> {
+    return this.http.post<Inquiry>(this.baseUrl, inquiry);
   }
 
   deleteInquiry(id: string): Observable<Inquiry> {

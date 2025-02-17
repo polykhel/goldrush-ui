@@ -35,7 +35,7 @@ export interface Quotation extends BaseModel {
   inquiry?: Inquiry | string | null;
 }
 
-export interface Flight extends BaseModel {
+export interface Flight {
   flightNumber?: string | null;
   iataCode?: string | null;
   date?: Date | null;

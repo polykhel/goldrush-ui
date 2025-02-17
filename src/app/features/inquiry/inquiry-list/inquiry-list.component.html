@@ -58,9 +58,9 @@
           Client Name
           <p-sortIcon field="clientName"></p-sortIcon>
         </th>
-        <th id="destination" pSortableColumn="destination">
+        <th id="destination" pSortableColumn="travelDetails.destination">
           Destination
-          <p-sortIcon field="destination"></p-sortIcon>
+          <p-sortIcon field="travelDetails.destination"></p-sortIcon>
         </th>
         <th id="travelDates">Travel Dates</th>
         <th id="status" pSortableColumn="inquiryStatus">
@@ -77,11 +77,9 @@
     <ng-template pTemplate="body" let-inquiry>
       <tr>
         <td>{{ inquiry.clientName }}</td>
-        <td>{{ inquiry.destination }}</td>
+        <td>{{ inquiry.travelDetails.destination }}</td>
         <td>
-          <div *ngFor="let dateRange of inquiry.dateRanges">
-            {{ dateRange.start | date }} - {{ dateRange.end | date }}
-          </div>
+          {{ inquiry.travelDetails.startDate | date }} - {{ inquiry.travelDetails.endDate | date }}
         </td>
         <td>
           <!-- Status Dropdown -->
@@ -89,7 +87,7 @@
             [options]="statusOptions"
             optionLabel="label"
             optionValue="value"
-            [(ngModel)]="inquiry.inquiryStatus"
+            [(ngModel)]="inquiry.status"
             (onChange)="updateStatus(inquiry)">
             <ng-template let-status pTemplate="selectedItem">
               <span [class]="status.color">{{status.label}}</span>

@@ -109,7 +109,7 @@ export class InquiryListComponent implements OnInit, OnDestroy {
   }
 
   editInquiry(inquiry: Inquiry) {
-    this.router.navigate(['/inquiries', inquiry.documentId]);
+    this.router.navigate(['/inquiries', inquiry.id]);
   }
 
   confirmDelete(inquiry: Inquiry) {
@@ -142,7 +142,7 @@ export class InquiryListComponent implements OnInit, OnDestroy {
   }
 
   canGenerateQuotation(inquiry: Inquiry): boolean {
-    return inquiry.providerQuotations?.some((pq) => pq.priceAmount);
+    return inquiry.quotations?.some((pq) => pq.priceAmount);
   }
 
   navigateToQuotationGenerator(inquiry: Inquiry) {
@@ -197,6 +197,7 @@ export class InquiryListComponent implements OnInit, OnDestroy {
       .subscribe({
         next: (response) => {
           this.inquiries = response.items;
+          console.log(this.inquiries);
           this.totalRecords = response.total;
           this.loading = false;
         },

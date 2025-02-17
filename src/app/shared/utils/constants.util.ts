@@ -1,9 +1,9 @@
 export const CURRENCIES = ['PHP', 'USD'];
 
 export const PROVIDER_QUOTATION_STATUSES = [
-  { label: 'Pending', value: 'pending', class: 'text-yellow-600' },
-  { label: 'Received', value: 'received', class: 'text-green-600' },
-  { label: 'Sent', value: 'sent', class: 'text-green-600' },
-  { label: 'Not Available', value: 'not_available', class: 'text-red-600' },
-  { label: 'No Response', value: 'no_response', class: 'text-gray-600' },
+  { label: 'Pending', value: 'PENDING', class: 'text-yellow-600' },
+  { label: 'Received', value: 'RECEIVED', class: 'text-green-600' },
+  { label: 'Sent', value: 'SENT', class: 'text-green-600' },
+  { label: 'Not Available', value: 'NOT_AVAILABLE', class: 'text-red-600' },
+  { label: 'No Response', value: 'NO_RESPONSE', class: 'text-gray-600' },
 ];

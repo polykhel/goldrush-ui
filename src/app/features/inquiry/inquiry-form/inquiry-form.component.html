@@ -1,11 +1,12 @@
-<section class="container mx-auto px-4 py-8">
-  <form [formGroup]="inquiryForm" class="p-6 shadow-md rounded max-w-4xl border mx-auto bg-white">
+<section class="container mx-auto p-8 bg-white rounded-lg shadow-lg hover:shadow-xl border border-gray-100">
+  <form [formGroup]="inquiryForm" class="max-w-5xl mx-auto">
     <div class="flex justify-between align-items-center mb-3">
       <p-button (click)="goBack()" [text]="true" icon="pi pi-arrow-left" label="Back"></p-button>
       <h2 class="text-2xl font-bold">{{ editMode ? 'Edit' : 'New' }} Inquiry</h2>
     </div>
+
     <!-- Basic Information Section -->
-    <section class="mb-6">
+    <section class="mb-8 bg-gray-50 p-6 rounded-lg">
       <h3 class="text-lg font-bold mb-4 text-gray-700 border-b pb-2">Basic Information</h3>
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <p-float-label variant="on">
@@ -15,15 +16,7 @@
             formControlName="status"
             optionLabel="label"
             optionValue="value"
-            placeholder="Select Status">
-            <ng-template let-status pTemplate="selectedItem">
-              <span [class]="status.color">{{status.label}}</span>
-            </ng-template>
-            <ng-template let-status pTemplate="item">
-              <p-fluid>
-                <span [class]="status.color">{{status.label}}</span>
-              </p-fluid>
-            </ng-template>
+          >
           </p-select>
           <label for="status">Status</label>
         </p-float-label>
@@ -42,30 +35,32 @@
         </p-float-label>
       </div>
 
-      <div class="mt-4" formGroupName="source">
+      <div class="mt-4">
         <label class="text-gray-700 font-semibold block mb-2">Source</label>
         <div class="flex flex-wrap items-center gap-4">
           <div class="flex items-center">
-            <p-radio-button formControlName="type" inputId="sourceFB" value="fb"/>
-            <label class="ml-2" for="sourceFB">Facebook</label>
+            <p-radio-button formControlName="source" inputId="sourceFB" value="FB"/>
+            <label class="ml-2" for="sourceFB">Facebook/Instagram</label>
           </div>
           <div class="flex items-center">
-            <p-radio-button formControlName="type" inputId="sourcePM" value="pm"/>
-            <label class="ml-2" for="sourcePM">Private Message</label>
+            <p-radio-button formControlName="source" inputId="sourceW" value="WALK_IN"/>
+            <label class="ml-2" for="sourceW">Walk-In</label>
           </div>
-          <input class="w-48" formControlName="other" pInputText placeholder="Others"
-                 type="text">
+          <div class="flex items-center">
+            <p-radio-button formControlName="source" inputId="sourceRe" value="REFERRAL"/>
+            <label class="ml-2" for="sourceRe">Referral</label>
+          </div>
         </div>
       </div>
     </section>
 
     <!-- Travel Details Section -->
-    <section class="mb-6" formGroupName="travelDetails">
+    <section class="mb-8 bg-gray-50 p-6 rounded-lg" formGroupName="travelDetails">
       <h3 class="text-lg font-bold mb-4 text-gray-700 border-b pb-2">Travel Details</h3>
       <p-fluid class="grid grid-cols-2 gap-4 mb-4">
         <p-float-label variant="on">
-          <p-select [options]="countries" formControlName="countryId" inputId="countryId"
-                    optionLabel="name">
+          <p-select [options]="countries" formControlName="countryId" inputId="countryId" optionLabel="name"
+                    optionValue="id">
             <ng-template pTemplate="dropdownicon">
               <i class="pi pi-map"></i>
             </ng-template>
@@ -123,12 +118,16 @@
             <p-input-number [showButtons]="true" formControlName="children" inputId="children"/>
             <label for="children">Children</label>
           </p-float-label>
+          <p-float-label variant="on" *ngIf="childrenControl.value">
+            <input pInputText formControlName="childAges" inputId="childAges"/>
+            <label for="childAges">Child Age(s)</label>
+          </p-float-label>
         </p-fluid>
       </div>
     </section>
 
     <!-- Package Details Section -->
-    <section class="mb-6">
+    <section class="mb-8 bg-gray-50 p-6 rounded-lg">
       <h3 class="text-lg font-bold mb-4 text-gray-700 border-b pb-2">Package Details</h3>
       <div class="grid grid-cols-2 gap-4 mb-4">
         <div>
@@ -136,15 +135,15 @@
           <div class="grid grid-cols-1 gap-2">
             <div class="flex items-center gap-2">
               <p-radio-button formControlName="packageType" inputId="allInclusive"
-                              value="all-inclusive"/>
+                              value="ALL_INCLUSIVE"/>
               <label for="allInclusive">All-Inclusive Package</label>
             </div>
             <div class="flex flex-col gap-2">
               <div class="flex items-center gap-2">
-                <p-radio-button formControlName="packageType" inputId="custom" value="custom"/>
+                <p-radio-button formControlName="packageType" inputId="custom" value="CUSTOM"/>
                 <label for="custom">Custom Package</label>
               </div>
-              <div *ngIf="inquiryForm.controls.packageType.value === 'custom'"
+              <div *ngIf="inquiryForm.controls.packageType.value === 'CUSTOM'"
                    class="ml-6 flex flex-col gap-2">
                 <div *ngFor="let option of packageOptions" class="flex items-center gap-2">
                   <p-checkbox
@@ -162,45 +161,57 @@
     </section>
 
     <!-- Pricing & Quotation Section -->
-    <section class="mb-6">
+    <section class="mb-8 bg-gray-50 p-6 rounded-lg">
       <h3 class="text-lg font-bold mb-4 text-gray-700 border-b pb-2">Pricing & Quotation</h3>
 
       <div class="space-y-6">
         <!-- Provider Price List -->
-        <div formArrayName="providerQuotations">
-          <label class="text-gray-700 font-semibold block mb-2">Provider Quotations</label>
+        <div formArrayName="quotations">
+          <div class="flex justify-between items-center mb-4">
+            <label class="text-gray-700 font-semibold">Provider Quotations</label>
+            <div class="flex gap-2 items-center">
+              <p-select [(ngModel)]="selectedProvider" [ngModelOptions]="{standalone: true}"
+                        [options]="availableProviders" [placeholder]="'Select Provider'"
+                        optionLabel="name" optionValue="id"></p-select>
+              <p-button (onClick)="addQuotation()" [disabled]="!selectedProvider"
+                        icon="pi pi-plus" label="Add Quotation"></p-button>
+            </div>
+          </div>
 
-          <app-provider-quotation (onAddGroup)="addGroupToFormArray($event)"
-                                  (onGenerateQuotation)="generateQuotation($event)"
-                                  *ngFor="let provider of providers"
-                                  [existingProviderQuotation]="getProviderQuotation(provider.documentId!)"
-                                  [isEditMode]="editMode"
-                                  [provider]="provider">
-          </app-provider-quotation>
+          <div class="space-y-4">
+            <app-provider-quotation (onGenerateQuotation)="generateQuotation($event)"
+                                    *ngFor="let quotationControl of quotations.controls; let i = index"
+                                    [formGroup]="getProviderQuotationControl(i)"
+                                    [isEditMode]="editMode"
+                                    [provider]="providerMap.get(quotationControl.get('providerId')?.value)!">
+            </app-provider-quotation>
+          </div>
         </div>
       </div>
     </section>
 
     <!-- Remarks Section -->
-    <section class="mb-6">
+    <section class="mb-8 bg-gray-50 p-6 rounded-lg">
       <h3 class="text-lg font-bold mb-4 text-gray-700 border-b pb-2">Remarks</h3>
       <textarea class="w-full" formControlName="remarks" id="remarks" pTextarea rows="4"></textarea>
     </section>
 
-    <div class="flex justify-center gap-2">
-      <p-button (onClick)="saveInquiry()" [loading]="saving" [rounded]="true" icon="pi pi-save"
-                label="Save" severity="info"
+    <div class="flex justify-center gap-4 mt-12">
+      <p-button (onClick)="saveInquiry()" [loading]="saving" [rounded]="true"
+                class="transform transition-all duration-300 hover:scale-105"
+                icon="pi pi-save" label="Save" severity="info"
                 type="button"/>
-      <p-button (onClick)="sendQuotations()" [rounded]="true" icon="pi pi-send" label="Send"
-                severity="success"
+      <p-button (onClick)="sendQuotations()" [rounded]="true"
+                class="transform transition-all duration-300 hover:scale-105" icon="pi pi-send"
+                label="Send" severity="success"
                 type="button"/>
     </div>
 
     <!-- Audit Information -->
-    <div class="mt-8 text-xs text-gray-500 border-t pt-4">
+    <div *ngIf="editMode" class="mt-12 text-xs text-gray-500 border-t pt-4 bg-gray-50 p-4 rounded-lg">
       <div class="grid grid-cols-2 gap-2">
-        <div>Created by {{ creator.value }} on {{ createdAt | date:'medium' }}</div>
-        <div>Last updated by {{ modifier.value }} on {{ updatedAt | date:'medium' }}</div>
+        <div>Created by {{ auditFields.createdBy }} on {{ auditFields.createdAt| date:'medium' }}</div>
+        <div>Last updated by {{ auditFields.updatedBy }} on {{ auditFields.updatedAt | date:'medium' }}</div>
       </div>
     </div>
 
@@ -210,7 +221,7 @@
       [(visible)]="showEmailPreview"
       [emailData]="emailData"
       [isSending]="isSending"
-      [providerQuotations]="providerQuotations.value"
+      [providerQuotations]="quotations.value"
       [providers]="providerMap"
     ></app-email-preview-modal>
   </form>

@@ -1,11 +1,9 @@
 import { AuditedBaseModel, BaseModel } from './base.model';
-import { Country } from '@models/country.model';
 
 export interface Inquiry extends AuditedBaseModel {
   status: string;
   date: Date;
   clientName: string;
-  country: Country;
   source: string;
   travelDetails: {
     countryId: string,
@@ -14,32 +12,34 @@ export interface Inquiry extends AuditedBaseModel {
     nights: number,
     startDate: Date,
     endDate: Date,
-    preferredHotel: string,
+    preferredHotel: string | null,
     adults: number,
     children: number
+    childAges: string | null,
   },
   packageType: string;
   customPackageOptions: string | null;
-  providerQuotations: ProviderQuotation[];
+  quotations: ProviderQuotation[];
   remarks: string | null;
 }
 
-export interface DateRange {
-  start: Date;
-  end: Date;
-}
-
 export interface ProviderQuotation {
-  includeInEmail: boolean;
+  id: string;
   status: string;
   priceAmount: number | null;
   currencyCode: string | null;
   exchangeRate: number | null;
+  exchangeRateLastUpdated: Date | null;
   phpEquivalentAmount: number | null;
   emailQuotation: string | null;
   internalRemarks: string | null;
   providerId: string;
   sent: boolean;
+}
+
+export interface DateRange {
+  start: Date;
+  end: Date;
 }
 
 export interface ProviderQuotationRequest {
