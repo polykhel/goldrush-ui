@@ -3,15 +3,27 @@ export interface SingleData<T extends BaseModel> {
 }
 
 export interface ListData<T extends BaseModel> {
+  content: T[],
   data: T[],
-  meta: {
-    pagination: {
-      page: number;
-      pageSize: number;
-      pageCount: number;
-      total: number;
-    }
-  }
+  empty: boolean,
+  first: boolean,
+  last: boolean,
+  number: number,
+  numberOfElements: number,
+  pageable: {
+    offset: number,
+    pageNumber: number,
+    pageSize: number,
+    paged: boolean,
+  },
+  size: number,
+  sort: {
+    empty: boolean,
+    sorted: boolean,
+    unsorted: boolean,
+  },
+  totalElements: number,
+  totalPages: number,
 }
 
 export interface BaseModel {

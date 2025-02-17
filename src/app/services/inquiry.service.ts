@@ -18,53 +18,24 @@ type InquiryParams = PageParams & {
 })
 export class InquiryService {
   private http = inject(HttpClient);
-  private baseUrl = `${environment.backendUrl}/api/inquiries`;
-  private inquiryStatusUrl = `${environment.backendUrl}/api/inquiry-statuses`;
+  private baseUrl = `${environment.backendUrl}/api/inquiry`;
 
   getInquiries(params: InquiryParams) {
-    const query = qs.stringify(
-      {
-        pagination: {
-          page: params.page + 1,
-          pageSize: params.pageSize,
-        },
-        sort: params.sortField
-          ? [`${params.sortField}:${params.sortOrder === 1 ? 'asc' : 'desc'}`]
-          : ['createdAt:desc'],
-        filters: {
-          $or: params.search
-            ? [
-                {
-                  clientName: {
-                    $containsi: params.search,
-                  },
-                },
-                {
-                  destination: {
-                    $containsi: params.search,
-                  },
-                },
-              ]
-            : undefined,
-          ...(params.status
-            ? {
-                inquiryStatus: {
-                  $eq: params.status,
-                },
-              }
-            : {}),
-        },
-        populate: ['dateRanges'],
-      },
-      {
-        encodeValuesOnly: true,
-      },
-    );
+    const sortDirection = params.sortOrder === 1 ? 'asc' : 'desc';
+    const query = qs.stringify({
+      page: params.page,
+      size: params.pageSize,
+      sort: params.sortField
+        ? `${params.sortField},${sortDirection}`
+        : 'createdAt,desc',
+      query: params.search,
+      status: params.status,
+    })
 
     return this.http.get<ListData<Inquiry>>(`${this.baseUrl}?${query}`).pipe(
       map((response) => ({
-        items: response.data,
-        total: response.meta.pagination.total,
+        items: response.content,
+        total: response.totalElements,
       })),
     );
   }
@@ -110,11 +81,6 @@ export class InquiryService {
   }
 
   getInquiryStatuses() {
-    const query = qs.stringify({
-      sort: ['order'],
-    });
-    return this.http
-      .get<ListData<InquiryStatus>>(`${this.inquiryStatusUrl}?${query}`)
-      .pipe(map((response) => response.data));
+    return this.http.get<InquiryStatus[]>(`${this.baseUrl}/statuses`);
   }
 }

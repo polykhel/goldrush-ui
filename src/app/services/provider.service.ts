@@ -1,8 +1,8 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { environment } from '@env/environment';
-import { Provider } from '@models/provider.model';
 import { ListData } from '@models/base.model';
+import { Provider } from '@models/provider.model';
 import qs from 'qs';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
@@ -11,9 +11,10 @@ import { map } from 'rxjs/operators';
   providedIn: 'root',
 })
 export class ProviderService {
-  private baseUrl: string = environment.backendUrl + '/api/providers';
+  private baseUrl: string = environment.backendUrl + '/api/provider';
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) {
+  }
 
   getProvidersByCountry(countryId: string): Observable<Provider[]> {
     const query = qs.stringify({
@@ -30,12 +31,14 @@ export class ProviderService {
     );
   }
 
-  getProviders(populate: string[] = []): Observable<Provider[]> {
-    const query = qs.stringify({
-      populate: ['logo'].concat(populate),
-    });
-    return this.http.get<ListData<Provider>>(`${this.baseUrl}?${query}`).pipe(
-      map(response => response.data)
+  getProviders(): Observable<Provider[]> {
+    return this.http.get<Provider[]>(`${this.baseUrl}`).pipe(
+      map(response => response.map(provider => {
+        return {
+          ...provider,
+          logo: `${environment.fileUrl}/logos/${provider.logo}`
+        };
+      }))
     );
   }
 }

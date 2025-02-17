@@ -63,6 +63,6 @@ export class HomeComponent implements OnInit {
   }
 
   login() {
-    window.location.href = `${this.baseUrl}/api/connect/google`;
+    window.location.href = `${this.baseUrl}/oauth2/authorization/google`;
   }
 }

@@ -8,6 +8,7 @@ import { QuotationListComponent } from './features/quotation/quotation-list/quot
 import { QuotationGeneratorComponent } from './features/quotation/quotation-generator/quotation-generator.component';
 import { PaymentSchedulerComponent } from './features/payment/payment-scheduler/payment-scheduler.component';
 import { ListToJsonComponent } from './features/tools/list-to-json/list-to-json.component';
+import { ForbiddenComponent } from '@shared/components/forbidden/forbidden.component';
 
 export const routes: Routes = [
   {
@@ -74,10 +75,14 @@ export const routes: Routes = [
     path: 'auth',
     children: [
       {
-        path: 'callback/google',
+        path: 'callback',
         component: AuthCallbackComponent,
       },
     ],
+  },
+  {
+    path: 'forbidden',
+    component: ForbiddenComponent
   },
   {
     path: '**',

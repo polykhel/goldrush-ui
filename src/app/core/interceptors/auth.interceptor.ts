@@ -5,6 +5,7 @@ import {
   HttpRequest,
 } from '@angular/common/http';
 import { inject } from '@angular/core';
+import { Router } from '@angular/router';
 import { throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { AuthService } from '@services/auth.service';
@@ -20,6 +21,7 @@ export function authInterceptor(
   }
 
   const idToken = inject(AuthService).getToken();
+  const router = inject(Router);
 
   if (idToken) {
     const newRequest = req.clone({
@@ -28,6 +30,12 @@ export function authInterceptor(
 
     return next(newRequest).pipe(
       catchError((error: HttpErrorResponse) => {
+        if (error.status === 401) {
+          router.navigate(['/home'], { queryParams: { loginRequired: true } });
+        } else if (error.status === 403) {
+          router.navigate(['/forbidden']);
+        }
+
         return throwError(() => error);
       }),
     );

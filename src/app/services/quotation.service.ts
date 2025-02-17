@@ -36,7 +36,7 @@ export class QuotationService {
     return this.http.get<ListData<Quotation>>(`${this.baseUrl}?${query}`).pipe(
       map(response => ({
           items: response.data,
-            total: response.meta.pagination.total,
+            total: response.totalElements,
         }
       )
     ));

@@ -5,7 +5,7 @@ import { environment } from '@env/environment';
 import { Auth } from '@models/auth.model';
 import { User } from '@models/user.model';
 import dayjs from 'dayjs';
-import { BehaviorSubject, Observable, tap } from 'rxjs';
+import { BehaviorSubject, tap } from 'rxjs';
 import { SKIP_AUTH } from '@core/interceptors/auth.interceptor';
 
 @Injectable({
@@ -13,7 +13,6 @@ import { SKIP_AUTH } from '@core/interceptors/auth.interceptor';
 })
 export class AuthService implements OnDestroy {
   private baseUrl = environment.backendUrl;
-  private tokenLifetime = 3;
   private currentUserSubject = new BehaviorSubject<User | null>(null);
   public currentUser$ = this.currentUserSubject.asObservable();
   private tokenCheckInterval: any;
@@ -34,7 +33,7 @@ export class AuthService implements OnDestroy {
   login(accessToken: string) {
     return this.http
       .get<Auth>(
-        `${this.baseUrl}/api/auth/google/callback?access_token=${accessToken}`,
+        `${this.baseUrl}/api/auth/callback?access_token=${accessToken}`,
         {
           context: new HttpContext().set(SKIP_AUTH, true),
         },
@@ -62,22 +61,14 @@ export class AuthService implements OnDestroy {
     return !!localStorage.getItem('id_token') && this.isTokenValid();
   }
 
-  isLoggedOut() {
-    return !this.isLoggedIn();
-  }
-
   isTokenValid() {
     const expiration = localStorage.getItem('expires_at');
     if (typeof expiration === 'string') {
-      const expiresAt = JSON.parse(expiration);
+      const expiresAt: Date = JSON.parse(expiration);
       return dayjs().isBefore(dayjs(expiresAt));
     }
 
     return false;
-  }
-
-  getCurrentUser(): Observable<User | null> {
-    return this.currentUser$;
   }
 
   ngOnDestroy() {
@@ -101,7 +92,7 @@ export class AuthService implements OnDestroy {
   }
 
   private loadCurrentUser() {
-    this.http.get<User>(`${this.baseUrl}/api/users/me`).subscribe({
+    this.http.get<User>(`${this.baseUrl}/api/auth/me`).subscribe({
       next: (user) => {
         this.currentUserSubject.next(user);
       },
@@ -110,9 +101,7 @@ export class AuthService implements OnDestroy {
   }
 
   private setSession(auth: Auth) {
-    const expiresAt = dayjs().add(this.tokenLifetime, 'hour');
-
-    localStorage.setItem('id_token', auth.jwt);
-    localStorage.setItem('expires_at', JSON.stringify(expiresAt.valueOf()));
+    localStorage.setItem('id_token', auth.token);
+    localStorage.setItem('expires_at', JSON.stringify(auth.expiration));
   }
 }
