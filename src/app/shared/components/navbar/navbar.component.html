@@ -1,19 +1,18 @@
-<p-menubar [model]="items">
-  <ng-template pTemplate="end">
-    <div class="flex align-items-center gap-2">
-      <p-button *ngIf="authService.isLoggedIn()"
-                label="Logout"
-                (onClick)="logout()"
-                severity="secondary"
-                size="small">
-      </p-button>
-      <p-button *ngIf="!authService.isLoggedIn()"
-                label="Login"
-                routerLink="/home"
-                [queryParams]="{loginRequired: true}"
-                severity="primary"
-                size="small">
-      </p-button>
+<nav class="fixed top-0 left-0 w-full z-50 h-20 px-8 pl-4 flex items-center justify-between bg-white">
+  <div class="flex items-center gap-4">
+    <a routerLink="/home" class="flex align-items-center">
+      <img ngSrc="/images/logo-48x48.png" width="48" height="48" alt="logo" class="w-[3rem]">
+    </a>
+  </div>
+  @if (currentUser$ | async; as currentUser) {
+    <div class="cursor-pointer" (click)="menu.toggle($event)">
+      <div class="flex items-center gap-2 p-2">
+        <img [ngSrc]="currentUser.profileImage" width="48" height="48" alt="profile" class="w-10 h-10 rounded-full">
+        <span class="text-gray-700">{{currentUser.name}}</span>
+      </div>
+      <p-menu #menu [popup]="true" [model]="items"></p-menu>
     </div>
-  </ng-template>
-</p-menubar>
+  } @else {
+    <p-button label="Login" routerLink="/home" [queryParams]="{loginRequired: true}" severity="primary" size="small"></p-button>
+  }
+</nav>

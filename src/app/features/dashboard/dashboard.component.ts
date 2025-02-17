@@ -1,7 +1,6 @@
 import { NgForOf, NgOptimizedImage } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { environment } from '@env/environment';
 import { Provider } from '@models/provider.model';
 import { ProviderService } from '@services/provider.service';
 import { ButtonModule } from 'primeng/button';
@@ -22,7 +21,6 @@ interface Activity {
   imports: [ButtonModule, TableModule, RouterLink, NgOptimizedImage, NgForOf],
 })
 export class DashboardComponent implements OnInit {
-  private baseUrl = environment.backendUrl;
   recentActivities: Activity[] = [
     {
       date: '2024-03-20',

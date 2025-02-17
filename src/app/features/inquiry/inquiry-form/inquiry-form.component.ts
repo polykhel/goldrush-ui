@@ -324,7 +324,7 @@ export class InquiryFormComponent implements OnInit {
         preferredHotel: inquiry.preferredHotel,
         otherServices: inquiry.otherServices,
         emailRemarks: quotation.emailRemarks,
-        sender: `${this.currentUser?.firstName} ${this.currentUser?.lastName?.charAt(0)}.`,
+        sender: `${this.currentUser?.name}`,
         sent: quotation.sent,
       }));
   }
