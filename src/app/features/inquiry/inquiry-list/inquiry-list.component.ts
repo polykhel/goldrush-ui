@@ -142,7 +142,7 @@ export class InquiryListComponent implements OnInit, OnDestroy {
   }
 
   canGenerateQuotation(inquiry: Inquiry): boolean {
-    return inquiry.providerQuotations?.some((pq) => pq.price);
+    return inquiry.providerQuotations?.some((pq) => pq.priceAmount);
   }
 
   navigateToQuotationGenerator(inquiry: Inquiry) {
@@ -154,13 +154,13 @@ export class InquiryListComponent implements OnInit, OnDestroy {
   updateStatus(inquiry: Inquiry) {
     if (!inquiry.documentId) return;
     this.inquiryService
-      .updateInquiryStatus(inquiry.documentId, inquiry.inquiryStatus)
+      .updateInquiryStatus(inquiry.documentId, inquiry.status)
       .subscribe({
         next: () => {
           this.messageService.add({
             severity: 'success',
             summary: 'Status Updated',
-            detail: `The status of ${inquiry.clientName} has been updated to ${inquiry.inquiryStatus}.`,
+            detail: `The status of ${inquiry.clientName} has been updated to ${inquiry.status}.`,
           });
         },
         error: () => {

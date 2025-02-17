@@ -76,25 +76,29 @@ export class InquiryFormComponent implements OnInit {
   packageOptions = PACKAGE_OPTIONS;
 
   inquiryForm = this.formBuilder.group({
-    clientName: ['', [Validators.required]],
+    status: ['NEW', [Validators.required]],
     date: [new Date(), [Validators.required]],
-    contactPoint: this.formBuilder.control<string | null>(null),
-    contactPointOther: [''],
-    travelDays: [null, [Validators.required]],
-    travelNights: [null, [Validators.required]],
+    clientName: ['', [Validators.required]],
     country: [null, [Validators.required]],
-    destination: [null, [Validators.required]],
-    dateRanges: this.formBuilder.array<{ start: Date; end: Date }[]>([]),
-    preferredHotel: [null],
-    paxAdult: [null, [Validators.required]],
-    paxChild: [null, [Validators.required]],
-    paxChildAges: [''],
+    source: this.formBuilder.group({
+      type: [null],
+      other: [''],
+    }),
+    travelDetails: this.formBuilder.group({
+      countryId: [''],
+      destination: ['', [Validators.required]],
+      days: [null, [Validators.required]],
+      nights: [null, [Validators.required]],
+      startDate: [null],
+      endDate: [null],
+      preferredHotel: [''],
+      adults: [null, [Validators.required]],
+      children: [null, [Validators.required]]
+    }),
     packageType: ['all-inclusive'],
-    customPackageOptions: [[] as string[]],
-    otherServices: [''],
+    customPackageOptions: [null],
     providerQuotations: this.formBuilder.array<ProviderQuotation>([]),
-    remarks: [''],
-    inquiryStatus: this.formBuilder.control<string>('NEW'),
+    remarks: [null],
     creator: this.formBuilder.control<string | null>({
       value: null,
       disabled: true,
@@ -127,13 +131,7 @@ export class InquiryFormComponent implements OnInit {
     private route: ActivatedRoute,
     private location: Location,
     private router: Router,
-  ) {
-    this.addDateRange();
-  }
-
-  get dateRanges(): FormArray {
-    return this.inquiryForm.get('dateRanges') as FormArray;
-  }
+  ) {}
 
   get providerQuotations(): FormArray {
     return this.inquiryForm.get('providerQuotations') as FormArray;
@@ -145,21 +143,6 @@ export class InquiryFormComponent implements OnInit {
 
   get modifier(): FormControl {
     return this.inquiryForm.get('modifier') as FormControl;
-  }
-
-  async ngOnInit() {
-    this.authService.currentUser$
-      .pipe(takeUntil(this.destroy$))
-      .subscribe((user) => {
-        this.currentUser = user;
-      });
-
-    // Load initial data that we only need once
-    this.inquiryService.getInquiryStatuses().subscribe((statuses) => {
-      this.statusOptions = statuses;
-    });
-    await this.loadInitialData();
-    await this.initForm();
   }
 
   async initForm() {
@@ -177,7 +160,7 @@ export class InquiryFormComponent implements OnInit {
           this.currentInquiry.providerQuotations.reduce(
             (acc, providerQuotation) => {
               acc.set(
-                providerQuotation.provider.documentId!,
+                providerQuotation.providerId,
                 providerQuotation,
               );
               return acc;
@@ -191,10 +174,6 @@ export class InquiryFormComponent implements OnInit {
         id: this.currentInquiry.documentId,
         modifier: this.currentUser?.username ?? null,
         date: new Date(this.currentInquiry.date),
-        dateRanges: this.currentInquiry.dateRanges.map((dateRange) => ({
-          start: new Date(dateRange.start),
-          end: new Date(dateRange.end),
-        })),
         customPackageOptions:
           this.currentInquiry.customPackageOptions?.split(';') || [],
       } as any);
@@ -208,12 +187,27 @@ export class InquiryFormComponent implements OnInit {
     }
   }
 
+  async ngOnInit() {
+    this.authService.currentUser$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((user) => {
+        this.currentUser = user;
+      });
+
+    // Load initial data that we only need once
+    this.inquiryService.getInquiryStatuses().subscribe((statuses) => {
+      this.statusOptions = statuses;
+    });
+    await this.loadInitialData();
+    await this.initForm();
+  }
+
   saveInquiry() {
     if (this.inquiryForm.valid) {
       const formValue = this.inquiryForm.getRawValue();
       const toSave = {
         ...formValue,
-        customPackageOptions: formValue.customPackageOptions?.join(';'),
+        customPackageOptions: formValue.customPackageOptions,
       };
 
       this.saving = true;
@@ -262,21 +256,6 @@ export class InquiryFormComponent implements OnInit {
         detail: 'Please fill in all required fields',
       });
     }
-  }
-
-  newDateRange(): FormGroup {
-    return this.formBuilder.group({
-      start: [null],
-      end: [null],
-    });
-  }
-
-  addDateRange() {
-    this.dateRanges.push(this.newDateRange());
-  }
-
-  removeDateRange(index: number) {
-    this.dateRanges.removeAt(index);
   }
 
   sendQuotations() {
@@ -398,16 +377,16 @@ export class InquiryFormComponent implements OnInit {
     // Prepare the quotation data
     const quotationData = {
       clientName: inquiryData.clientName,
-      destination: inquiryData.destination,
-      title: `${inquiryData?.travelDays}D${inquiryData?.travelNights}N ${inquiryData?.destination} Package`,
-      travelDates: inquiryData?.dateRanges,
+      destination: inquiryData.travelDetails.destination,
+      title: `${inquiryData?.travelDetails.days}D${inquiryData?.travelDetails.nights}N ${inquiryData?.travelDetails.destination} Package`,
+      travelDates: inquiryData?.travelDetails.startDate,
       ratePerPax:
-        providerQuotation.currency === 'PHP'
-          ? providerQuotation.price
-          : providerQuotation.phpEquivalent,
-      noOfPax: (inquiryData?.paxAdult ?? 0) + (inquiryData?.paxChild ?? 0),
+        providerQuotation.currencyCode === 'PHP'
+          ? providerQuotation.priceAmount
+          : providerQuotation.phpEquivalentAmount,
+      noOfPax: (inquiryData?.travelDetails.adults ?? 0) + (inquiryData?.travelDetails.children ?? 0),
       country: inquiryData?.country,
-      provider: providerQuotation.provider,
+      provider: providerQuotation.providerId,
       packageType: inquiryData?.packageType,
       customPackageOptions: inquiryData?.customPackageOptions,
       inquiryId: this.inquiryId,

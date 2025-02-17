@@ -1,27 +1,27 @@
 import { AuditedBaseModel, BaseModel } from './base.model';
-import { Provider } from './provider.model';
 import { Country } from '@models/country.model';
 
 export interface Inquiry extends AuditedBaseModel {
-  clientName: string;
+  status: string;
   date: Date;
+  clientName: string;
   country: Country;
-  contactPoint: string;
-  contactPointOther?: string;
-  travelDays: number;
-  travelNights: number;
-  destination: string;
-  dateRanges: DateRange[];
-  preferredHotel: string;
-  paxAdult: number;
-  paxChild: number;
-  paxChildAges?: string;
+  source: string;
+  travelDetails: {
+    countryId: string,
+    destination: string,
+    days: number,
+    nights: number,
+    startDate: Date,
+    endDate: Date,
+    preferredHotel: string,
+    adults: number,
+    children: number
+  },
   packageType: string;
-  customPackageOptions?: string;
-  otherServices?: string;
+  customPackageOptions: string | null;
   providerQuotations: ProviderQuotation[];
-  remarks?: string;
-  inquiryStatus: string;
+  remarks: string | null;
 }
 
 export interface DateRange {
@@ -31,15 +31,14 @@ export interface DateRange {
 
 export interface ProviderQuotation {
   includeInEmail: boolean;
-  providerStatus: string;
-  price: number | null;
-  currency: string;
-  exchangeRate?: number | null;
-  exchangeRateLastUpdated?: Date | null;
-  phpEquivalent?: number | null;
-  remarks?: string;
-  emailRemarks?: string | null;
-  provider: Provider;
+  status: string;
+  priceAmount: number | null;
+  currencyCode: string | null;
+  exchangeRate: number | null;
+  phpEquivalentAmount: number | null;
+  emailQuotation: string | null;
+  internalRemarks: string | null;
+  providerId: string;
   sent: boolean;
 }
 

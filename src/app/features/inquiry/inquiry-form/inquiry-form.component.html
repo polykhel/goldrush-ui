@@ -12,7 +12,7 @@
           <p-select
             [options]="statusOptions"
             [styleClass]="'w-full'"
-            formControlName="inquiryStatus"
+            formControlName="status"
             optionLabel="label"
             optionValue="value"
             placeholder="Select Status">
@@ -25,7 +25,7 @@
               </p-fluid>
             </ng-template>
           </p-select>
-          <label for="inquiryStatus">Status</label>
+          <label for="status">Status</label>
         </p-float-label>
 
         <p-float-label variant="on">
@@ -42,35 +42,35 @@
         </p-float-label>
       </div>
 
-      <div class="mt-4">
-        <label class="text-gray-700 font-semibold block mb-2">Contact Point</label>
+      <div class="mt-4" formGroupName="source">
+        <label class="text-gray-700 font-semibold block mb-2">Source</label>
         <div class="flex flex-wrap items-center gap-4">
           <div class="flex items-center">
-            <p-radio-button formControlName="contactPoint" inputId="contactPointFB" value="fb"/>
-            <label class="ml-2" for="contactPointFB">Facebook</label>
+            <p-radio-button formControlName="type" inputId="sourceFB" value="fb"/>
+            <label class="ml-2" for="sourceFB">Facebook</label>
           </div>
           <div class="flex items-center">
-            <p-radio-button formControlName="contactPoint" inputId="contactPointPM" value="pm"/>
-            <label class="ml-2" for="contactPointPM">Private Message</label>
+            <p-radio-button formControlName="type" inputId="sourcePM" value="pm"/>
+            <label class="ml-2" for="sourcePM">Private Message</label>
           </div>
-          <input class="w-48" formControlName="contactPointOther" pInputText placeholder="Others"
+          <input class="w-48" formControlName="other" pInputText placeholder="Others"
                  type="text">
         </div>
       </div>
     </section>
 
     <!-- Travel Details Section -->
-    <section class="mb-6">
+    <section class="mb-6" formGroupName="travelDetails">
       <h3 class="text-lg font-bold mb-4 text-gray-700 border-b pb-2">Travel Details</h3>
       <p-fluid class="grid grid-cols-2 gap-4 mb-4">
         <p-float-label variant="on">
-          <p-select [options]="countries" formControlName="country" inputId="country"
+          <p-select [options]="countries" formControlName="countryId" inputId="countryId"
                     optionLabel="name">
             <ng-template pTemplate="dropdownicon">
               <i class="pi pi-map"></i>
             </ng-template>
           </p-select>
-          <label for="country">Country</label>
+          <label for="countryId">Country</label>
         </p-float-label>
 
         <p-float-label variant="on">
@@ -80,61 +80,48 @@
         </p-float-label>
 
         <p-float-label variant="on">
-          <p-input-number [showButtons]="true" formControlName="travelDays" inputId="days"/>
+          <p-input-number [showButtons]="true" formControlName="days" inputId="days"/>
           <label for="days">Days</label>
         </p-float-label>
 
         <p-float-label variant="on">
-          <p-input-number [showButtons]="true" formControlName="travelNights" inputId="nights"/>
+          <p-input-number [showButtons]="true" formControlName="nights" inputId="nights"/>
           <label for="nights">Nights</label>
         </p-float-label>
       </p-fluid>
 
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div formArrayName="dateRanges">
-          <label class="text-gray-700 font-semibold block mb-2">Preferred Travel Dates</label>
-          <div *ngFor="let _ of dateRanges.controls; let i = index" [formGroupName]="i"
-               class="mb-2 grid gap-1 grid-cols-[40%_40%_10%]">
+        <div>
+          <label class="text-gray-700 font-semibold block mb-2">Travel Dates</label>
+          <div class="grid gap-4 grid-cols-2">
             <p-float-label variant="on">
-              <p-date-picker [inputId]="'startDate' + i" [showIcon]="true" dateFormat="mm/dd/y"
-                             formControlName="start" iconDisplay="input"/>
-              <label for="'startDate' + i">Start Date</label>
+              <p-date-picker [showIcon]="true" dateFormat="mm/dd/y" formControlName="startDate" iconDisplay="input"/>
+              <label for="startDate">Start Date</label>
             </p-float-label>
             <p-float-label variant="on">
-              <p-date-picker [inputId]="'endDate' + i" [showIcon]="true" dateFormat="mm/dd/y"
-                             formControlName="end" iconDisplay="input"/>
-              <label [for]="'endDate' + i">End Date</label>
+              <p-date-picker [showIcon]="true" dateFormat="mm/dd/y" formControlName="endDate" iconDisplay="input"/>
+              <label for="endDate">End Date</label>
             </p-float-label>
-            <p-button (click)="removeDateRange(i)" *ngIf="dateRanges.length > 1" [text]="true"
-                      icon="pi pi-times"
-                      severity="danger" size="small"/>
           </div>
-          <p-button (click)="addDateRange()" [text]="true" icon="pi pi-plus" label="Add Date Range"
-                    size="small"/>
         </div>
         <div>
           <label class="text-gray-700 font-semibold block mb-2">Preferred Hotel(s)</label>
           <div class="flex items-center">
-            <input fluid formControlName="preferredHotel" id="preferredHotel" pInputText
-                   type="text">
+            <input fluid formControlName="preferredHotel" id="preferredHotel" pInputText type="text">
           </div>
         </div>
       </div>
 
       <div class="mt-4">
         <label class="text-gray-700 font-semibold block mb-2">Number of Travelers</label>
-        <p-fluid class="grid grid-cols-2 md:grid-cols-3 gap-4">
+        <p-fluid class="grid grid-cols-2 gap-4">
           <p-float-label variant="on">
-            <p-input-number [showButtons]="true" formControlName="paxAdult" inputId="paxAdult"/>
-            <label for="paxAdult">Adults</label>
+            <p-input-number [showButtons]="true" formControlName="adults" inputId="adults"/>
+            <label for="adults">Adults</label>
           </p-float-label>
           <p-float-label variant="on">
-            <p-input-number [showButtons]="true" formControlName="paxChild" inputId="paxChild"/>
-            <label for="paxChild">Child</label>
-          </p-float-label>
-          <p-float-label *ngIf="inquiryForm.controls.paxChild.value" variant="on">
-            <input formControlName="paxChildAges" id="paxChildAges" pInputText type="text">
-            <label for="paxChildAges">Child Ages</label>
+            <p-input-number [showButtons]="true" formControlName="children" inputId="children"/>
+            <label for="children">Children</label>
           </p-float-label>
         </p-fluid>
       </div>
@@ -169,13 +156,7 @@
                 </div>
               </div>
             </div>
-
           </div>
-        </div>
-
-        <div>
-          <label class="text-gray-700 font-semibold block mb-2">Other Services</label>
-          <textarea class="w-full" formControlName="otherServices" pTextarea rows="5"></textarea>
         </div>
       </div>
     </section>
