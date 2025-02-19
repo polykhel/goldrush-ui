@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { NavbarComponent } from '@shared/components/navbar/navbar.component';
 import { AuthService } from '@services/auth.service';
@@ -11,11 +11,15 @@ import { SidebarComponent } from '@shared/components/sidebar/sidebar.component';
   styleUrl: './app.component.css',
   standalone: true,
 })
-export class AppComponent implements OnInit {
+export class AppComponent {
 
-  constructor(private authService: AuthService) {}
+  isLoggedIn = false;
 
-  ngOnInit() {
+  constructor(private authService: AuthService) {
     this.authService.init();
+    // Subscribe to the auth state changes
+    this.authService.currentUser$.subscribe(user => {
+      this.isLoggedIn = !!user;
+    });
   }
 }

@@ -62,6 +62,7 @@ export class AuthService implements OnDestroy {
   }
 
   public isLoggedIn(): boolean {
+    console.trace(this.currentUserSubject.getValue());
     return this.currentUserSubject.getValue() !== null;
   }
 

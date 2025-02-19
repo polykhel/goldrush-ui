@@ -1,7 +1,9 @@
 <div class="flex h-screen overflow-hidden">
-  <app-navbar class="fixed top-0 left-0 right-0 z-50" />
-  <app-sidebar class="fixed top-20 left-0 h-[calc(100vh-5rem)]" />
-  <div class="flex-1 mt-20 ml-24 flex flex-col">
+  <app-navbar class="fixed top-0 left-0 right-0 z-50"/>
+  @if (isLoggedIn) {
+    <app-sidebar class="fixed top-20 left-0 h-[calc(100vh-5rem)]"/>
+  }
+  <div [class.ml-24]="isLoggedIn" class="flex-1 mt-20 flex flex-col">
     <main class="flex-1 p-8 rounded-tl-[30px] shadow-inner bg-gray-100 overflow-y-auto">
       <router-outlet></router-outlet>
     </main>
