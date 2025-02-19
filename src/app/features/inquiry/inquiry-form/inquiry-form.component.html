@@ -183,7 +183,8 @@
                                     *ngFor="let quotationControl of quotations.controls; let i = index"
                                     [formGroup]="getProviderQuotationControl(i)"
                                     [isEditMode]="editMode"
-                                    [provider]="providerMap.get(quotationControl.get('providerId')?.value)!">
+                                    [provider]="providerMap.get(quotationControl.get('providerId')?.value)!"
+                                    (onRemove)="removeQuotation(i)">
             </app-provider-quotation>
           </div>
         </div>

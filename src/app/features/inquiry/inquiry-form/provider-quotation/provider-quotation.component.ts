@@ -41,6 +41,7 @@ export class ProviderQuotationComponent implements OnInit {
   @Input() isEditMode = false;
 
   @Output() onGenerateQuotation = new EventEmitter<ProviderQuotation>();
+  @Output() onRemove = new EventEmitter<void>();
 
   isLoadingRate = false;
   exchangeRateLastUpdated: Date | null = null;
@@ -137,5 +138,9 @@ export class ProviderQuotationComponent implements OnInit {
 
   generateQuotation() {
     this.onGenerateQuotation.emit(this.formGroup.getRawValue());
+  }
+
+  remove() {
+    this.onRemove.emit();
   }
 }

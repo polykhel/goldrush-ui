@@ -1,4 +1,4 @@
-import { DatePipe, NgForOf, NgIf } from '@angular/common';
+import { DatePipe, NgIf } from '@angular/common';
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -34,7 +34,6 @@ import { Fluid } from 'primeng/fluid';
     Button,
     Card,
     DatePipe,
-    NgForOf,
     InputGroup,
     InputGroupAddon,
     InputText,
@@ -141,16 +140,6 @@ export class InquiryListComponent implements OnInit, OnDestroy {
     }
   }
 
-  canGenerateQuotation(inquiry: Inquiry): boolean {
-    return inquiry.quotations?.some((pq) => pq.priceAmount);
-  }
-
-  navigateToQuotationGenerator(inquiry: Inquiry) {
-    this.router.navigate(['/quotation-generator'], {
-      queryParams: { inquiryId: inquiry.id },
-    });
-  }
-
   updateStatus(inquiry: Inquiry) {
     if (!inquiry.documentId) return;
     this.inquiryService
@@ -197,7 +186,6 @@ export class InquiryListComponent implements OnInit, OnDestroy {
       .subscribe({
         next: (response) => {
           this.inquiries = response.items;
-          console.log(this.inquiries);
           this.totalRecords = response.total;
           this.loading = false;
         },

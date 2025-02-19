@@ -9,6 +9,7 @@
       </a>
     </div>
     <div class="flex items-center gap-2">
+      <p-button (onClick)="remove()" [text]="true" icon="pi pi-trash" severity="danger"></p-button>
       <p-select [options]="quotationStatuses"
                 [styleClass]="'status-dropdown w-[200px]'"
                 formControlName="status"

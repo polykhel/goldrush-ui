@@ -435,7 +435,6 @@ export class InquiryFormComponent implements OnInit {
   }
 
   removeQuotation(index: number) {
-    const provider = this.quotations.at(index).get('providerId')?.value;
     this.quotations.removeAt(index);
     this.updateAvailableProviders();
   }
