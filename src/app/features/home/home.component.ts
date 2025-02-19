@@ -25,9 +25,7 @@ export class HomeComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.authService.currentUser$.subscribe(user => {
-      this.isLoggedIn = !!user;
-    });
+    this.isLoggedIn = this.authService.isLoggedIn();
 
     this.route.queryParams
       .pipe(takeUntil(this.destroy$))

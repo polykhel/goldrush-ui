@@ -8,7 +8,6 @@ import { inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
-import { AuthService } from '@services/auth.service';
 
 export const SKIP_AUTH = new HttpContextToken<boolean>(() => false);
 
@@ -20,7 +19,7 @@ export function authInterceptor(
     return next(req);
   }
 
-  const idToken = inject(AuthService).getToken();
+  const idToken = localStorage.getItem('id_token');
   const router = inject(Router);
 
   if (idToken) {

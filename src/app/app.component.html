@@ -3,8 +3,8 @@
   @if (isLoggedIn) {
     <app-sidebar class="fixed top-20 left-0 h-[calc(100vh-5rem)]"/>
   }
-  <div [class.ml-24]="isLoggedIn" class="flex-1 mt-20 flex flex-col">
-    <main class="flex-1 p-8 rounded-tl-[30px] shadow-inner bg-gray-100 overflow-y-auto">
+  <div [class.ml-24]="isLoggedIn" class="flex-1 mt-20 flex flex-col overflow-auto">
+    <main class="flex-1 p-8 rounded-tl-[30px] shadow-inner bg-gray-100">
       <router-outlet></router-outlet>
     </main>
     <footer class="py-4 px-6 bg-gray-100 text-gray-600 text-sm border-t">

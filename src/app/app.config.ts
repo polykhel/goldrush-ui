@@ -1,5 +1,5 @@
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
-import { ApplicationConfig, provideZoneChangeDetection } from '@angular/core';
+import { ApplicationConfig, inject, provideAppInitializer, provideZoneChangeDetection } from '@angular/core';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { provideRouter, withViewTransitions } from '@angular/router';
 import { authInterceptor } from '@core/interceptors/auth.interceptor';
@@ -7,6 +7,7 @@ import Aura from '@primeng/themes/aura';
 import { providePrimeNG } from 'primeng/config';
 
 import { routes } from './app.routes';
+import { AuthService } from '@services/auth.service';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -18,6 +19,10 @@ export const appConfig: ApplicationConfig = {
       theme: {
         preset: Aura,
       },
+    }),
+    provideAppInitializer(() => {
+      const authService = inject(AuthService);
+      return authService.loadCurrentUser();
     })
   ],
 };

@@ -1,12 +1,12 @@
 import { HttpClient, HttpContext } from '@angular/common/http';
 import { Injectable, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
+import { SKIP_AUTH } from '@core/interceptors/auth.interceptor';
 import { environment } from '@env/environment';
 import { Auth } from '@models/auth.model';
 import { User } from '@models/user.model';
 import dayjs from 'dayjs';
-import { BehaviorSubject, tap } from 'rxjs';
-import { SKIP_AUTH } from '@core/interceptors/auth.interceptor';
+import { BehaviorSubject, concatMap, Observable, of, tap } from 'rxjs';
 
 @Injectable({
   providedIn: 'root',
@@ -24,12 +24,6 @@ export class AuthService implements OnDestroy {
     this.startTokenCheck();
   }
 
-  public init() {
-    if (this.doesTokenExist()) {
-      this.loadCurrentUser();
-    }
-  }
-
   login(accessToken: string) {
     return this.http
       .get<Auth>(
@@ -41,8 +35,8 @@ export class AuthService implements OnDestroy {
       .pipe(
         tap((auth) => {
           this.setSession(auth);
-          this.loadCurrentUser();
         }),
+        concatMap(() => this.loadCurrentUser()),
       );
   }
 
@@ -62,7 +56,6 @@ export class AuthService implements OnDestroy {
   }
 
   public isLoggedIn(): boolean {
-    console.trace(this.currentUserSubject.getValue());
     return this.currentUserSubject.getValue() !== null;
   }
 
@@ -96,13 +89,16 @@ export class AuthService implements OnDestroy {
     this.router.navigate(['/home'], { queryParams: { loginRequired: true } });
   }
 
-  private loadCurrentUser() {
-    this.http.get<User>(`${this.baseUrl}/api/auth/me`).subscribe({
-      next: (user) => {
+  loadCurrentUser(): Observable<User | null> {
+    if (!this.doesTokenExist()) {
+      return of(null);
+    }
+
+    return this.http.get<User>(`${this.baseUrl}/api/auth/me`).pipe(
+      tap((user) => {
         this.currentUserSubject.next(user);
-      },
-      error: () => this.currentUserSubject.next(null),
-    });
+      }),
+    )
   }
 
   private setSession(auth: Auth) {
