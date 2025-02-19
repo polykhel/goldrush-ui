@@ -1,6 +1,7 @@
 import { NgClass } from '@angular/common';
 import { Component, Input, OnInit } from '@angular/core';
 import { RouterModule } from '@angular/router';
+import { AuthService } from '@services/auth.service';
 import { MenuItem } from 'primeng/api';
 import { MenuModule } from 'primeng/menu';
 
@@ -16,6 +17,7 @@ export class SidebarComponent implements OnInit {
   items: MenuItem[] = [];
 
   _collapsed = false;
+  loggedIn = false;
 
   get collapsed() {
     return this._collapsed;
@@ -33,7 +35,11 @@ export class SidebarComponent implements OnInit {
     }
   }
 
+  constructor(private authService: AuthService) {
+  }
+
   ngOnInit() {
+    this.loggedIn = this.authService.isLoggedIn();
     this.items = [
       {
         label: 'Home',

@@ -1,0 +1,22 @@
+<div class="flex flex-col items-center justify-center min-h-[calc(100vh-64px)] p-6">
+  <div class="w-full max-w-md bg-white rounded-lg shadow-lg p-8 text-center">
+    <div class="mb-8">
+      <i class="pi pi-shield text-4xl text-blue-600"></i>
+      <h1 class="text-2xl font-bold text-gray-800 mt-4">Employee Portal</h1>
+      <p class="text-gray-600 mt-2">Sign in to access the customer management system</p>
+    </div>
+
+    <p-button
+      (onClick)="login()"
+      class="w-full"
+      severity="primary">
+      <i class="pi pi-google mr-2"></i>
+      Sign in with Company Account
+    </p-button>
+
+    <div class="mt-6 text-sm text-gray-500">
+      <p>Please use your company Google account to sign in.</p>
+      <p class="mt-2">Contact IT support if you have trouble accessing the system.</p>
+    </div>
+  </div>
+</div>

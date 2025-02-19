@@ -25,7 +25,7 @@ export class AuthService implements OnDestroy {
   }
 
   public init() {
-    if (this.isLoggedIn()) {
+    if (this.doesTokenExist()) {
       this.loadCurrentUser();
     }
   }
@@ -57,8 +57,12 @@ export class AuthService implements OnDestroy {
     this.router.navigate(['/home']);
   }
 
-  public isLoggedIn() {
+  public doesTokenExist() {
     return !!localStorage.getItem('id_token') && this.isTokenValid();
+  }
+
+  public isLoggedIn(): boolean {
+    return this.currentUserSubject.getValue() !== null;
   }
 
   isTokenValid() {
