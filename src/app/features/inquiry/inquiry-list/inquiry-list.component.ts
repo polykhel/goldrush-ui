@@ -1,9 +1,9 @@
-import { DatePipe, NgIf } from '@angular/common';
+import { DatePipe } from '@angular/common';
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { InquiryService } from '@services/inquiry.service';
 import { Inquiry, InquiryStatus } from '@models/inquiry.model';
+import { InquiryService } from '@services/inquiry.service';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { Button } from 'primeng/button';
 import { Card } from 'primeng/card';
@@ -21,8 +21,6 @@ import {
   Subject,
   takeUntil,
 } from 'rxjs';
-import { Select } from 'primeng/select';
-import { Fluid } from 'primeng/fluid';
 
 @Component({
   selector: 'app-inquiry-list',
@@ -39,9 +37,6 @@ import { Fluid } from 'primeng/fluid';
     InputText,
     SelectButton,
     FormsModule,
-    NgIf,
-    Select,
-    Fluid,
   ],
   providers: [MessageService, ConfirmationService],
   templateUrl: './inquiry-list.component.html',
@@ -138,28 +133,6 @@ export class InquiryListComponent implements OnInit, OnDestroy {
         detail: 'Failed to delete inquiry',
       });
     }
-  }
-
-  updateStatus(inquiry: Inquiry) {
-    if (!inquiry.documentId) return;
-    this.inquiryService
-      .updateInquiryStatus(inquiry.documentId, inquiry.status)
-      .subscribe({
-        next: () => {
-          this.messageService.add({
-            severity: 'success',
-            summary: 'Status Updated',
-            detail: `The status of ${inquiry.clientName} has been updated to ${inquiry.status}.`,
-          });
-        },
-        error: () => {
-          this.messageService.add({
-            severity: 'error',
-            summary: 'Error',
-            detail: 'Failed to update the inquiry status.',
-          });
-        },
-      });
   }
 
   private setupSearch() {

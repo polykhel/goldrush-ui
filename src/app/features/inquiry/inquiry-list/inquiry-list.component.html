@@ -37,7 +37,6 @@
     [value]="inquiries"
     [rows]="10"
     [paginator]="true"
-    [tableStyle]="{ 'min-width': '75rem' }"
     [rowHover]="true"
     dataKey="id"
     [showCurrentPageReport]="true"
@@ -82,22 +81,7 @@
           {{ inquiry.travelDetails.startDate | date }} - {{ inquiry.travelDetails.endDate | date }}
         </td>
         <td>
-          <!-- Status Dropdown -->
-          <p-select
-            [options]="statusOptions"
-            optionLabel="label"
-            optionValue="value"
-            [(ngModel)]="inquiry.status"
-            (onChange)="updateStatus(inquiry)">
-            <ng-template let-status pTemplate="selectedItem">
-              <span [class]="status.color">{{status.label}}</span>
-            </ng-template>
-            <ng-template let-status pTemplate="item">
-              <p-fluid [class]="status.color">
-                <span [class]="status.color">{{status.label}}</span>
-              </p-fluid>
-            </ng-template>
-          </p-select>
+          {{ inquiry.status }}
         </td>
         <td>{{ inquiry.createdAt | date }}</td>
         <td>
