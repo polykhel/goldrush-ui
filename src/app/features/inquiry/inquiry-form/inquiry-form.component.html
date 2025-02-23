@@ -75,36 +75,33 @@
         </p-float-label>
 
         <p-float-label variant="on">
-          <p-input-number [showButtons]="true" formControlName="days" inputId="days"/>
-          <label for="days">Days</label>
+          <p-date-picker [showIcon]="true" dateFormat="mm/dd/y" formControlName="startDate" iconDisplay="input" (onSelect)="calculateTravelDuration()"/>
+          <label for="startDate">Start Date</label>
         </p-float-label>
 
         <p-float-label variant="on">
-          <p-input-number [showButtons]="true" formControlName="nights" inputId="nights"/>
-          <label for="nights">Nights</label>
+          <p-date-picker [showIcon]="true" dateFormat="mm/dd/y" formControlName="endDate" iconDisplay="input" (onSelect)="calculateTravelDuration()"/>
+          <label for="endDate">End Date</label>
         </p-float-label>
       </p-fluid>
 
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div>
-          <label class="text-gray-700 font-semibold block mb-2">Travel Dates</label>
-          <div class="grid gap-4 grid-cols-2">
-            <p-float-label variant="on">
-              <p-date-picker [showIcon]="true" dateFormat="mm/dd/y" formControlName="startDate" iconDisplay="input"/>
-              <label for="startDate">Start Date</label>
-            </p-float-label>
-            <p-float-label variant="on">
-              <p-date-picker [showIcon]="true" dateFormat="mm/dd/y" formControlName="endDate" iconDisplay="input"/>
-              <label for="endDate">End Date</label>
-            </p-float-label>
-          </div>
+        <div class="grid gap-4 grid-cols-2">
+          <p-float-label variant="on">
+            <p-input-number [showButtons]="true" formControlName="days" inputId="days"/>
+            <label for="days">Days</label>
+          </p-float-label>
+
+          <p-float-label variant="on">
+            <p-input-number [showButtons]="true" formControlName="nights" inputId="nights"/>
+            <label for="nights">Nights</label>
+          </p-float-label>
         </div>
-        <div>
-          <label class="text-gray-700 font-semibold block mb-2">Preferred Hotel(s)</label>
-          <div class="flex items-center">
-            <input fluid formControlName="preferredHotel" id="preferredHotel" pInputText type="text">
-          </div>
-        </div>
+
+        <p-float-label variant="on">
+          <input fluid formControlName="preferredHotel" id="preferredHotel" pInputText type="text">
+          <label for="preferredHotel">Preferred Hotel(s)</label>
+        </p-float-label>
       </div>
 
       <div class="mt-4">
@@ -119,7 +116,7 @@
             <label for="children">Children</label>
           </p-float-label>
           <p-float-label variant="on" *ngIf="childrenControl.value">
-            <input pInputText formControlName="childAges" inputId="childAges"/>
+            <input pInputText formControlName="childAges" id="childAges"/>
             <label for="childAges">Child Age(s)</label>
           </p-float-label>
         </p-fluid>

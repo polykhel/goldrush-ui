@@ -25,6 +25,7 @@ import { InquiryService } from '@services/inquiry.service';
 import { ProviderService } from '@services/provider.service';
 import { EmailData, prepareProviderEmail } from '@utils/email.util';
 import { PACKAGE_OPTIONS } from '@utils/package.util';
+import dayjs from 'dayjs';
 import { MessageService } from 'primeng/api';
 import { Button } from 'primeng/button';
 import { Checkbox } from 'primeng/checkbox';
@@ -166,9 +167,10 @@ export class InquiryFormComponent implements OnInit {
   async initForm() {
     const params = await firstValueFrom(this.route.params);
 
-    const id = params['id'] || this.inquiryId;
+    const id = params['id'];
     if (id) {
       this.editMode = true;
+      this.inquiryId = id;
       this.currentInquiry = await firstValueFrom(
         this.inquiryService.getInquiry(id),
       );
@@ -233,7 +235,7 @@ export class InquiryFormComponent implements OnInit {
             if (!this.editMode) {
               this.editMode = true;
               this.inquiryId = response.id!;
-              this.initForm();
+              this.router.navigate(['/inquiries', this.inquiryId]);
             }
           },
           error: (error) => {
@@ -465,6 +467,27 @@ export class InquiryFormComponent implements OnInit {
         acc.set(provider.id!, provider);
         return acc;
       }, new Map<string, Provider>());
+    }
+  }
+
+  calculateTravelDuration() {
+    const travelDetails = this.inquiryForm.get('travelDetails');
+    if (!travelDetails) return;
+
+    const startDate = travelDetails.get('startDate')?.value;
+    const endDate = travelDetails.get('endDate')?.value;
+
+    if (startDate && endDate) {
+      const start = dayjs(startDate);
+      const end = dayjs(endDate);
+
+      if (start.isBefore(end)) {
+        const days = end.diff(start, 'days') + 1;
+        const nights = days - 1;
+
+        travelDetails.get('days')?.setValue(days);
+        travelDetails.get('nights')?.setValue(nights);
+      }
     }
   }
 }

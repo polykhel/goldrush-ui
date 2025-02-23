@@ -1,7 +1,7 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
-import { NavbarComponent } from '@shared/components/navbar/navbar.component';
 import { AuthService } from '@services/auth.service';
+import { NavbarComponent } from '@shared/components/navbar/navbar.component';
 import { SidebarComponent } from '@shared/components/sidebar/sidebar.component';
 
 @Component({
@@ -11,11 +11,14 @@ import { SidebarComponent } from '@shared/components/sidebar/sidebar.component';
   styleUrl: './app.component.css',
   standalone: true,
 })
-export class AppComponent {
-
+export class AppComponent implements OnInit {
   isLoggedIn = false;
 
-  constructor(private authService: AuthService) {
-    this.isLoggedIn = this.authService.isLoggedIn();
+  constructor(private authService: AuthService) {}
+
+  ngOnInit() {
+    this.authService.currentUser$.subscribe((user) => {
+      this.isLoggedIn = !!user;
+    });
   }
 }
