@@ -18,9 +18,7 @@ export class AuthService implements OnDestroy {
   public currentUser$ = this.currentUserSubject.asObservable();
   private tokenCheckInterval: any;
 
-  constructor(
-    private router: Router,
-  ) {
+  constructor(private router: Router) {
     this.startTokenCheck();
   }
 
@@ -98,7 +96,7 @@ export class AuthService implements OnDestroy {
       tap((user) => {
         this.currentUserSubject.next(user);
       }),
-    )
+    );
   }
 
   private setSession(auth: Auth) {

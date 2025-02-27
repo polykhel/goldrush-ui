@@ -54,8 +54,8 @@ export class PackageService {
       },
       sort: ['travelPeriod:desc'],
     });
-    return this.http.get<ListData<Package>>(`${this.baseUrl}?${query}`).pipe(
-      map(response => response.data)
-    );
+    return this.http
+      .get<ListData<Package>>(`${this.baseUrl}?${query}`)
+      .pipe(map((response) => response.data));
   }
 }

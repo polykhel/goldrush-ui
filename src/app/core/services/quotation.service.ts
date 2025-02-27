@@ -10,7 +10,7 @@ import { map } from 'rxjs/operators';
 import { PageParams } from '@models/params.model';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class QuotationService {
   private http = inject(HttpClient);
@@ -27,55 +27,57 @@ export class QuotationService {
         : ['createdAt:desc'],
       populate: {
         travelDates: {
-          fields: ['start', 'end']
+          fields: ['start', 'end'],
         },
-      }
-    })
+      },
+    });
     return this.http.get<ListData<Quotation>>(`${this.baseUrl}?${query}`).pipe(
-      map(response => ({
-          items: response.data,
-            total: response.totalElements,
-        }
-      )
-    ));
+      map((response) => ({
+        items: response.data,
+        total: response.totalElements,
+      })),
+    );
   }
 
   getQuotation(id: string): Observable<Quotation> {
     const query = qs.stringify({
       populate: {
         travelDates: {
-          fields: ['start', 'end']
+          fields: ['start', 'end'],
         },
         country: {
-          fields: ['*']
+          fields: ['*'],
         },
         provider: {
-          fields: ['*']
+          fields: ['*'],
         },
         departure: {
-          fields: ['*']
+          fields: ['*'],
         },
         arrival: {
-          fields: ['*']
-        }
-      }
+          fields: ['*'],
+        },
+      },
     });
-    return this.http.get<SingleData<Quotation>>(`${this.baseUrl}/${id}?${query}`).pipe(
-      map(response => response.data)
-    );
+    return this.http
+      .get<SingleData<Quotation>>(`${this.baseUrl}/${id}?${query}`)
+      .pipe(map((response) => response.data));
   }
 
-
   createQuotation(quotation: Quotation): Observable<Quotation> {
-    return this.http.post<SingleData<Quotation>>(this.baseUrl, { data: transformBody(quotation) }).pipe(
-      map(response => response.data)
-    );
+    return this.http
+      .post<
+        SingleData<Quotation>
+      >(this.baseUrl, { data: transformBody(quotation) })
+      .pipe(map((response) => response.data));
   }
 
   updateQuotation(id: string, quotation: Quotation): Observable<Quotation> {
-    return this.http.put<SingleData<Quotation>>(`${this.baseUrl}/${id}`, { data: transformBody(quotation) }).pipe(
-      map(response => response.data)
-    );
+    return this.http
+      .put<
+        SingleData<Quotation>
+      >(`${this.baseUrl}/${id}`, { data: transformBody(quotation) })
+      .pipe(map((response) => response.data));
   }
 
   deleteQuotation(id: string): Observable<void> {

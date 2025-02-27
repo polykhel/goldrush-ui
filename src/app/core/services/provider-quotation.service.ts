@@ -11,6 +11,9 @@ export class ProviderQuotationService {
   private baseUrl = `${environment.backendUrl}/api/provider-quotation`;
 
   updateProviderQuotation(id: string, request: ProviderQuotationUpdateRequest) {
-    return this.http.patch<void>(`${this.baseUrl}/provider-quotation/${id}`, request);
+    return this.http.patch<void>(
+      `${this.baseUrl}/provider-quotation/${id}`,
+      request,
+    );
   }
 }

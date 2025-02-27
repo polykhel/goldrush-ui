@@ -12,7 +12,7 @@ import {
 import { ActivatedRoute, Router } from '@angular/router';
 import { AuditFields } from '@models/base.model';
 import { Country } from '@models/country.model';
-import { Inquiry, InquiryStatus, } from '@models/inquiry.model';
+import { Inquiry, InquiryStatus } from '@models/inquiry.model';
 import { Provider } from '@models/provider.model';
 import { CountryService } from '@services/country.service';
 import { DestroyService } from '@services/destroy.service';
@@ -22,7 +22,6 @@ import { ProviderService } from '@services/provider.service';
 import { ToastService } from '@services/toast.service';
 import { EmailData, prepareProviderEmail } from '@utils/email.util';
 import { PACKAGE_OPTIONS } from '@utils/package.util';
-import dayjs from 'dayjs';
 import { Button } from 'primeng/button';
 import { Checkbox } from 'primeng/checkbox';
 import { DatePicker } from 'primeng/datepicker';
@@ -36,14 +35,38 @@ import { Select } from 'primeng/select';
 import { Textarea } from 'primeng/textarea';
 import { Toast } from 'primeng/toast';
 import { finalize, firstValueFrom, takeUntil } from 'rxjs';
-import { EmailPreviewModalComponent } from './email-preview-modal/email-preview-modal.component';
-import { ProviderQuotationComponent } from './provider-quotation/provider-quotation.component';
-import { ProviderQuotation, ProviderQuotationEmailRequest } from '@models/provider-quotation.model';
+import {
+  ProviderQuotation,
+  ProviderQuotationEmailRequest,
+} from '@models/provider-quotation.model';
 import { ProviderQuotationService } from '@services/provider-quotation.service';
+import { EmailPreviewModalComponent } from '../../components/email-preview-modal/email-preview-modal.component';
+import { ProviderQuotationComponent } from '../../components/provider-quotation/provider-quotation.component';
+import dayjs from 'dayjs';
 
 @Component({
   selector: 'app-inquiry-form',
-  imports: [ReactiveFormsModule, RadioButton, DatePicker, FloatLabel, InputText, InputNumber, NgForOf, Button, NgIf, Textarea, DropdownModule, Select, Fluid, DatePipe, Toast, EmailPreviewModalComponent, ProviderQuotationComponent, Checkbox, FormsModule,],
+  imports: [
+    ReactiveFormsModule,
+    RadioButton,
+    DatePicker,
+    FloatLabel,
+    InputText,
+    InputNumber,
+    NgForOf,
+    Button,
+    NgIf,
+    Textarea,
+    DropdownModule,
+    Select,
+    Fluid,
+    DatePipe,
+    Toast,
+    EmailPreviewModalComponent,
+    ProviderQuotationComponent,
+    Checkbox,
+    FormsModule,
+  ],
   templateUrl: './inquiry-form.component.html',
 })
 export class InquiryFormComponent implements OnInit {
@@ -68,8 +91,18 @@ export class InquiryFormComponent implements OnInit {
   selectedProvider: string | null = null;
   providerQuotationRequest: ProviderQuotationEmailRequest | null = null;
 
-  constructor(private providerService: ProviderService, private countryService: CountryService, private destroy$: DestroyService, private inquiryService: InquiryService, private providerQuotationService: ProviderQuotationService, private emailService: EmailService, private toastService: ToastService, private route: ActivatedRoute, private location: Location, private router: Router,) {
-  }
+  constructor(
+    private providerService: ProviderService,
+    private countryService: CountryService,
+    private destroy$: DestroyService,
+    private inquiryService: InquiryService,
+    private providerQuotationService: ProviderQuotationService,
+    private emailService: EmailService,
+    private toastService: ToastService,
+    private route: ActivatedRoute,
+    private location: Location,
+    private router: Router,
+  ) {}
 
   get quotations(): FormArray {
     return this.inquiryForm.get('quotations') as FormArray;
@@ -87,22 +120,42 @@ export class InquiryFormComponent implements OnInit {
     return this.fb.group({
       id: new FormControl<string | null>(null),
       status: this.fb.nonNullable.control<string>('NEW', [Validators.required]),
-      date: this.fb.nonNullable.control<Date>(new Date(), [Validators.required,]),
-      clientName: this.fb.nonNullable.control<string>('', [Validators.required,]),
+      date: this.fb.nonNullable.control<Date>(new Date(), [
+        Validators.required,
+      ]),
+      clientName: this.fb.nonNullable.control<string>('', [
+        Validators.required,
+      ]),
       source: this.fb.nonNullable.control<string>('', [Validators.required]),
       travelDetails: this.fb.group({
-        countryId: this.fb.nonNullable.control<string>(null!, [Validators.required,]),
-        destination: this.fb.nonNullable.control<string>('', [Validators.required,]),
+        countryId: this.fb.nonNullable.control<string>(null!, [
+          Validators.required,
+        ]),
+        destination: this.fb.nonNullable.control<string>('', [
+          Validators.required,
+        ]),
         days: this.fb.nonNullable.control<number>(null!, [Validators.required]),
-        nights: this.fb.nonNullable.control<number>(null!, [Validators.required,]),
-        startDate: this.fb.nonNullable.control<Date>(null!, [Validators.required,]),
-        endDate: this.fb.nonNullable.control<Date>(null!, [Validators.required,]),
+        nights: this.fb.nonNullable.control<number>(null!, [
+          Validators.required,
+        ]),
+        startDate: this.fb.nonNullable.control<Date>(null!, [
+          Validators.required,
+        ]),
+        endDate: this.fb.nonNullable.control<Date>(null!, [
+          Validators.required,
+        ]),
         preferredHotel: [''],
-        adults: this.fb.nonNullable.control<number>(null!, [Validators.required,]),
-        children: this.fb.nonNullable.control<number>(null!, [Validators.required,]),
+        adults: this.fb.nonNullable.control<number>(null!, [
+          Validators.required,
+        ]),
+        children: this.fb.nonNullable.control<number>(null!, [
+          Validators.required,
+        ]),
         childAges: new FormControl<string | null>(null),
       }),
-      packageType: this.fb.nonNullable.control<string>('ALL_INCLUSIVE', [Validators.required,]),
+      packageType: this.fb.nonNullable.control<string>('ALL_INCLUSIVE', [
+        Validators.required,
+      ]),
       customPackageOptions: [[] as string[]],
       quotations: this.fb.nonNullable.array<ProviderQuotation>([]),
       remarks: new FormControl<string | null>(null),
@@ -121,7 +174,9 @@ export class InquiryFormComponent implements OnInit {
     if (id) {
       this.editMode = true;
       this.inquiryId = id;
-      this.currentInquiry = await firstValueFrom(this.inquiryService.getInquiry(id),);
+      this.currentInquiry = await firstValueFrom(
+        this.inquiryService.getInquiry(id),
+      );
       this.auditFields = {
         createdBy: this.currentInquiry.createdBy,
         createdAt: this.currentInquiry.createdAt,
@@ -138,11 +193,15 @@ export class InquiryFormComponent implements OnInit {
       }
 
       this.inquiryForm.patchValue({
-        ...this.currentInquiry, date: new Date(this.currentInquiry.date), travelDetails: {
+        ...this.currentInquiry,
+        date: new Date(this.currentInquiry.date),
+        travelDetails: {
           ...this.currentInquiry.travelDetails,
           startDate: new Date(this.currentInquiry.travelDetails.startDate),
           endDate: new Date(this.currentInquiry.travelDetails.endDate),
-        }, customPackageOptions: this.currentInquiry.customPackageOptions?.split(';') || [],
+        },
+        customPackageOptions:
+          this.currentInquiry.customPackageOptions?.split(';') || [],
       });
     }
   }
@@ -151,35 +210,48 @@ export class InquiryFormComponent implements OnInit {
     if (this.inquiryForm.valid) {
       const formValue = this.inquiryForm.getRawValue();
       const toSave = {
-        ...formValue, customPackageOptions: formValue.customPackageOptions?.join(';') ?? null,
+        ...formValue,
+        customPackageOptions: formValue.customPackageOptions?.join(';') ?? null,
       };
 
       this.saving = true;
-      this.toastService.info('Saving', `${this.editMode ? 'Updating' : 'Creating'} inquiry...`,);
+      this.toastService.info(
+        'Saving',
+        `${this.editMode ? 'Updating' : 'Creating'} inquiry...`,
+      );
 
       this.inquiryService
-      .saveInquiry(toSave)
-      .pipe(finalize(() => (this.saving = false)), takeUntil(this.destroy$),)
-      .subscribe({
-        next: (response) => {
-          this.toastService.success('Success', 'Inquiry saved successfully');
+        .saveInquiry(toSave)
+        .pipe(
+          finalize(() => (this.saving = false)),
+          takeUntil(this.destroy$),
+        )
+        .subscribe({
+          next: (response) => {
+            this.toastService.success('Success', 'Inquiry saved successfully');
 
-          if (!this.editMode) {
-            this.editMode = true;
-            this.inquiryId = response.id!;
-            this.router.navigate(['/inquiries', this.inquiryId]);
-          } else {
-            this.auditFields = {
-              ...this.auditFields, updatedBy: response.updatedBy, updatedAt: response.updatedAt,
-            };
-          }
-        }, error: (error) => {
-          this.toastService.defaultError('Failed to save inquiry');
-          console.error('Error saving inquiry:', error);
-        },
-      });
+            if (!this.editMode) {
+              this.editMode = true;
+              this.inquiryId = response.id!;
+              this.router.navigate(['/inquiries', this.inquiryId]);
+            } else {
+              this.auditFields = {
+                ...this.auditFields,
+                updatedBy: response.updatedBy,
+                updatedAt: response.updatedAt,
+              };
+            }
+          },
+          error: (error) => {
+            this.toastService.defaultError('Failed to save inquiry');
+            console.error('Error saving inquiry:', error);
+          },
+        });
     } else {
-      this.toastService.warn('Validation Error', 'Please fill in all required fields',);
+      this.toastService.warn(
+        'Validation Error',
+        'Please fill in all required fields',
+      );
     }
   }
 
@@ -196,7 +268,8 @@ export class InquiryFormComponent implements OnInit {
       this.providerQuotationRequest = {
         providerId: providerQuotation.providerId,
         dateRange: {
-          start: inquiry.travelDetails.startDate, end: inquiry.travelDetails.endDate,
+          start: inquiry.travelDetails.startDate,
+          end: inquiry.travelDetails.endDate,
         },
         travelDays: inquiry.travelDetails.days,
         travelNights: inquiry.travelDetails.nights,
@@ -216,51 +289,63 @@ export class InquiryFormComponent implements OnInit {
       this.emailData = prepareProviderEmail(this.providerQuotationRequest);
       this.showEmailPreview = true;
     } else {
-      this.toastService.warn('Validation Error', 'Please fill in all required field',);
+      this.toastService.warn(
+        'Validation Error',
+        'Please fill in all required field',
+      );
     }
   }
 
   handleSendEmail() {
     if (!this.emailData || !this.providerQuotationRequest) {
-      this.toastService.warn('Validation Error', 'Email data not found',);
+      this.toastService.warn('Validation Error', 'Email data not found');
       return;
     }
 
     this.isSending = true;
-    this.emailService.sendEmail({
-      to: this.providerQuotationRequest.to,
-      subject: this.emailData?.subject,
-      content: this.emailData?.emailContent,
-    }).subscribe({
-      next: () => {
-        this.quotations.controls.forEach((control) => {
-          const providerId = control.get('providerId')?.value;
-          if (providerId === this.providerQuotationRequest?.providerId) {
-            control.patchValue({
-              sent: true,
-            });
+    this.emailService
+      .sendEmail({
+        to: this.providerQuotationRequest.to,
+        subject: this.emailData?.subject,
+        content: this.emailData?.emailContent,
+      })
+      .subscribe({
+        next: () => {
+          this.quotations.controls.forEach((control) => {
+            const providerId = control.get('providerId')?.value;
+            if (providerId === this.providerQuotationRequest?.providerId) {
+              control.patchValue({
+                sent: true,
+              });
 
-            this.providerQuotationService.updateProviderQuotation(control.get('id')?.value, {
-              emailQuotation: control.get('emailQuotation')?.value, sent: true
-            })
-            .subscribe();
-          }
-        });
+              this.providerQuotationService
+                .updateProviderQuotation(control.get('id')?.value, {
+                  emailQuotation: control.get('emailQuotation')?.value,
+                  sent: true,
+                })
+                .subscribe();
+            }
+          });
 
-        this.toastService.success('Emails sent successfully');
-        this.showEmailPreview = false;
-      }, error: (error) => {
-        this.toastService.defaultError('Failed to send emails');
-        console.error('Error sending emails:', error);
-      }, complete: () => {
-        this.isSending = false;
-      }
-    });
+          this.toastService.success('Emails sent successfully');
+          this.showEmailPreview = false;
+        },
+        error: (error) => {
+          this.toastService.defaultError('Failed to send emails');
+          console.error('Error sending emails:', error);
+        },
+        complete: () => {
+          this.isSending = false;
+        },
+      });
   }
 
   generateQuotation(providerQuotationId: string) {
     if (!this.inquiryId) {
-      this.toastService.warn('Inquiry not saved yet', 'Please save inquiry first before generating',);
+      this.toastService.warn(
+        'Inquiry not saved yet',
+        'Please save inquiry first before generating',
+      );
     }
 
     this.router.navigate(['/quotations/new'], {
@@ -281,12 +366,18 @@ export class InquiryFormComponent implements OnInit {
       providerId: [quotation?.providerId ?? null],
       priceAmount: [quotation?.priceAmount ?? null],
       currencyCode: [quotation?.currencyCode ?? 'PHP'],
-      exchangeRate: [{value: quotation?.exchangeRate ?? null, disabled: true},],
-      exchangeRateLastUpdated: [{
-        value: quotation?.exchangeRateLastUpdated ?? null,
-        disabled: true
-      },],
-      phpEquivalentAmount: [{value: quotation?.phpEquivalentAmount ?? null, disabled: true},],
+      exchangeRate: [
+        { value: quotation?.exchangeRate ?? null, disabled: true },
+      ],
+      exchangeRateLastUpdated: [
+        {
+          value: quotation?.exchangeRateLastUpdated ?? null,
+          disabled: true,
+        },
+      ],
+      phpEquivalentAmount: [
+        { value: quotation?.phpEquivalentAmount ?? null, disabled: true },
+      ],
       internalRemarks: [quotation?.internalRemarks ?? null],
       emailQuotation: [quotation?.emailQuotation ?? null],
       sent: [quotation?.sent ?? false],
@@ -295,7 +386,12 @@ export class InquiryFormComponent implements OnInit {
   }
 
   addQuotation() {
-    if (this.selectedProvider && !this.quotations.controls.some((control) => control.get('providerId')?.value === this.selectedProvider,)) {
+    if (
+      this.selectedProvider &&
+      !this.quotations.controls.some(
+        (control) => control.get('providerId')?.value === this.selectedProvider,
+      )
+    ) {
       const provider = this.providerMap.get(this.selectedProvider);
       if (provider) {
         const group = this.buildProviderQuotationForm();
@@ -335,16 +431,26 @@ export class InquiryFormComponent implements OnInit {
   }
 
   private updateAvailableProviders() {
-    const usedProviders = new Set(this.quotations.controls.map((control) => control.get('providerId')?.value,),);
-    this.availableProviders = this.providers.filter((provider) => !usedProviders.has(provider.id),);
+    const usedProviders = new Set(
+      this.quotations.controls.map(
+        (control) => control.get('providerId')?.value,
+      ),
+    );
+    this.availableProviders = this.providers.filter(
+      (provider) => !usedProviders.has(provider.id),
+    );
   }
 
   private async loadInitialData() {
-    this.statusOptions = await firstValueFrom(this.inquiryService.getInquiryStatuses(),);
+    this.statusOptions = await firstValueFrom(
+      this.inquiryService.getInquiryStatuses(),
+    );
 
     this.countries = await firstValueFrom(this.countryService.getCountries());
 
-    const providerListData = await firstValueFrom(this.providerService.getProviders(),);
+    const providerListData = await firstValueFrom(
+      this.providerService.getProviders(),
+    );
     if (providerListData) {
       this.providers = providerListData;
       this.availableProviders = [...providerListData];

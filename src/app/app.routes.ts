@@ -1,14 +1,14 @@
 import { Routes } from '@angular/router';
-import { HomeComponent } from './features/home/home.component';
 import { AuthCallbackComponent } from '@core/auth/auth-callback.component';
 import { AuthGuard } from '@core/guards/auth.guard';
-import { InquiryListComponent } from './features/inquiry/inquiry-list/inquiry-list.component';
-import { InquiryFormComponent } from './features/inquiry/inquiry-form/inquiry-form.component';
-import { QuotationListComponent } from './features/quotation/quotation-list/quotation-list.component';
-import { QuotationGeneratorComponent } from './features/quotation/quotation-generator/quotation-generator.component';
-import { PaymentSchedulerComponent } from './features/payment/payment-scheduler/payment-scheduler.component';
-import { ListToJsonComponent } from './features/tools/list-to-json/list-to-json.component';
 import { ForbiddenComponent } from '@shared/components/forbidden/forbidden.component';
+import { HomeComponent } from './home/home.component';
+import { InquiryListComponent } from './inquiry/pages/inquiry-list/inquiry-list.component';
+import { InquiryFormComponent } from './inquiry/pages/inquiry-form/inquiry-form.component';
+import { QuotationListComponent } from './quotation/pages/quotation-list/quotation-list.component';
+import { QuotationGeneratorComponent } from './quotation/pages/quotation-generator/quotation-generator.component';
+import { PaymentSchedulerComponent } from './payment/pages/payment-scheduler/payment-scheduler.component';
+import { ListToJsonComponent } from './tools/pages/list-to-json/list-to-json.component';
 
 export const routes: Routes = [
   {
@@ -82,7 +82,7 @@ export const routes: Routes = [
   },
   {
     path: 'forbidden',
-    component: ForbiddenComponent
+    component: ForbiddenComponent,
   },
   {
     path: '**',

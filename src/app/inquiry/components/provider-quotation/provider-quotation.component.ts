@@ -118,11 +118,13 @@ export class ProviderQuotationComponent implements OnInit {
         this.calculatePhpEquivalent();
 
         const value = this.formGroup.getRawValue();
-        this.providerQuotationService.updateProviderQuotation(value.id, {
-          exchangeRate: rate,
-          exchangeRateLastUpdated: this.exchangeRateLastUpdated,
-          phpEquivalentAmount: value.phpEquivalentAmount,
-        }).subscribe();
+        this.providerQuotationService
+          .updateProviderQuotation(value.id, {
+            exchangeRate: rate,
+            exchangeRateLastUpdated: this.exchangeRateLastUpdated,
+            phpEquivalentAmount: value.phpEquivalentAmount,
+          })
+          .subscribe();
       },
       error: () => {
         this.toastService.defaultError('Failed to fetch exchange rate');
@@ -152,20 +154,25 @@ export class ProviderQuotationComponent implements OnInit {
   generateQuotation() {
     const value = this.formGroup.getRawValue();
 
-    this.providerQuotationService.updateProviderQuotation(value.id, {
-      currencyCode: value.currencyCode,
-      priceAmount: value.priceAmount,
-      internalRemarks: value.internalRemarks,
-      status: value.status
-    }).subscribe({
-      next: () => {
-        this.toastService.success('Success', 'Quotation generated successfully');
-        this.onGenerateQuotation.emit(value.id);
-      },
-      error: () => {
-        this.toastService.defaultError('Failed to generate quotation');
-      },
-    });
+    this.providerQuotationService
+      .updateProviderQuotation(value.id, {
+        currencyCode: value.currencyCode,
+        priceAmount: value.priceAmount,
+        internalRemarks: value.internalRemarks,
+        status: value.status,
+      })
+      .subscribe({
+        next: () => {
+          this.toastService.success(
+            'Success',
+            'Quotation generated uccessfully',
+          );
+          this.onGenerateQuotation.emit(value.id);
+        },
+        error: () => {
+          this.toastService.defaultError('Failed to generate quotatin');
+        },
+      });
   }
 
   remove() {

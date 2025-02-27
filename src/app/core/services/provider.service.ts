@@ -21,22 +21,24 @@ export class ProviderService {
           documentId: {
             $eq: countryId,
           },
-        }
+        },
       },
     });
-    return this.http.get<ListData<Provider>>(`${this.baseUrl}?${query}`).pipe(
-      map(response => response.data)
-    );
+    return this.http
+      .get<ListData<Provider>>(`${this.baseUrl}?${query}`)
+      .pipe(map((response) => response.data));
   }
 
   getProviders(): Observable<Provider[]> {
     return this.http.get<Provider[]>(`${this.baseUrl}`).pipe(
-      map(response => response.map(provider => {
-        return {
-          ...provider,
-          logo: `${environment.fileUrl}/logos/${provider.logo}`
-        };
-      }))
+      map((response) =>
+        response.map((provider) => {
+          return {
+            ...provider,
+            logo: `${environment.fileUrl}/logos/${provider.logo}`,
+          };
+        }),
+      ),
     );
   }
 }

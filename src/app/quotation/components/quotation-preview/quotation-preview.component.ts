@@ -4,7 +4,6 @@ import { formatDateRange } from '@utils/date.util';
 import { Quotation } from '@models/quotation.model';
 import dayjs from 'dayjs';
 
-
 import { DateRange } from '@models/date-range.model';
 
 @Component({
@@ -13,7 +12,6 @@ import { DateRange } from '@models/date-range.model';
   templateUrl: './quotation-preview.component.html',
 })
 export class QuotationPreviewComponent {
-
   @Input() quotation?: Quotation | null;
 
   today = dayjs().format('MMM DD, YYYY');
