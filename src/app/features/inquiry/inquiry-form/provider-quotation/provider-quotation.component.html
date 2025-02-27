@@ -31,6 +31,11 @@
                     rows="2"></textarea>
         <label [for]="'emailRemarks-' + provider.name">Remarks to include in email</label>
       </p-float-label>
+
+      <p-button (onClick)="sendQuotation()" [rounded]="true"
+                class="transform transition-all duration-300 hover:scale-105" icon="pi pi-send"
+                label="Send" severity="success"
+                type="button"/>
     </div>
 
     <!-- Pricing Section - Show when status is received -->

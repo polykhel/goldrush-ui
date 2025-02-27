@@ -1,5 +1,5 @@
 import { HttpClient } from '@angular/common/http';
-import { Injectable, inject } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { environment } from '@env/environment';
 import { Observable } from 'rxjs';
 
@@ -11,13 +11,15 @@ export interface EmailOptions {
 }
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class EmailService {
   private http = inject(HttpClient);
   private baseUrl = `${environment.backendUrl}/api/email`;
 
   sendEmail(options: EmailOptions): Observable<any> {
-    return this.http.post(`${this.baseUrl}/send`, options);
+    console.log('email works');
+    return new Observable();
+    // return this.http.post(`${this.baseUrl}/send`, options);
   }
-} 
+}

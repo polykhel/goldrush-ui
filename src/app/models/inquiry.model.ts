@@ -6,17 +6,17 @@ export interface Inquiry extends AuditedBaseModel {
   clientName: string;
   source: string;
   travelDetails: {
-    countryId: string,
-    destination: string,
-    days: number,
-    nights: number,
-    startDate: Date,
-    endDate: Date,
-    preferredHotel: string | null,
-    adults: number,
-    children: number
-    childAges: string | null,
-  },
+    countryId: string;
+    destination: string;
+    days: number;
+    nights: number;
+    startDate: Date;
+    endDate: Date;
+    preferredHotel: string | null;
+    adults: number;
+    children: number;
+    childAges: string | null;
+  };
   packageType: string;
   customPackageOptions: string | null;
   quotations: ProviderQuotation[];
@@ -44,7 +44,7 @@ export interface DateRange {
 
 export interface ProviderQuotationRequest {
   providerId: string;
-  dateRanges: DateRange[];
+  dateRange: DateRange;
   travelDays: number;
   travelNights: number;
   destination: string;
@@ -55,9 +55,10 @@ export interface ProviderQuotationRequest {
   packageType: string;
   customPackageOptions?: string;
   preferredHotel: string | null;
-  otherServices?: string | null;
-  sender: string;
   emailRemarks?: string | null;
+  sender: string | null;
+  sent: boolean;
+  to: string;
 }
 
 export interface InquiryStatus extends BaseModel {

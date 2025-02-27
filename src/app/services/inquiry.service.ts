@@ -1,12 +1,12 @@
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { environment } from '@env/environment';
-import { ListData, SingleData } from '@models/base.model';
+import { ListData } from '@models/base.model';
 import { Inquiry, InquiryStatus } from '@models/inquiry.model';
+import { PageParams } from '@models/params.model';
 import qs from 'qs';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { PageParams } from '@models/params.model';
 
 type InquiryParams = PageParams & {
   status?: string;
@@ -29,7 +29,7 @@ export class InquiryService {
         : 'createdAt,desc',
       query: params.search,
       status: params.status,
-    })
+    });
 
     return this.http.get<ListData<Inquiry>>(`${this.baseUrl}?${query}`).pipe(
       map((response) => ({
@@ -48,9 +48,7 @@ export class InquiryService {
   }
 
   deleteInquiry(id: string): Observable<Inquiry> {
-    return this.http
-      .delete<SingleData<Inquiry>>(`${this.baseUrl}/${id}`)
-      .pipe(map((data) => data.data));
+    return this.http.delete<Inquiry>(`${this.baseUrl}/${id}`);
   }
 
   updateInquiryStatus(id: string, inquiryStatus: string) {
@@ -59,5 +57,11 @@ export class InquiryService {
 
   getInquiryStatuses() {
     return this.http.get<InquiryStatus[]>(`${this.baseUrl}/statuses`);
+  }
+
+  updateProviderQuotationSent(id: string, sent: boolean) {
+    return this.http.patch<void>(`${this.baseUrl}/provider-quotation/${id}`, {
+      sent,
+    });
   }
 }

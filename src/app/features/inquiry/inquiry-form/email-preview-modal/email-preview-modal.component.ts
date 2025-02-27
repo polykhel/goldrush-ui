@@ -1,60 +1,33 @@
 import { CommonModule } from '@angular/common';
-import {
-  Component,
-  EventEmitter,
-  Input,
-  OnChanges,
-  Output,
-  SimpleChanges,
-} from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { EmailData } from '@utils/email.util';
-import { Provider } from '@models/provider.model';
 import { PrimeTemplate } from 'primeng/api';
 import { Button } from 'primeng/button';
 import { Dialog } from 'primeng/dialog';
+import { Divider } from 'primeng/divider';
 import { TabsModule } from 'primeng/tabs';
 
 @Component({
   selector: 'app-email-preview-modal',
   standalone: true,
-  imports: [CommonModule, Dialog, TabsModule, Button, PrimeTemplate],
+  imports: [CommonModule, Dialog, TabsModule, Button, PrimeTemplate, Divider],
   templateUrl: './email-preview-modal.component.html',
 })
-export class EmailPreviewModalComponent implements OnChanges {
+export class EmailPreviewModalComponent {
   @Input() visible = false;
-  @Input() emailData!: Map<string, EmailData>;
-  @Input() providers!: Map<string, Provider>;
-  @Input() providerQuotations: any[] = [];
+  @Input() emailData!: EmailData;
   @Input() isSending = false;
 
   @Output() visibleChange = new EventEmitter<boolean>();
   @Output() send = new EventEmitter<void>();
   @Output() cancel = new EventEmitter<void>();
 
-  selectedTab: string = '';
-
-  ngOnChanges(changes: SimpleChanges): void {
-    if (changes['emailData']?.currentValue) {
-      const firstKey = this.emailData?.keys().next().value;
-      if (firstKey) {
-        this.selectedTab = firstKey;
-      }
-    }
+  isProviderSent(): boolean {
+    return this.emailData.sent;
   }
 
-  getProviderName(key: string): string {
-    return this.providers.get(key)?.name ?? 'Unknown Provider';
-  }
-
-  isProviderSent(providerId: string): boolean {
-    const quotation = this.providerQuotations.find(
-      (q) => q.provider === providerId,
-    );
-    return quotation?.sent || false;
-  }
-
-  getStatusClass(key: string): string {
-    return this.isProviderSent(key) ? 'text-green-600' : 'text-yellow-600';
+  getStatusClass(): string {
+    return this.isProviderSent() ? 'text-green-600' : 'text-yellow-600';
   }
 
   onSend() {
@@ -65,9 +38,5 @@ export class EmailPreviewModalComponent implements OnChanges {
     this.cancel.emit();
     this.visible = false;
     this.visibleChange.emit(false);
-  }
-
-  trackByKey(_: number, item: { key: string; value: any }): string {
-    return item.key;
   }
 }

@@ -4,8 +4,8 @@ import { FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { ProviderQuotation } from '@models/inquiry.model';
 import { Provider } from '@models/provider.model';
 import { ExchangeRateService } from '@services/exchange-rate.service';
+import { ToastService } from '@services/toast.service';
 import { CURRENCIES, PROVIDER_QUOTATION_STATUSES } from '@utils/constants.util';
-import { MessageService } from 'primeng/api';
 import { Button } from 'primeng/button';
 import { FloatLabel } from 'primeng/floatlabel';
 import { InputGroup } from 'primeng/inputgroup';
@@ -31,7 +31,6 @@ import { Textarea } from 'primeng/textarea';
     Select,
     Textarea,
   ],
-  providers: [MessageService],
 })
 export class ProviderQuotationComponent implements OnInit {
   currencies = CURRENCIES;
@@ -40,6 +39,7 @@ export class ProviderQuotationComponent implements OnInit {
   @Input({ required: true }) formGroup!: FormGroup;
   @Input() isEditMode = false;
 
+  @Output() onSendEmail = new EventEmitter<ProviderQuotation>();
   @Output() onGenerateQuotation = new EventEmitter<ProviderQuotation>();
   @Output() onRemove = new EventEmitter<void>();
 
@@ -49,7 +49,7 @@ export class ProviderQuotationComponent implements OnInit {
 
   constructor(
     private exchangeRateService: ExchangeRateService,
-    private messageService: MessageService,
+    private toastService: ToastService,
   ) {}
 
   get showEmailSection(): boolean {
@@ -112,11 +112,7 @@ export class ProviderQuotationComponent implements OnInit {
         this.calculatePhpEquivalent();
       },
       error: () => {
-        this.messageService.add({
-          severity: 'error',
-          summary: 'Error',
-          detail: 'Failed to fetch exchange rate',
-        });
+        this.toastService.defaultError('Failed to fetch exchange rate');
       },
       complete: () => {
         this.isLoadingRate = false;
@@ -134,6 +130,10 @@ export class ProviderQuotationComponent implements OnInit {
     } else {
       this.formGroup.get('phpEquivalentAmount')?.setValue(null);
     }
+  }
+
+  sendQuotation() {
+    this.onSendEmail.emit(this.formGroup.getRawValue());
   }
 
   generateQuotation() {

@@ -181,6 +181,7 @@
                                     [formGroup]="getProviderQuotationControl(i)"
                                     [isEditMode]="editMode"
                                     [provider]="providerMap.get(quotationControl.get('providerId')?.value)!"
+                                    (onSendEmail)="openEmailModal($event)"
                                     (onRemove)="removeQuotation(i)">
             </app-provider-quotation>
           </div>
@@ -199,10 +200,6 @@
                 class="transform transition-all duration-300 hover:scale-105"
                 icon="pi pi-save" label="Save" severity="info"
                 type="button"/>
-      <p-button (onClick)="sendQuotations()" [rounded]="true"
-                class="transform transition-all duration-300 hover:scale-105" icon="pi pi-send"
-                label="Send" severity="success"
-                type="button"/>
     </div>
 
     <!-- Audit Information -->
@@ -214,13 +211,12 @@
     </div>
 
     <app-email-preview-modal
+      (send)="handleSendEmail()"
       (cancel)="showEmailPreview = false"
-      (send)="handleSendEmails()"
+      *ngIf="emailData"
       [(visible)]="showEmailPreview"
       [emailData]="emailData"
       [isSending]="isSending"
-      [providerQuotations]="quotations.value"
-      [providers]="providerMap"
     ></app-email-preview-modal>
   </form>
   <p-toast></p-toast>

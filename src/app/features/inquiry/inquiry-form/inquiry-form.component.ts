@@ -4,9 +4,10 @@ import {
   FormArray,
   FormBuilder,
   FormControl,
-  FormGroup, FormsModule,
+  FormGroup,
+  FormsModule,
   ReactiveFormsModule,
-  Validators
+  Validators,
 } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AuditFields } from '@models/base.model';
@@ -23,10 +24,10 @@ import { DestroyService } from '@services/destroy.service';
 import { EmailService } from '@services/email.service';
 import { InquiryService } from '@services/inquiry.service';
 import { ProviderService } from '@services/provider.service';
+import { ToastService } from '@services/toast.service';
 import { EmailData, prepareProviderEmail } from '@utils/email.util';
 import { PACKAGE_OPTIONS } from '@utils/package.util';
 import dayjs from 'dayjs';
-import { MessageService } from 'primeng/api';
 import { Button } from 'primeng/button';
 import { Checkbox } from 'primeng/checkbox';
 import { DatePicker } from 'primeng/datepicker';
@@ -67,13 +68,12 @@ import { ProviderQuotationComponent } from './provider-quotation/provider-quotat
     FormsModule,
   ],
   templateUrl: './inquiry-form.component.html',
-  providers: [MessageService],
 })
 export class InquiryFormComponent implements OnInit {
   fb = inject(FormBuilder);
   editMode = false;
   showEmailPreview = false;
-  emailData = new Map<string, EmailData>();
+  emailData: EmailData | null = null;
   isSending = false;
   packageOptions = PACKAGE_OPTIONS;
   auditFields: AuditFields = {};
@@ -88,6 +88,7 @@ export class InquiryFormComponent implements OnInit {
   inquiryId: string | null = null;
   saving = false;
   selectedProvider: string | null = null;
+  providerQuotationRequest: ProviderQuotationRequest | null = null;
 
   constructor(
     private providerService: ProviderService,
@@ -95,7 +96,7 @@ export class InquiryFormComponent implements OnInit {
     private destroy$: DestroyService,
     private inquiryService: InquiryService,
     private emailService: EmailService,
-    private messageService: MessageService,
+    private toastService: ToastService,
     private route: ActivatedRoute,
     private location: Location,
     private router: Router,
@@ -186,7 +187,7 @@ export class InquiryFormComponent implements OnInit {
           const group = this.buildProviderQuotationForm(quotation);
           this.quotations.push(group);
           this.updateAvailableProviders();
-        })
+        });
       }
 
       this.inquiryForm.patchValue({
@@ -212,11 +213,10 @@ export class InquiryFormComponent implements OnInit {
       };
 
       this.saving = true;
-      this.messageService.add({
-        severity: 'info',
-        summary: 'Saving',
-        detail: `${this.editMode ? 'Updating' : 'Creating'} inquiry...`,
-      });
+      this.toastService.info(
+        'Saving',
+        `${this.editMode ? 'Updating' : 'Creating'} inquiry...`,
+      );
 
       this.inquiryService
         .saveInquiry(toSave)
@@ -226,134 +226,113 @@ export class InquiryFormComponent implements OnInit {
         )
         .subscribe({
           next: (response) => {
-            this.messageService.add({
-              severity: 'success',
-              summary: 'Success',
-              detail: 'Inquiry saved successfully',
-            });
+            this.toastService.success('Success', 'Inquiry saved successfully');
 
             if (!this.editMode) {
               this.editMode = true;
               this.inquiryId = response.id!;
               this.router.navigate(['/inquiries', this.inquiryId]);
+            } else {
+              this.auditFields = {
+                ...this.auditFields,
+                updatedBy: response.updatedBy,
+                updatedAt: response.updatedAt,
+              };
             }
           },
           error: (error) => {
-            this.messageService.add({
-              severity: 'error',
-              summary: 'Error',
-              detail: 'Failed to save inquiry',
-            });
+            this.toastService.defaultError('Failed to save inquiry');
             console.error('Error saving inquiry:', error);
           },
         });
     } else {
-      this.messageService.add({
-        severity: 'warn',
-        summary: 'Validation Error',
-        detail: 'Please fill in all required fields',
-      });
+      this.toastService.warn(
+        'Validation Error',
+        'Please fill in all required fields',
+      );
     }
   }
 
-  sendQuotations() {
-    this.saveInquiry();
-
+  openEmailModal(providerQuotation: ProviderQuotation) {
     if (this.inquiryForm.valid) {
-      this.emailData = prepareProviderEmail(
-        this.mapFormToEmailContent(this.inquiryForm.getRawValue()),
-      );
+      const inquiry = this.inquiryForm.getRawValue();
+      const provider = this.providerMap.get(providerQuotation.providerId);
 
-      if (this.emailData.size === 0) {
-        this.messageService.add({
-          severity: 'info',
-          summary: 'No Quotations',
-          detail:
-            'No new quotations to send. All selected quotations have already been sent.',
-        });
+      if (!provider) {
+        this.toastService.warn('Validation Error', 'Provider not found.');
         return;
       }
 
+      this.providerQuotationRequest = {
+        providerId: providerQuotation.providerId,
+        dateRange: {
+          start: inquiry.travelDetails.startDate,
+          end: inquiry.travelDetails.endDate,
+        },
+        travelDays: inquiry.travelDetails.days,
+        travelNights: inquiry.travelDetails.nights,
+        destination: inquiry.travelDetails.destination,
+        paxAdult: inquiry.travelDetails.adults,
+        paxChild: inquiry.travelDetails.children,
+        paxChildAges: inquiry.travelDetails.childAges,
+        packageType: inquiry.packageType,
+        customPackageOptions: inquiry.customPackageOptions?.join(';'),
+        preferredHotel: inquiry.travelDetails.preferredHotel,
+        emailRemarks: providerQuotation.emailQuotation,
+        sender: this.auditFields.createdBy ?? 'Goldrush',
+        sent: providerQuotation.sent,
+        to: provider?.email,
+      };
+
+      this.emailData = prepareProviderEmail(this.providerQuotationRequest);
       this.showEmailPreview = true;
     } else {
-      this.messageService.add({
-        severity: 'warn',
-        summary: 'Validation Error',
-        detail: 'Please fill in all required fields',
-      });
+      this.toastService.warn(
+        'Validation Error',
+        'Please fill in all required field',
+      );
     }
   }
 
-  mapFormToEmailContent(inquiry: any): ProviderQuotationRequest[] {
-    return inquiry.providerQuotations
-      .filter((quotation: any) => !quotation.sent)
-      .map((quotation: any) => ({
-        providerId: quotation.provider.id,
-        dateRanges: inquiry.dateRanges,
-        travelDays: inquiry.travelDays,
-        travelNights: inquiry.travelNights,
-        destination: inquiry.destination,
-        paxAdult: inquiry.paxAdult,
-        paxChild: inquiry.paxChild,
-        paxChildAges: inquiry.paxChildAges,
-        packageType: inquiry.packageType,
-        customPackageOptions: inquiry.customPackageOptions.join(';'),
-        preferredHotel: inquiry.preferredHotel,
-        otherServices: inquiry.otherServices,
-        emailRemarks: quotation.emailRemarks,
-        sent: quotation.sent,
-      }));
-  }
+  async handleSendEmail() {
+    if (!this.emailData) {
+      return;
+    }
 
-  async handleSendEmails() {
     try {
       this.isSending = true;
-      const emailPromises = Array.from(this.emailData.entries()).map(
-        async ([providerId, emailData]) => {
-          const provider = this.providerMap.get(providerId);
-          if (!provider) {
-            console.error(`Provider not found for ID: ${providerId}`);
-            return;
-          }
 
-          return firstValueFrom(
-            this.emailService.sendEmail({
-              to: provider.email,
-              subject: emailData.subject,
-              html: emailData.emailContent,
-            }),
-          );
-        },
-      );
-
-      await Promise.all(emailPromises.filter(Boolean));
-
-      // Update sent status for providers
-      const quotations = this.quotations.controls;
-      this.emailData.forEach((_, providerId) => {
-        const index = quotations.findIndex(
-          (q) => q.get('provider')?.value === providerId,
+      if (!this.providerQuotationRequest) {
+        this.toastService.warn(
+          'Validation Error',
+          'Provider Quotation Request not found',
         );
-        if (index !== -1) {
-          quotations[index].patchValue({ sent: true });
+        return;
+      }
+
+      this.emailService.sendEmail({
+        to: this.providerQuotationRequest.to,
+        subject: this.emailData?.subject,
+        html: this.emailData?.emailContent,
+      });
+
+      this.quotations.controls.forEach((control) => {
+        const providerId = control.get('provider')?.value;
+        if (providerId === this.providerQuotationRequest?.providerId) {
+          control.patchValue({
+            sent: true,
+          });
+
+          this.inquiryService
+            .updateProviderQuotationSent(control.get('id')?.value, true)
+            .subscribe();
         }
       });
 
-      // Save the inquiry with updated sent status
-      this.saveInquiry();
-
-      this.messageService.add({
-        severity: 'success',
-        summary: 'Success',
-        detail: 'Emails sent successfully',
-      });
+      this.toastService.defaultSuccess('Emails sent successfully');
       this.showEmailPreview = false;
     } catch (error) {
-      this.messageService.add({
-        severity: 'error',
-        summary: 'Error',
-        detail: 'Failed to send emails',
-      });
+      this.toastService.defaultError('Failed to send emails');
     } finally {
       this.isSending = false;
     }
@@ -361,11 +340,10 @@ export class InquiryFormComponent implements OnInit {
 
   generateQuotation(providerQuotation: ProviderQuotation) {
     if (!this.inquiryId) {
-      this.messageService.add({
-        severity: 'warning',
-        summary: 'Inquiry not saved yet',
-        detail: 'Please save inquiry first before generating',
-      });
+      this.toastService.warn(
+        'Inquiry not saved yet',
+        'Please save inquiry first before generating',
+      );
     }
 
     const inquiryData = this.inquiryForm.getRawValue();
@@ -407,14 +385,20 @@ export class InquiryFormComponent implements OnInit {
       providerId: [quotation?.providerId ?? null],
       priceAmount: [quotation?.priceAmount ?? null],
       currencyCode: [quotation?.currencyCode ?? 'PHP'],
-      exchangeRate: [{ value: quotation?.exchangeRate ?? null, disabled: true }],
-      exchangeRateLastUpdated: [{ value: quotation?.exchangeRateLastUpdated ?? null, disabled: true }],
-      phpEquivalentAmount: [{ value: quotation?.phpEquivalentAmount ?? null, disabled: true }],
+      exchangeRate: [
+        { value: quotation?.exchangeRate ?? null, disabled: true },
+      ],
+      exchangeRateLastUpdated: [
+        { value: quotation?.exchangeRateLastUpdated ?? null, disabled: true },
+      ],
+      phpEquivalentAmount: [
+        { value: quotation?.phpEquivalentAmount ?? null, disabled: true },
+      ],
       internalRemarks: [quotation?.internalRemarks ?? null],
       emailQuotation: [quotation?.emailQuotation ?? null],
       sent: [quotation?.sent ?? false],
       status: [quotation?.status ?? 'PENDING'],
-    })
+    });
   }
 
   addQuotation() {
@@ -426,7 +410,7 @@ export class InquiryFormComponent implements OnInit {
     ) {
       const provider = this.providerMap.get(this.selectedProvider);
       if (provider) {
-        const group = this.buildProviderQuotationForm()
+        const group = this.buildProviderQuotationForm();
         group.controls.providerId.setValue(this.selectedProvider);
 
         this.quotations.push(group);
@@ -443,7 +427,9 @@ export class InquiryFormComponent implements OnInit {
 
   private updateAvailableProviders() {
     const usedProviders = new Set(
-      this.quotations.controls.map((control) => control.get('providerId')?.value),
+      this.quotations.controls.map(
+        (control) => control.get('providerId')?.value,
+      ),
     );
     this.availableProviders = this.providers.filter(
       (provider) => !usedProviders.has(provider.id),

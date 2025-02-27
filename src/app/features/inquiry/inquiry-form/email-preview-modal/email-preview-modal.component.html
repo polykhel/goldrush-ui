@@ -1,42 +1,36 @@
 <p-dialog
+  (onHide)="onCancel()"
   [(visible)]="visible"
   [modal]="true"
   [style]="{ width: '80vw', maxWidth: '900px' }"
-  (onHide)="onCancel()"
-  header="Email Preview"
->
-  <p-tabs [value]="selectedTab">
-    <p-tablist>
-      <p-tab *ngFor="let email of emailData | keyvalue; trackBy: trackByKey" [value]="email.key">
-        {{ getProviderName(email.key) }}
-      </p-tab>
-    </p-tablist>
-    <p-tabpanels>
-      <p-tabpanel *ngFor="let email of emailData | keyvalue; trackBy: trackByKey"
-                  [value]="email.key">
-        <div class="flex justify-content-between mb-3">
-            <span [class]="getStatusClass(email.key)">
-              {{ isProviderSent(email.key) ? 'Already Sent' : 'Not Sent' }}
-            </span>
-        </div>
-        <pre class="whitespace-pre-wrap">{{ email.value.subject }}</pre>
-        <div [innerHTML]="email.value.emailContent"></div>
-      </p-tabpanel>
-    </p-tabpanels>
-  </p-tabs>
+  header="Email Preview">
+  <div class="flex justify-content-between mb-3">
+    <span [class]="getStatusClass()">
+      {{ isProviderSent() ? 'Already Sent' : 'Not Sent' }}
+    </span>
+  </div>
+
+  <p-divider></p-divider>
+  <p><span class="font-bold">To</span>: {{ emailData.to }}</p>
+  <p-divider></p-divider>
+  <p>
+    <span class="font-bold">Subject</span>: {{ emailData.subject }}
+  </p>
+  <p-divider></p-divider>
+  <div [innerHTML]="emailData.emailContent"></div>
 
   <ng-template pTemplate="footer">
     <p-button
-      label="Cancel"
-      icon="pi pi-times"
       (onClick)="onCancel()"
       [text]="true"
+      icon="pi pi-times"
+      label="Cancel"
     ></p-button>
     <p-button
-      label="Send"
-      icon="pi pi-send"
       (onClick)="onSend()"
-      [disabled]="isSending"
+      [disabled]="isSending || isProviderSent()"
+      icon="pi pi-send"
+      label="Send"
     ></p-button>
   </ng-template>
 </p-dialog>

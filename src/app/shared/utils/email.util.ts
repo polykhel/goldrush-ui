@@ -5,77 +5,76 @@ import { PACKAGE_OPTIONS } from './package.util';
 export interface EmailData {
   emailContent: string;
   subject: string;
+  sent: boolean;
+  to: string;
 }
 
-export function prepareProviderEmail(providerQuotationRequests: ProviderQuotationRequest[]): Map<string, EmailData> {
-  const emailData = new Map<string, EmailData>();
+export function prepareProviderEmail(
+  request: ProviderQuotationRequest,
+): EmailData {
+  const duration = `${request.travelDays}D${request.travelNights}N`;
+  const travelDates = `${formatDateRange(request.dateRange)}`;
+  const packageTypeDisplay = formatPackageType(
+    request.packageType,
+    request.customPackageOptions,
+  );
 
-  providerQuotationRequests.forEach((request) => {
-    const duration = `${request.travelDays}D${request.travelNights}N`;
-    const travelDates = `${formatDateRanges(request.dateRanges)}`;
-    const packageTypeDisplay = formatPackageType(request.packageType, request.customPackageOptions);
-
-    const emailContent = `
+  const emailContent = `
       Dear Partner,<br><br>
 
 Please see inquiry details below:<br><br>
 
-Travel Dates: ${formatDateRanges(request.dateRanges)}<br>
+Travel Dates: ${formatDateRange(request.dateRange)}<br>
 Duration: ${request.travelDays}D${request.travelNights}N<br>
 Destination: ${request.destination}<br>
 Pax: ${request.paxAdult} Adult(s)${request.paxChild ? `, ${request.paxChild} Child(ren)` : ''}<br>
 ${request.paxChildAges ? `Child Ages: ${request.paxChildAges} <br>` : ''}
 Package Type: ${packageTypeDisplay}<br>
 ${request.preferredHotel ? `Preferred Hotel: ${request.preferredHotel} <br>` : ''}
-${request.otherServices ? `${request.otherServices} <br>` : ''}
 ${request.emailRemarks ? `${request.emailRemarks} <br>` : ''}
 <br>
 Best regards,<br>
 ${request.sender}
     `;
 
-    const subject = `${duration} | ${request.destination} | ${travelDates}`;
-
-    emailData.set(request.providerId, {
-      emailContent,
-      subject
-    });
-  });
-
-  return emailData;
+  return {
+    emailContent,
+    subject: `${duration} | ${request.destination} | ${travelDates}`,
+    sent: request.sent,
+    to: request.to,
+  };
 }
 
-function formatDateRanges(dateRanges: DateRange[]): string {
-  if (!dateRanges.length) return '';
+function formatDateRange(dateRange: DateRange): string {
+  const startDate = dayjs(dateRange.start);
+  const endDate = dayjs(dateRange.end);
 
-  return dateRanges
-    .map((range) => {
-      const startDate = dayjs(range.start);
-      const endDate = dayjs(range.end);
+  if (!startDate.isValid() || !endDate.isValid()) {
+    return '';
+  }
 
-      if (!startDate.isValid() || !endDate.isValid()) {
-        return null;
-      }
-
-      if (startDate.month() === endDate.month() && startDate.year() === endDate.year()) {
-        return `${startDate.format('MMM D')} - ${endDate.format('D')} '${startDate.format('YY')}`;
-      } else {
-        return `${startDate.format('MMM D')} '${startDate.format('YY')} - ${endDate.format('MMM D')} '${endDate.format('YY')}`;
-      }
-    })
-    .filter(Boolean)
-    .join(', ');
+  if (
+    startDate.month() === endDate.month() &&
+    startDate.year() === endDate.year()
+  ) {
+    return `${startDate.format('MMM D')} - ${endDate.format('D')} '${startDate.format('YY')}`;
+  } else {
+    return `${startDate.format('MMM D')} '${startDate.format('YY')} - ${endDate.format('MMM D')} '${endDate.format('YY')}`;
+  }
 }
 
-function formatPackageType(type: string, customPackageOptions?: string): string {
-  if (type === 'all-inclusive') {
+function formatPackageType(
+  type: string,
+  customPackageOptions?: string,
+): string {
+  if (type === 'ALL_INCLUSIVE') {
     return 'All-Inclusive Package';
   }
 
-  if (type === 'custom' && customPackageOptions) {
-    const selectedOptions = PACKAGE_OPTIONS
-      .filter(option => customPackageOptions.split(';').includes(option.id))
-      .map(option => option.label);
+  if (type === 'CUSTOM' && customPackageOptions) {
+    const selectedOptions = PACKAGE_OPTIONS.filter((option) =>
+      customPackageOptions.split(';').includes(option.id),
+    ).map((option) => option.label);
     return selectedOptions.join(' + ') || 'Custom Package';
   }
 
