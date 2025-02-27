@@ -41,6 +41,7 @@ type FlightDetail = Partial<{
 
 @Component({
   selector: 'app-quotation-form',
+  standalone: true,
   imports: [
     CommonModule,
     DatePicker,

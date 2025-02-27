@@ -8,6 +8,7 @@ import { QuotationFormComponent } from '../../components/quotation-form/quotatio
 
 @Component({
   selector: 'app-quotation-generator',
+  standalone: true,
   imports: [
     QuotationPreviewComponent,
     QuotationFormComponent,

@@ -3,12 +3,6 @@ import { AuthCallbackComponent } from '@core/auth/auth-callback.component';
 import { AuthGuard } from '@core/guards/auth.guard';
 import { ForbiddenComponent } from '@shared/components/forbidden/forbidden.component';
 import { HomeComponent } from './home/home.component';
-import { InquiryListComponent } from './inquiry/pages/inquiry-list/inquiry-list.component';
-import { InquiryFormComponent } from './inquiry/pages/inquiry-form/inquiry-form.component';
-import { QuotationListComponent } from './quotation/pages/quotation-list/quotation-list.component';
-import { QuotationGeneratorComponent } from './quotation/pages/quotation-generator/quotation-generator.component';
-import { PaymentSchedulerComponent } from './payment/pages/payment-scheduler/payment-scheduler.component';
-import { ListToJsonComponent } from './tools/pages/list-to-json/list-to-json.component';
 
 export const routes: Routes = [
   {
@@ -23,53 +17,26 @@ export const routes: Routes = [
   {
     path: 'inquiries',
     canActivate: [AuthGuard],
-    children: [
-      {
-        path: '',
-        component: InquiryListComponent,
-      },
-      {
-        path: 'new',
-        component: InquiryFormComponent,
-      },
-      {
-        path: ':id',
-        component: InquiryFormComponent,
-      },
-    ],
+    loadChildren: () =>
+      import('./inquiry/inquiry.routes').then((m) => m.INQUIRY_ROUTES),
   },
   {
     path: 'quotations',
     canActivate: [AuthGuard],
-    children: [
-      {
-        path: '',
-        component: QuotationListComponent,
-      },
-      {
-        path: 'new',
-        component: QuotationGeneratorComponent,
-      },
-      {
-        path: ':id',
-        component: QuotationGeneratorComponent,
-      },
-    ],
+    loadChildren: () =>
+      import('./quotation/quotation.routes').then((m) => m.QUOTATION_ROUTES),
   },
   {
     path: 'payments',
-    component: PaymentSchedulerComponent,
     canActivate: [AuthGuard],
+    loadChildren: () =>
+      import('./payment/payment.routes').then((m) => m.PAYMENT_ROUTES),
   },
   {
     path: 'tools',
     canActivate: [AuthGuard],
-    children: [
-      {
-        path: 'list-to-json',
-        component: ListToJsonComponent,
-      },
-    ],
+    loadChildren: () =>
+      import('./tools/tools.routes').then((m) => m.TOOLS_ROUTES),
   },
   {
     path: 'auth',

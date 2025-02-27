@@ -8,6 +8,7 @@ import { DateRange } from '@models/date-range.model';
 
 @Component({
   selector: 'app-quotation-preview',
+  standalone: true,
   imports: [CommonModule],
   templateUrl: './quotation-preview.component.html',
 })

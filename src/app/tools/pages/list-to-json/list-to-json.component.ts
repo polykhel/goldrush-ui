@@ -5,8 +5,9 @@ import { Textarea } from 'primeng/textarea';
 
 @Component({
   selector: 'app-list-to-json',
+  standalone: true,
   imports: [Textarea, FormsModule, Button],
-  templateUrl: './list-to-json.component.html'
+  templateUrl: './list-to-json.component.html',
 })
 export class ListToJsonComponent {
   inputText: string = '';

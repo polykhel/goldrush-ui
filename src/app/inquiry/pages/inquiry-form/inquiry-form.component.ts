@@ -45,6 +45,7 @@ import { ProviderQuotationComponent } from '../../components/provider-quotation/
 import dayjs from 'dayjs';
 
 @Component({
+  standalone: true,
   selector: 'app-inquiry-form',
   imports: [
     ReactiveFormsModule,

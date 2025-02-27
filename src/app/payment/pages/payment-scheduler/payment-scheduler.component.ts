@@ -23,6 +23,7 @@ interface Schedule {
 
 @Component({
   selector: 'app-payment-scheduler',
+  standalone: true,
   imports: [
     Button,
     DatePicker,
