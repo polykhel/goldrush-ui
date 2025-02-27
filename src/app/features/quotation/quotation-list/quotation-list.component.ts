@@ -1,21 +1,20 @@
-import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { TableModule } from 'primeng/table';
-import { ButtonModule } from 'primeng/button';
+import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { QuotationService } from '@services/quotation.service';
 import { Quotation } from '@models/quotation.model';
-import { TooltipModule } from 'primeng/tooltip';
-import { TagModule } from 'primeng/tag';
+import { QuotationService } from '@services/quotation.service';
+import { ToastService } from '@services/toast.service';
 import dayjs from 'dayjs';
-import { MessageService } from 'primeng/api';
+import { ButtonModule } from 'primeng/button';
+import { TableModule } from 'primeng/table';
+import { TagModule } from 'primeng/tag';
+import { TooltipModule } from 'primeng/tooltip';
 
 @Component({
   selector: 'app-quotation-list',
   standalone: true,
   imports: [CommonModule, TableModule, ButtonModule, TooltipModule, TagModule],
   templateUrl: './quotation-list.component.html',
-  providers: [MessageService],
 })
 export class QuotationListComponent implements OnInit {
   quotations: Quotation[] = [];
@@ -31,7 +30,7 @@ export class QuotationListComponent implements OnInit {
   constructor(
     private router: Router,
     private quotationService: QuotationService,
-    private messageService: MessageService,
+    private toastService: ToastService,
   ) {}
 
   ngOnInit() {
@@ -59,11 +58,7 @@ export class QuotationListComponent implements OnInit {
           this.loading = false;
         },
         error: () => {
-          this.messageService.add({
-            severity: 'error',
-            summary: 'Error',
-            detail: 'Failed to load quotations',
-          });
+          this.toastService.error('Error', 'Failed to load quotations');
           this.loading = false;
         },
       });

@@ -1,9 +1,9 @@
 import { NgClass, NgIf } from '@angular/common';
 import { Component, inject } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { ToastService } from '@services/toast.service';
 import { SumPipe } from '@shared/pipes/sum.pipe';
 import dayjs from 'dayjs';
-import { MessageService } from 'primeng/api';
 import { Button } from 'primeng/button';
 import { DatePicker } from 'primeng/datepicker';
 import { FloatLabel } from 'primeng/floatlabel';
@@ -39,7 +39,6 @@ interface Schedule {
     SumPipe,
   ],
   templateUrl: './payment-scheduler.component.html',
-  providers: [MessageService],
 })
 export class PaymentSchedulerComponent {
   minDate: Date = dayjs().add(45, 'day').toDate();
@@ -78,16 +77,15 @@ export class PaymentSchedulerComponent {
       Validators.max(100),
     ]),
   });
-  private messageService = inject(MessageService);
+  private toastService = inject(ToastService);
   private readonly dateFormat = 'MMM D, YYYY';
 
   generateSchedule(): void {
     if (!this.form.valid) {
-      this.messageService.add({
-        severity: 'error',
-        summary: 'Validation Error',
-        detail: 'Please fill in all required fields correctly',
-      });
+      this.toastService.warn(
+        'Validation Error',
+        'Please fill in all required fields correctly',
+      );
       return;
     }
 
@@ -102,7 +100,7 @@ export class PaymentSchedulerComponent {
       }
 
       const lastPaymentDate = travelDate.subtract(45, 'day');
-      const downPaymentPercent = value.downPaymentPercentage || 20;
+      const downPaymentPercent = value.downPaymentPercentage ?? 20;
       const isBank = value.paymentMethod === 'bank';
       const monthlyChargePercent = isBank
         ? (value.monthlyChargePercentage ?? 5)
@@ -208,17 +206,12 @@ export class PaymentSchedulerComponent {
         lastPaymentDate: lastPaymentDate.toDate(),
       });
 
-      this.messageService.add({
-        severity: 'success',
-        summary: 'Schedule Generated',
-        detail: `Created ${this.schedule.length} payment(s)`,
-      });
+      this.toastService.success(
+        'Schedule Generated',
+        'Created ' + this.schedule.length + ' payment(s)',
+      );
     } catch (error) {
-      this.messageService.add({
-        severity: 'error',
-        summary: 'Error',
-        detail: 'Failed to generate payment schedule',
-      });
+      this.toastService.defaultError('Failed to generate payment schedule');
     }
   }
 

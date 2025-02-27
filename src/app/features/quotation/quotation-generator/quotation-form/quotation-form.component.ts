@@ -2,7 +2,6 @@ import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, inject, OnInit, Output } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
-import { formatPairedValues, formatValue } from '@utils/string.util';
 import { environment } from '@env/environment';
 import { Asset } from '@models/asset.model';
 import { Country } from '@models/country.model';
@@ -13,8 +12,13 @@ import { CountryService } from '@services/country.service';
 import { DestroyService } from '@services/destroy.service';
 import { PackageService } from '@services/package.service';
 import { ProviderService } from '@services/provider.service';
+import { QuotationService } from '@services/quotation.service';
+import { ToastService } from '@services/toast.service';
+import { PACKAGE_OPTIONS } from '@utils/package.util';
+import { formatPairedValues, formatValue } from '@utils/string.util';
 import dayjs from 'dayjs';
 import { Button } from 'primeng/button';
+import { Card } from 'primeng/card';
 import { Checkbox } from 'primeng/checkbox';
 import { DatePicker } from 'primeng/datepicker';
 import { FloatLabel } from 'primeng/floatlabel';
@@ -24,12 +28,8 @@ import { InputText } from 'primeng/inputtext';
 import { RadioButton } from 'primeng/radiobutton';
 import { Select } from 'primeng/select';
 import { Textarea } from 'primeng/textarea';
-import { finalize, merge, takeUntil } from 'rxjs';
-import { QuotationService } from '@services/quotation.service';
-import { MessageService } from 'primeng/api';
 import { ToastModule } from 'primeng/toast';
-import { PACKAGE_OPTIONS } from '@utils/package.util';
-import { Card } from 'primeng/card';
+import { finalize, merge, takeUntil } from 'rxjs';
 
 type FlightDetail = Partial<{
   flightNumber: string | null;
@@ -58,7 +58,6 @@ type FlightDetail = Partial<{
     Card,
   ],
   templateUrl: './quotation-form.component.html',
-  providers: [MessageService],
 })
 export class QuotationFormComponent implements OnInit {
   @Output() onFormChange: EventEmitter<any> = new EventEmitter();
@@ -143,7 +142,7 @@ export class QuotationFormComponent implements OnInit {
     private providerService: ProviderService,
     private packageService: PackageService,
     private quotationService: QuotationService,
-    private messageService: MessageService,
+    private toastService: ToastService,
     private destroy$: DestroyService,
     private route: ActivatedRoute,
   ) {}
@@ -369,11 +368,7 @@ export class QuotationFormComponent implements OnInit {
         this.generate();
       },
       error: () => {
-        this.messageService.add({
-          severity: 'error',
-          summary: 'Error',
-          detail: 'Failed to load quotation',
-        });
+        this.toastService.defaultError('Failed to load quotation');
       },
     });
   }
@@ -483,11 +478,10 @@ export class QuotationFormComponent implements OnInit {
 
   generate() {
     if (this.form.invalid) {
-      this.messageService.add({
-        severity: 'error',
-        summary: 'Validation Error',
-        detail: 'Please fill in all required fields before previewing',
-      });
+      this.toastService.warn(
+        'Validation Error',
+        'Please fill in all required fields before previewing',
+      );
       return;
     }
 
@@ -509,11 +503,10 @@ export class QuotationFormComponent implements OnInit {
       if (arrivalDetails) flightDetails.push(arrivalDetails);
     }
 
-    this.messageService.add({
-      severity: 'info',
-      summary: 'Preview Generated',
-      detail: 'Generating preview of the quotation',
-    });
+    this.toastService.info(
+      'Preview Generated',
+      'Generating preview of the quotation',
+    );
 
     this.onFormChange.emit({
       title: value.title,
@@ -531,20 +524,18 @@ export class QuotationFormComponent implements OnInit {
 
   save() {
     if (this.form.invalid) {
-      this.messageService.add({
-        severity: 'error',
-        summary: 'Validation Error',
-        detail: 'Please fill in all required fields',
-      });
+      this.toastService.warn(
+        'Validation Error',
+        'Please fill in all required fields before saving',
+      );
       return;
     }
 
     this.saving = true;
-    this.messageService.add({
-      severity: 'info',
-      summary: 'Saving',
-      detail: `${this.editMode ? 'Updating' : 'Creating'} quotation...`,
-    });
+    this.toastService.info(
+      'Saving',
+      `Saving ${this.editMode ? 'update' : 'new'} quotation...`,
+    );
 
     const formValue = this.form.value;
     const travelDates = formValue.travelDates
@@ -595,18 +586,14 @@ export class QuotationFormComponent implements OnInit {
       )
       .subscribe({
         next: () => {
-          this.messageService.add({
-            severity: 'success',
-            summary: 'Success',
-            detail: `Quotation ${this.editMode ? 'updated' : 'created'} successfully`,
-          });
+          this.toastService.defaultSuccess(
+            `Quotation ${this.editMode ? 'updated' : 'created'} successfully`,
+          );
         },
         error: (error) => {
-          this.messageService.add({
-            severity: 'error',
-            summary: 'Error',
-            detail: `Failed to ${this.editMode ? 'update' : 'create'} quotation: ${error.message || 'Unknown error occurred'}`,
-          });
+          this.toastService.defaultError(
+            `Failed to ${this.editMode ? 'update' : 'create'} quotation: ${error.message || 'Unknown error occurred'}`,
+          );
         },
       });
   }

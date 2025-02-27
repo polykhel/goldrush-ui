@@ -4,7 +4,8 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { Inquiry, InquiryStatus } from '@models/inquiry.model';
 import { InquiryService } from '@services/inquiry.service';
-import { ConfirmationService, MessageService } from 'primeng/api';
+import { ToastService } from '@services/toast.service';
+import { ConfirmationService } from 'primeng/api';
 import { Button } from 'primeng/button';
 import { Card } from 'primeng/card';
 import { ConfirmDialog } from 'primeng/confirmdialog';
@@ -38,7 +39,7 @@ import {
     SelectButton,
     FormsModule,
   ],
-  providers: [MessageService, ConfirmationService],
+  providers: [ConfirmationService],
   templateUrl: './inquiry-list.component.html',
 })
 export class InquiryListComponent implements OnInit, OnDestroy {
@@ -59,7 +60,7 @@ export class InquiryListComponent implements OnInit, OnDestroy {
   constructor(
     private inquiryService: InquiryService,
     private router: Router,
-    private messageService: MessageService,
+    private toastService: ToastService,
     private confirmationService: ConfirmationService,
   ) {
     this.setupSearch();
@@ -120,18 +121,10 @@ export class InquiryListComponent implements OnInit, OnDestroy {
       await firstValueFrom(
         this.inquiryService.deleteInquiry(inquiry.documentId!),
       );
-      this.messageService.add({
-        severity: 'success',
-        summary: 'Success',
-        detail: 'Inquiry deleted successfully',
-      });
+      this.toastService.success('Success', 'Inquiry deleted successfully');
       this.loadInquiries();
     } catch (error) {
-      this.messageService.add({
-        severity: 'error',
-        summary: 'Error',
-        detail: 'Failed to delete inquiry',
-      });
+      this.toastService.error('Error', 'Failed to delete inquiry');
     }
   }
 
@@ -163,11 +156,7 @@ export class InquiryListComponent implements OnInit, OnDestroy {
           this.loading = false;
         },
         error: () => {
-          this.messageService.add({
-            severity: 'error',
-            summary: 'Error',
-            detail: 'Failed to load inquiries',
-          });
+          this.toastService.error('Error', 'Failed to load inquiries');
           this.loading = false;
         },
       });
