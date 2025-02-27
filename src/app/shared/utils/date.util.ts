@@ -1,5 +1,7 @@
 import dayjs from 'dayjs';
-import { DateRange } from '@models/inquiry.model';
+
+
+import { DateRange } from '@models/date-range.model';
 
 export function formatDateRange(dateRange?: DateRange | null) {
   if (!dateRange?.start) {

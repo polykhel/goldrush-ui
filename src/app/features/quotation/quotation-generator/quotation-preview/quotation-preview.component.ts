@@ -3,7 +3,9 @@ import { Component, Input } from '@angular/core';
 import { formatDateRange } from '@utils/date.util';
 import { Quotation } from '@models/quotation.model';
 import dayjs from 'dayjs';
-import { DateRange } from '@models/inquiry.model';
+
+
+import { DateRange } from '@models/date-range.model';
 
 @Component({
   selector: 'app-quotation-preview',

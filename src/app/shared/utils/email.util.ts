@@ -1,6 +1,7 @@
-import { DateRange, ProviderQuotationRequest } from '@models/inquiry.model';
 import dayjs from 'dayjs';
 import { PACKAGE_OPTIONS } from './package.util';
+import { ProviderQuotationEmailRequest } from "@models/provider-quotation.model";
+import { DateRange } from '@models/date-range.model';
 
 export interface EmailData {
   emailContent: string;
@@ -10,7 +11,7 @@ export interface EmailData {
 }
 
 export function prepareProviderEmail(
-  request: ProviderQuotationRequest,
+  request: ProviderQuotationEmailRequest,
 ): EmailData {
   const duration = `${request.travelDays}D${request.travelNights}N`;
   const travelDates = `${formatDateRange(request.dateRange)}`;

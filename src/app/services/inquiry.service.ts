@@ -51,17 +51,7 @@ export class InquiryService {
     return this.http.delete<Inquiry>(`${this.baseUrl}/${id}`);
   }
 
-  updateInquiryStatus(id: string, inquiryStatus: string) {
-    return this.http.put(`${this.baseUrl}/${id}`, { data: { inquiryStatus } });
-  }
-
   getInquiryStatuses() {
     return this.http.get<InquiryStatus[]>(`${this.baseUrl}/statuses`);
-  }
-
-  updateProviderQuotationSent(id: string, sent: boolean) {
-    return this.http.patch<void>(`${this.baseUrl}/provider-quotation/${id}`, {
-      sent,
-    });
   }
 }

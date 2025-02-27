@@ -6,8 +6,7 @@ import { Observable } from 'rxjs';
 export interface EmailOptions {
   to: string;
   subject: string;
-  html: string;
-  from?: string;
+  content: string;
 }
 
 @Injectable({
@@ -17,9 +16,7 @@ export class EmailService {
   private http = inject(HttpClient);
   private baseUrl = `${environment.backendUrl}/api/email`;
 
-  sendEmail(options: EmailOptions): Observable<any> {
-    console.log('email works');
-    return new Observable();
-    // return this.http.post(`${this.baseUrl}/send`, options);
+  sendEmail(options: EmailOptions): Observable<void> {
+    return this.http.post<void>(`${this.baseUrl}`, options);
   }
 }

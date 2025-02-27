@@ -1,7 +1,6 @@
 import { DatePipe, NgIf } from '@angular/common';
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { FormGroup, ReactiveFormsModule } from '@angular/forms';
-import { ProviderQuotation } from '@models/inquiry.model';
 import { Provider } from '@models/provider.model';
 import { ExchangeRateService } from '@services/exchange-rate.service';
 import { ToastService } from '@services/toast.service';
@@ -14,6 +13,8 @@ import { InputNumber } from 'primeng/inputnumber';
 import { InputText } from 'primeng/inputtext';
 import { Select } from 'primeng/select';
 import { Textarea } from 'primeng/textarea';
+import { ProviderQuotation } from '@models/provider-quotation.model';
+import { ProviderQuotationService } from '@services/provider-quotation.service';
 
 @Component({
   selector: 'app-provider-quotation',
@@ -40,7 +41,7 @@ export class ProviderQuotationComponent implements OnInit {
   @Input() isEditMode = false;
 
   @Output() onSendEmail = new EventEmitter<ProviderQuotation>();
-  @Output() onGenerateQuotation = new EventEmitter<ProviderQuotation>();
+  @Output() onGenerateQuotation = new EventEmitter<string>();
   @Output() onRemove = new EventEmitter<void>();
 
   isLoadingRate = false;
@@ -49,6 +50,7 @@ export class ProviderQuotationComponent implements OnInit {
 
   constructor(
     private exchangeRateService: ExchangeRateService,
+    private providerQuotationService: ProviderQuotationService,
     private toastService: ToastService,
   ) {}
 
@@ -59,7 +61,11 @@ export class ProviderQuotationComponent implements OnInit {
 
   get showPricingSection(): boolean {
     const status = this.formGroup.get('status')?.value;
-    return status === 'RECEIVED' || status === 'SENT';
+    return status === 'RECEIVED';
+  }
+
+  get isSent(): boolean {
+    return this.formGroup.get('sent')?.value ?? false;
   }
 
   ngOnInit() {
@@ -110,6 +116,13 @@ export class ProviderQuotationComponent implements OnInit {
         });
         this.exchangeRateLastUpdated = new Date();
         this.calculatePhpEquivalent();
+
+        const value = this.formGroup.getRawValue();
+        this.providerQuotationService.updateProviderQuotation(value.id, {
+          exchangeRate: rate,
+          exchangeRateLastUpdated: this.exchangeRateLastUpdated,
+          phpEquivalentAmount: value.phpEquivalentAmount,
+        }).subscribe();
       },
       error: () => {
         this.toastService.defaultError('Failed to fetch exchange rate');
@@ -137,7 +150,22 @@ export class ProviderQuotationComponent implements OnInit {
   }
 
   generateQuotation() {
-    this.onGenerateQuotation.emit(this.formGroup.getRawValue());
+    const value = this.formGroup.getRawValue();
+
+    this.providerQuotationService.updateProviderQuotation(value.id, {
+      currencyCode: value.currencyCode,
+      priceAmount: value.priceAmount,
+      internalRemarks: value.internalRemarks,
+      status: value.status
+    }).subscribe({
+      next: () => {
+        this.toastService.success('Success', 'Quotation generated successfully');
+        this.onGenerateQuotation.emit(value.id);
+      },
+      error: () => {
+        this.toastService.defaultError('Failed to generate quotation');
+      },
+    });
   }
 
   remove() {
