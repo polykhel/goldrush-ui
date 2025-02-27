@@ -1,5 +1,5 @@
 import { HttpClient } from '@angular/common/http';
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { environment } from '@env/environment';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
@@ -19,9 +19,8 @@ interface ExchangeRateResponse {
   providedIn: 'root',
 })
 export class ExchangeRateService {
+  private http = inject(HttpClient);
   private readonly baseUrl = environment.backendUrl;
-
-  constructor(private http: HttpClient) {}
 
   getExchangeRate(fromCurrency: string): Observable<number> {
     return this.http

@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '@env/environment';
 import { Quotation } from '@models/quotation.model';
@@ -13,10 +13,8 @@ import { PageParams } from '@models/params.model';
   providedIn: 'root'
 })
 export class QuotationService {
+  private http = inject(HttpClient);
   private baseUrl = `${environment.backendUrl}/api/quotations`;
-
-  constructor(private http: HttpClient) {
-  }
 
   getQuotations(params: PageParams) {
     const query = qs.stringify({

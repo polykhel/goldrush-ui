@@ -1,5 +1,5 @@
 import { HttpClient } from '@angular/common/http';
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { environment } from '@env/environment';
 import { ListData } from '@models/base.model';
 import { Provider } from '@models/provider.model';
@@ -11,10 +11,8 @@ import { map } from 'rxjs/operators';
   providedIn: 'root',
 })
 export class ProviderService {
+  private http = inject(HttpClient);
   private baseUrl: string = environment.backendUrl + '/api/provider';
-
-  constructor(private http: HttpClient) {
-  }
 
   getProvidersByCountry(countryId: string): Observable<Provider[]> {
     const query = qs.stringify({

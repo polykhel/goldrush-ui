@@ -1,5 +1,5 @@
 import { HttpClient, HttpContext } from '@angular/common/http';
-import { Injectable, OnDestroy } from '@angular/core';
+import { inject, Injectable, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
 import { SKIP_AUTH } from '@core/interceptors/auth.interceptor';
 import { environment } from '@env/environment';
@@ -12,13 +12,13 @@ import { BehaviorSubject, concatMap, Observable, of, tap } from 'rxjs';
   providedIn: 'root',
 })
 export class AuthService implements OnDestroy {
+  private http = inject(HttpClient);
   private baseUrl = environment.backendUrl;
   private currentUserSubject = new BehaviorSubject<User | null>(null);
   public currentUser$ = this.currentUserSubject.asObservable();
   private tokenCheckInterval: any;
 
   constructor(
-    private http: HttpClient,
     private router: Router,
   ) {
     this.startTokenCheck();
