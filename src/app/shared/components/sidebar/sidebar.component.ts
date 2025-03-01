@@ -13,8 +13,7 @@ import { MenuModule } from 'primeng/menu';
 export class SidebarComponent implements OnInit {
   items: MenuItem[] = [];
 
-  constructor() {
-  }
+  constructor() {}
 
   ngOnInit() {
     this.items = [
@@ -27,6 +26,11 @@ export class SidebarComponent implements OnInit {
         label: 'Inquiries',
         icon: 'pi pi-address-book',
         routerLink: ['/inquiries'],
+      },
+      {
+        label: 'Payments',
+        icon: 'pi pi-money-bill',
+        routerLink: ['/payments'],
       },
       {
         label: 'Bookings',
