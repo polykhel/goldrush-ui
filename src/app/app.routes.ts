@@ -21,12 +21,6 @@ export const routes: Routes = [
       import('./inquiry/inquiry.routes').then((m) => m.INQUIRY_ROUTES),
   },
   {
-    path: 'quotations',
-    canActivate: [AuthGuard],
-    loadChildren: () =>
-      import('./quotation/quotation.routes').then((m) => m.QUOTATION_ROUTES),
-  },
-  {
     path: 'payments',
     canActivate: [AuthGuard],
     loadChildren: () =>

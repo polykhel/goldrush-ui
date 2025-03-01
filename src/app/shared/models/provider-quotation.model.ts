@@ -1,17 +1,27 @@
 import { DateRange } from '@models/date-range.model';
+import { Flight } from '@models/quotation.model';
 
 export interface ProviderQuotation {
   id: string;
   status: string;
   priceAmount: number | null;
+  childPriceAmount: number | null;
   currencyCode: string | null;
   exchangeRate: number | null;
   exchangeRateLastUpdated: Date | null;
   phpEquivalentAmount: number | null;
+  childPhpEquivalentAmount: number | null;
   emailQuotation: string | null;
   internalRemarks: string | null;
   providerId: string;
   sent: boolean;
+  flightDetails: {
+    departure: Flight | null;
+    arrival: Flight | null;
+  } | null;
+  inclusions: string | null;
+  exclusions: string | null;
+  optionalTours: string | null;
 }
 
 export interface ProviderQuotationEmailRequest {
@@ -36,11 +46,9 @@ export interface ProviderQuotationEmailRequest {
 export interface ProviderQuotationUpdateRequest {
   emailQuotation?: string | null;
   sent?: boolean;
-  internalRemarks?: string | null;
-  currencyCode?: string | null;
-  priceAmount?: number | null;
   exchangeRate?: number | null;
   exchangeRateLastUpdated?: Date | null;
   phpEquivalentAmount?: number | null;
+  childPhpEquivalentAmount?: number | null;
   status?: string;
 }

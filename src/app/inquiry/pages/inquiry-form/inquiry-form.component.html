@@ -1,4 +1,4 @@
-<section class="container mx-auto p-8 bg-white rounded-lg shadow-lg hover:shadow-xl border border-gray-100">
+<section class="container mx-auto max-w-5xl p-8 bg-white rounded-lg shadow-lg hover:shadow-xl border border-gray-100">
   <form [formGroup]="inquiryForm" class="max-w-5xl mx-auto">
     <div class="flex justify-between align-items-center mb-3">
       <p-button (click)="goBack()" [text]="true" icon="pi pi-arrow-left" label="Back"></p-button>
@@ -180,6 +180,8 @@
                                     *ngFor="let quotationControl of quotations.controls; let i = index"
                                     [formGroup]="getProviderQuotationControl(i)"
                                     [isEditMode]="editMode"
+                                    [showFlightSection]="showFlightSection"
+                                    [showChildPrices]="!!inquiryForm.get('travelDetails.children')?.value"
                                     [provider]="providerMap.get(quotationControl.get('providerId')?.value)!"
                                     (onSendEmail)="openEmailModal($event)"
                                     (onRemove)="removeQuotation(i)">
@@ -218,6 +220,13 @@
       [emailData]="emailData"
       [isSending]="isSending"
     ></app-email-preview-modal>
+
+    <app-quotation-preview
+      (cancel)="showQuotationPreview = false"
+      *ngIf="quotationData"
+      [(visible)]="showQuotationPreview"
+      [quotation]="quotationData"
+    ></app-quotation-preview>
   </form>
   <p-toast></p-toast>
 </section>

@@ -1,7 +1,10 @@
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { environment } from '@env/environment';
-import { ProviderQuotationUpdateRequest } from '@models/provider-quotation.model';
+import {
+  ProviderQuotation,
+  ProviderQuotationUpdateRequest,
+} from '@models/provider-quotation.model';
 
 @Injectable({
   providedIn: 'root',
@@ -9,6 +12,13 @@ import { ProviderQuotationUpdateRequest } from '@models/provider-quotation.model
 export class ProviderQuotationService {
   private http = inject(HttpClient);
   private baseUrl = `${environment.backendUrl}/api/provider-quotation`;
+
+  saveProviderQuotation(providerQuotation: ProviderQuotation) {
+    return this.http.post<ProviderQuotation>(
+      `${this.baseUrl}`,
+      providerQuotation,
+    );
+  }
 
   updateProviderQuotation(id: string, request: ProviderQuotationUpdateRequest) {
     return this.http.patch<void>(

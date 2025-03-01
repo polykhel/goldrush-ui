@@ -1,23 +1,13 @@
 import { AuditedBaseModel, BaseModel } from './base.model';
 import { ProviderQuotation } from '@models/provider-quotation.model';
+import { TravelDetails } from '@models/travel-details.model';
 
 export interface Inquiry extends AuditedBaseModel {
   status: string;
   date: Date;
   clientName: string;
   source: string;
-  travelDetails: {
-    countryId: string;
-    destination: string;
-    days: number;
-    nights: number;
-    startDate: Date;
-    endDate: Date;
-    preferredHotel: string | null;
-    adults: number;
-    children: number;
-    childAges: string | null;
-  };
+  travelDetails: TravelDetails;
   packageType: string;
   customPackageOptions: string | null;
   quotations: ProviderQuotation[];

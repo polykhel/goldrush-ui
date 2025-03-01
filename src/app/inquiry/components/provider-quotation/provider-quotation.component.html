@@ -1,10 +1,10 @@
-<div class="mb-6 p-4 border rounded-lg bg-white" [formGroup]="formGroup" *ngIf="provider">
+<div *ngIf="provider" [formGroup]="formGroup" class="mb-6 p-4 border rounded-lg bg-white">
   <!-- Provider Header -->
   <div class="flex items-center justify-between mb-4">
     <div class="flex items-center gap-4">
       <span class="font-medium text-lg">{{ provider.name }}</span>
-      <a [href]="provider.trackerLink" target="_blank"
-         class="text-blue-500 hover:text-blue-700 text-sm">
+      <a [href]="provider.trackerLink" class="text-blue-500 hover:text-blue-700 text-sm"
+         target="_blank">
         <i class="pi pi-external-link"></i> View Tracker
       </a>
     </div>
@@ -36,16 +36,17 @@
         <p-button (onClick)="sendQuotation()" [icon]="isSent ? 'pi pi-search-plus' : 'pi pi-send'"
                   [label]="isSent ? 'Preview' : 'Sent'"
                   [rounded]="true"
-                  [severity]="isSent ? 'info' : 'success'" class="transform transition-all duration-300 hover:scale-105"
+                  [severity]="isSent ? 'info' : 'success'"
+                  class="transform transition-all duration-300 hover:scale-105"
                   type="button"/>
       </div>
     </div>
 
-    <!-- Pricing Section - Show when status is received -->
-    <div *ngIf="showPricingSection" class="p-4 border rounded bg-gray-50">
-      <h3 class="font-medium mb-3">Pricing Details</h3>
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div class="space-y-3">
+    @if (showQuotationSection) {
+      <!-- Pricing Section -->
+      <div class="p-4 border rounded bg-gray-50">
+        <h3 class="font-medium mb-3">Pricing Details</h3>
+        <div class="grid grid-cols-2 gap-4">
           <div class="flex gap-2">
             <p-select (onChange)="onCurrencyChange()"
                       [options]="currencies"
@@ -54,7 +55,7 @@
                       placeholder="Currency">
             </p-select>
             <p-float-label class="flex-1" variant="on">
-              <p-input-number (onInput)="onPriceInput()"
+              <p-input-number (onInput)="onPriceInput($event)"
                               [currency]="formGroup.get('currencyCode')?.value || 'PHP'"
                               [id]="'price-' + provider.name"
                               class="w-full"
@@ -64,27 +65,44 @@
               <label [for]="'price-' + provider.name">Price</label>
             </p-float-label>
           </div>
+          <div *ngIf="showChildPrices">
+            <p-float-label variant="on">
+              <p-input-number (onInput)="onChildPriceInput($event)"
+                              [id]="'childPriceAmount-' + provider.name"
+                              class="w-full"
+                              formControlName="childPriceAmount"
+                              [currency]="formGroup.get('currencyCode')?.value || 'PHP'"
+                              mode="currency"/>
+              <label [for]="'childPriceAmount-' + provider.name">Child Price</label>
+            </p-float-label>
+          </div>
 
-          <div *ngIf="formGroup.get('currencyCode')?.value !== 'PHP'" class="space-y-3">
-            <p-inputgroup>
-              <p-float-label class="flex-1" variant="on">
-                <p-input-number [id]="'exchangeRate-' + provider.name"
-                                [maxFractionDigits]="2"
-                                [minFractionDigits]="2"
-                                class="w-full"
-                                formControlName="exchangeRate"
-                                mode="decimal"/>
-                <label [for]="'exchangeRate-' + provider.name">Exchange Rate</label>
-              </p-float-label>
-              <p-inputgroup-addon>
-                <p-button (onClick)="fetchExchangeRate()"
-                          [disabled]="!formGroup.get('priceAmount')?.value"
-                          [loading]="isLoadingRate"
-                          [text]="true"
-                          icon="pi pi-refresh"
-                          severity="secondary"/>
-              </p-inputgroup-addon>
-            </p-inputgroup>
+          @if (formGroup.get('currencyCode')?.value !== 'PHP') {
+            <div class="col-span-2">
+              <p-inputgroup>
+                <p-float-label class="flex-1" variant="on">
+                  <p-input-number [id]="'exchangeRate-' + provider.name"
+                                  [maxFractionDigits]="2"
+                                  [minFractionDigits]="2"
+                                  class="w-full"
+                                  (onInput)="calculatePhpEquivalent()"
+                                  formControlName="exchangeRate"
+                                  mode="decimal"/>
+                  <label [for]="'exchangeRate-' + provider.name">Exchange Rate</label>
+                </p-float-label>
+                <p-inputgroup-addon>
+                  <p-button (onClick)="fetchExchangeRate()"
+                            [disabled]="!formGroup.get('priceAmount')?.value"
+                            [loading]="isLoadingRate"
+                            [text]="true"
+                            icon="pi pi-refresh"
+                            severity="secondary"/>
+                </p-inputgroup-addon>
+              </p-inputgroup>
+              <small *ngIf="exchangeRateLastUpdated" class="text-gray-500">
+                Last updated: {{ exchangeRateLastUpdated | date:'medium' }}
+              </small>
+            </div>
 
             <p-float-label variant="on">
               <p-input-number [id]="'phpEquivalent-' + provider.name"
@@ -93,32 +111,129 @@
                               currency="PHP"
                               formControlName="phpEquivalentAmount"
                               mode="currency"/>
-              <label [for]="'phpEquivalent-' + provider.name">PHP Equivalent</label>
+              <label [for]="'phpEquivalent-' + provider.name">Price in PHP</label>
             </p-float-label>
-            <small *ngIf="exchangeRateLastUpdated" class="text-gray-500">
-              Last updated: {{ exchangeRateLastUpdated | date:'medium' }}
-            </small>
-          </div>
-        </div>
 
-        <div class="space-y-3">
-          <p-float-label variant="on">
-            <input [id]="'remarks-' + provider.name"
-                   class="w-full"
-                   formControlName="internalRemarks"
-                   pInputText
-                   type="text">
-            <label [for]="'remarks-' + provider.name">Internal Remarks</label>
-          </p-float-label>
-
-          <div class="flex justify-end">
-            <p-button (onClick)="generateQuotation()"
-                      [text]="true"
-                      icon="pi pi-file-export"
-                      label="Generate Quotation"/>
-          </div>
+            <p-float-label variant="on" *ngIf="showChildPrices">
+              <p-input-number [id]="'childPhpEquivalent-' + provider.name"
+                              [readonly]="true"
+                              class="w-full"
+                              currency="PHP"
+                              formControlName="childPhpEquivalentAmount"
+                              mode="currency"/>
+              <label [for]="'phpEquivalent-' + provider.name">Child Price in PHP</label>
+            </p-float-label>
+          }
         </div>
       </div>
-    </div>
+      @if (showFlightSection) {
+        <div formGroupName="flightDetails" class="p-4 border rounded bg-gray-50">
+          <h3 class="font-medium mb-3">Flight Details</h3>
+          <div class="grid grid-cols-2 gap-4">
+            <p-fluid formGroupName="departure" class="flex flex-col gap-2">
+              <span class="font-semibold">Departure</span>
+              <p-float-label variant="on">
+                <input type="text" pInputText id="departureAirline" formControlName="airline"/>
+                <label for="departureAirline">Airline</label>
+              </p-float-label>
+              <p-float-label variant="on">
+                <input type="text" pInputText id="departureFlightNumber"
+                       formControlName="flightNumber"/>
+                <label for="departureFlightNumber">Flight Number</label>
+              </p-float-label>
+              <p-float-label variant="on">
+                <input type="text" pInputText id="departureAirportCode"
+                       formControlName="airportCode"/>
+                <label for="departureAirportCode">Airport Code</label>
+              </p-float-label>
+              <div class="grid grid-cols-2 gap-1">
+                <p-float-label variant="on">
+                  <p-date-picker id="departureStartDate" formControlName="startDate"
+                                 [showTime]="true"></p-date-picker>
+                  <label for="departureStartDate">Start Date</label>
+                </p-float-label>
+                <p-float-label variant="on">
+                  <p-date-picker id="departureEndDate" formControlName="endDate"
+                                 [showTime]="true"></p-date-picker>
+                  <label for="departureEndDate">End Date</label>
+                </p-float-label>
+              </div>
+              <p-float-label variant="on">
+                <p-input-number formControlName="price" id="price" mode="currency" currency="PHP" (onInput)="onFlightPriceInput($event, 'departure')"
+                                [minFractionDigits]="2" [maxFractionDigits]="2"/>
+                <label for="price">Price</label>
+              </p-float-label>
+              <p-float-label variant="on"  *ngIf="showChildPrices">
+                <p-input-number formControlName="childPrice" id="price" mode="currency" currency="PHP"
+                                [minFractionDigits]="2" [maxFractionDigits]="2"/>
+                <label for="childPrice">Child Price</label>
+              </p-float-label>
+            </p-fluid>
+            <p-fluid formGroupName="arrival" class="flex flex-col gap-2">
+              <span class="font-semibold">Arrival</span>
+              <p-float-label variant="on">
+                <input type="text" pInputText id="arrivalAirline" formControlName="airline"/>
+                <label for="arrivalAirline">Airline</label>
+              </p-float-label>
+              <p-float-label variant="on">
+                <input type="text" pInputText id="arrivalFlightNumber"
+                       formControlName="flightNumber"/>
+                <label for="arrivalFlightNumber">Flight Number</label>
+              </p-float-label>
+              <p-float-label variant="on">
+                <input type="text" pInputText id="arrivalAirportCode"
+                       formControlName="airportCode"/>
+                <label for="arrivalAirportCode">Airport Code</label>
+              </p-float-label>
+              <div class="grid grid-cols-2 gap-1">
+                <p-float-label variant="on">
+                  <p-date-picker id="arrivalStartDate" formControlName="startDate"
+                                 [showTime]="true"></p-date-picker>
+                  <label for="arrivalStartDate">Start Date</label>
+                </p-float-label>
+                <p-float-label variant="on">
+                  <p-date-picker id="arrivalEndDate" formControlName="endDate"
+                                 [showTime]="true"></p-date-picker>
+                  <label for="arrivalEndDate">End Date</label>
+                </p-float-label>
+              </div>
+              <p-float-label variant="on">
+                <p-input-number formControlName="price" id="price" mode="currency" currency="PHP"
+                                [minFractionDigits]="2" [maxFractionDigits]="2" (onInput)="onFlightPriceInput($event, 'arrival')"/>
+                <label for="price">Price</label>
+              </p-float-label>
+              <p-float-label variant="on" *ngIf="showChildPrices">
+                <p-input-number formControlName="childPrice" id="childPrice" mode="currency" currency="PHP"
+                                [minFractionDigits]="2" [maxFractionDigits]="2"/>
+                <label for="childPrice">Child Price</label>
+              </p-float-label>
+            </p-fluid>
+          </div>
+        </div>
+      }
+      <div class="p-4 border rounded bg-gray-50">
+        <h3 class="font-medium mb-3">Additional Details</h3>
+        <p-fluid class="grid grid-cols-1 gap-4">
+          <p-float-label variant="on">
+            <textarea pTextarea formControlName="inclusions" id="inclusions"></textarea>
+            <label for="inclusions">Inclusions</label>
+          </p-float-label>
+          <p-float-label variant="on">
+            <textarea pTextarea formControlName="exclusions" id="exclusions"></textarea>
+            <label for="exclusions">Exclusions</label>
+          </p-float-label>
+          <p-float-label variant="on">
+            <textarea pTextarea formControlName="optionalTours" id="optionalTours"></textarea>
+            <label for="optionalTours">Optional Tours</label>
+          </p-float-label>
+        </p-fluid>
+      </div>
+      <div class="flex justify-end">
+        <p-button (onClick)="generateQuotation()"
+                  [text]="true"
+                  icon="pi pi-file-export"
+                  label="Generate Quotation"/>
+      </div>
+    }
   </div>
 </div>

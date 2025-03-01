@@ -1,0 +1,136 @@
+<p-dialog
+  (onHide)="onCancel()"
+  [(visible)]="visible"
+  [modal]="true"
+  class="p-4 font-roboto w-full"
+  [style]="{ width: '80vw', maxWidth: '900px' }">
+  <section id="preview" class="relative">
+    <!-- Header -->
+    <div class="mb-6">
+      <h2 class="text-2xl font-bold text-center text-blue-700 mb-2">{{ quotation.title }}</h2>
+      <p class="text-center text-gray-600">QUOTED AS OF: {{ today }}</p>
+    </div>
+
+    <!-- Main Content -->
+    <div class="grid gap-6 mb-6">
+      <!-- Essential Information -->
+      <div class="bg-gray-50 p-4 rounded-lg">
+        <div class="font-semibold">TRAVEL DATES</div>
+        <div>{{ formatTravelDates(quotation.travelDates) }}</div>
+      </div>
+      <div class="p-4 rounded-lg">
+        <div class="font-semibold">NO. OF PAX</div>
+        <div>{{ quotation.noOfPax }}</div>
+      </div>
+      <div class="bg-gray-50 p-4 rounded-lg">
+        <div class="font-semibold">RATE PER PAX</div>
+        <div>
+        <span *ngIf="quotation.ratePerPax" class="text-xl font-bold text-red-600">
+          {{ quotation.ratePerPax | currency: 'PHP' }}
+        </span>
+        </div>
+        @if (quotation.ratePerPax !== quotation.ratePerChild) {
+          <div class="font-semibold">RATE PER CHILD</div>
+          <div>
+          <span *ngIf="quotation.ratePerChild" class="text-xl font-bold text-red-600">
+            {{ quotation.ratePerChild | currency: 'PHP' }}
+          </span>
+          </div>
+        }
+      </div>
+
+      <!-- Flight Information -->
+      <div *ngIf="quotation.flightDetails" class="p-4 rounded-lg">
+        <div class="font-semibold">
+          FLIGHT DETAILS
+          <span *ngIf="getAirline()" class="text-sm text-gray-600 block">
+          via {{ getAirline() }}
+        </span>
+        </div>
+        <ul class="pl-4 space-y-1">
+          <li><span class="mr-2">•</span> {{
+              getFlightDetails(quotation.flightDetails.departure,
+                quotation.flightDetails.arrival?.airportCode)
+            }}
+          </li>
+          <li><span class="mr-2">•</span> {{
+              getFlightDetails(quotation.flightDetails.arrival,
+                quotation.flightDetails.departure?.airportCode)
+            }}
+          </li>
+          <span></span>
+        </ul>
+      </div>
+
+      <!-- Package Details -->
+      <div class="bg-gray-50 p-4 rounded-lg">
+        <div class="font-semibold">INCLUSIONS</div>
+        <ul class="space-y-1">
+          <li *ngFor="let inclusion of quotation.inclusions" class="flex items-start">
+            <span class="mr-2">•</span> {{ inclusion }}
+          </li>
+        </ul>
+      </div>
+      <div class="p-4 rounded-lg">
+        <div class="font-semibold">EXCLUSIONS</div>
+        <ul class="space-y-1">
+          <li *ngFor="let exclusion of quotation.exclusions" class="flex items-start">
+            <span class="mr-2">•</span> {{ exclusion }}
+          </li>
+        </ul>
+      </div>
+      <div *ngIf="quotation.optionalTours ? quotation.optionalTours.length > 0 : false" class="bg-gray-50 p-4 rounded-lg">
+        <div class="font-semibold">OPTIONAL ACTIVITIES</div>
+        <ul class="space-y-1">
+          <li *ngFor="let activity of quotation.optionalTours" class="flex items-start">
+            <span class="mr-2">•</span> {{ activity }}
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Terms and Conditions -->
+    <div class="bg-gray-50 p-4 rounded-lg mb-6">
+      <h3 class="font-bold text-lg mb-3">Terms and Conditions</h3>
+      <ul class="space-y-2">
+        <li class="flex items-start">
+          <span class="mr-2">•</span> Book and Buy Basis
+        </li>
+        <li class="flex items-start">
+          <span class="mr-2">•</span> Rates and availability subject to change until finalization
+        </li>
+        <li class="flex items-start">
+          <span class="mr-2">•</span> Bookings not guaranteed until full payment and voucher
+          issuance
+        </li>
+        <li class="flex items-start">
+          <span class="mr-2">•</span> Cancellation Policy follows airline, hotel, and local operator
+          terms
+        </li>
+        <li class="flex items-start">
+          <span class="mr-2">•</span> Payment methods are cash or bank transfer only
+        </li>
+      </ul>
+    </div>
+
+    <!-- Images Gallery -->
+    <div class="grid grid-cols-4 gap-4">
+      <img *ngFor="let img of quotation.images"
+           [alt]="img.name"
+           [src]="img.url"
+           class="aspect-square object-cover rounded-lg shadow-sm">
+    </div>
+
+    <!-- Watermark -->
+    <div class="absolute inset-0 flex items-center justify-center pointer-events-none opacity-10">
+      <img alt="Watermark" class="max-w-[50%] max-h-[50%]" src="/images/logo.png"/>
+    </div>
+
+  </section>
+  <div class="flex gap-4 justify-center items-center mt-4">
+    <p-button (onClick)="generateDoc('img')" icon="pi pi-image" label="Download as Image"
+              severity="info"/>
+    <p-button (onClick)="generateDoc('pdf')" icon="pi pi-file-pdf" label="Download as PDF"
+              severity="secondary"></p-button>
+  </div>
+</p-dialog>

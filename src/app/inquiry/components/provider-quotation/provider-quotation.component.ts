@@ -9,12 +9,14 @@ import { Button } from 'primeng/button';
 import { FloatLabel } from 'primeng/floatlabel';
 import { InputGroup } from 'primeng/inputgroup';
 import { InputGroupAddon } from 'primeng/inputgroupaddon';
-import { InputNumber } from 'primeng/inputnumber';
+import { InputNumber, InputNumberInputEvent } from 'primeng/inputnumber';
 import { InputText } from 'primeng/inputtext';
 import { Select } from 'primeng/select';
 import { Textarea } from 'primeng/textarea';
 import { ProviderQuotation } from '@models/provider-quotation.model';
 import { ProviderQuotationService } from '@services/provider-quotation.service';
+import { DatePicker } from 'primeng/datepicker';
+import { Fluid } from 'primeng/fluid';
 
 @Component({
   selector: 'app-provider-quotation',
@@ -31,6 +33,8 @@ import { ProviderQuotationService } from '@services/provider-quotation.service';
     ReactiveFormsModule,
     Select,
     Textarea,
+    DatePicker,
+    Fluid,
   ],
 })
 export class ProviderQuotationComponent implements OnInit {
@@ -39,6 +43,8 @@ export class ProviderQuotationComponent implements OnInit {
   @Input({ required: true }) provider!: Provider;
   @Input({ required: true }) formGroup!: FormGroup;
   @Input() isEditMode = false;
+  @Input() showFlightSection = false;
+  @Input() showChildPrices = false;
 
   @Output() onSendEmail = new EventEmitter<ProviderQuotation>();
   @Output() onGenerateQuotation = new EventEmitter<string>();
@@ -59,7 +65,7 @@ export class ProviderQuotationComponent implements OnInit {
     return status === 'PENDING';
   }
 
-  get showPricingSection(): boolean {
+  get showQuotationSection(): boolean {
     const status = this.formGroup.get('status')?.value;
     return status === 'RECEIVED';
   }
@@ -74,16 +80,29 @@ export class ProviderQuotationComponent implements OnInit {
     )?.value;
   }
 
-  onPriceInput() {
+  onPriceInput(event: InputNumberInputEvent) {
+    const price = event.value;
     const exchangeRate = this.formGroup.get('exchangeRate');
-    const price = this.formGroup.get('priceAmount')?.value;
 
     if (price && this.formGroup.get('currencyCode')?.value !== 'PHP') {
-      exchangeRate?.enable();
+      exchangeRate?.enable({ emitEvent: false });
+      this.calculatePhpEquivalent();
     } else {
-      exchangeRate?.disable();
+      exchangeRate?.disable({ emitEvent: false });
       exchangeRate?.setValue(null);
       this.formGroup.get('phpEquivalentAmount')?.setValue(null);
+    }
+
+    if (price && !this.formGroup.get('childPriceAmount')?.value) {
+      this.formGroup.get('childPriceAmount')?.setValue(price);
+    }
+  }
+
+  onChildPriceInput(event: InputNumberInputEvent) {
+    const price = event.value;
+
+    if (price && this.formGroup.get('currencyCode')?.value !== 'PHP') {
+      this.calculatePhpEquivalent();
     }
   }
 
@@ -123,6 +142,7 @@ export class ProviderQuotationComponent implements OnInit {
             exchangeRate: rate,
             exchangeRateLastUpdated: this.exchangeRateLastUpdated,
             phpEquivalentAmount: value.phpEquivalentAmount,
+            childPhpEquivalentAmount: value.childPhpEquivalentAmount,
           })
           .subscribe();
       },
@@ -137,6 +157,7 @@ export class ProviderQuotationComponent implements OnInit {
 
   calculatePhpEquivalent() {
     const price = this.formGroup.get('priceAmount')?.value;
+    const childPrice = this.formGroup.get('childPriceAmount')?.value;
     const rate = this.formGroup.get('exchangeRate')?.value;
 
     if (price && rate) {
@@ -144,6 +165,15 @@ export class ProviderQuotationComponent implements OnInit {
       this.formGroup.get('phpEquivalentAmount')?.setValue(phpEquivalentAmount);
     } else {
       this.formGroup.get('phpEquivalentAmount')?.setValue(null);
+    }
+
+    if (childPrice && rate) {
+      const phpEquivalentAmount = childPrice * rate;
+      this.formGroup
+        .get('childPhpEquivalentAmount')
+        ?.setValue(phpEquivalentAmount);
+    } else {
+      this.formGroup.get('childPhpEquivalentAmount')?.setValue(null);
     }
   }
 
@@ -154,28 +184,26 @@ export class ProviderQuotationComponent implements OnInit {
   generateQuotation() {
     const value = this.formGroup.getRawValue();
 
-    this.providerQuotationService
-      .updateProviderQuotation(value.id, {
-        currencyCode: value.currencyCode,
-        priceAmount: value.priceAmount,
-        internalRemarks: value.internalRemarks,
-        status: value.status,
-      })
-      .subscribe({
-        next: () => {
-          this.toastService.success(
-            'Success',
-            'Quotation generated uccessfully',
-          );
-          this.onGenerateQuotation.emit(value.id);
-        },
-        error: () => {
-          this.toastService.defaultError('Failed to generate quotatin');
-        },
-      });
+    this.providerQuotationService.saveProviderQuotation(value).subscribe({
+      next: () => {
+        this.toastService.success('Success', 'Quotation details saved.');
+        this.onGenerateQuotation.emit(value.id);
+      },
+      error: () => {
+        this.toastService.defaultError('Failed to generate quotation');
+      },
+    });
   }
 
   remove() {
     this.onRemove.emit();
+  }
+
+  onFlightPriceInput(event: InputNumberInputEvent, type: string) {
+    const price = event.value;
+
+    if (price) {
+      this.formGroup.get(`flightDetails.${type}.childPrice`)?.setValue(price);
+    }
   }
 }

@@ -1,6 +1,9 @@
 // Helper function to handle empty/blank strings
-export const formatValue = (value?: string | null): string =>
-  value?.trim() ? value.trim() : '';
+export const formatValue = (value?: string | null): string => {
+  const trimmedValue = value?.trim();
+  if (trimmedValue) return trimmedValue;
+  return '';
+}
 
 // Helper function to format paired values with dash
 export const formatPairedValues = (

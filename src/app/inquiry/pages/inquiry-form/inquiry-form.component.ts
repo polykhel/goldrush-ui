@@ -2,10 +2,10 @@ import { DatePipe, Location, NgForOf, NgIf } from '@angular/common';
 import { Component, inject, OnInit } from '@angular/core';
 import {
   FormArray,
-  FormBuilder,
   FormControl,
   FormGroup,
   FormsModule,
+  NonNullableFormBuilder,
   ReactiveFormsModule,
   Validators,
 } from '@angular/forms';
@@ -43,6 +43,8 @@ import { ProviderQuotationService } from '@services/provider-quotation.service';
 import { EmailPreviewModalComponent } from '../../components/email-preview-modal/email-preview-modal.component';
 import { ProviderQuotationComponent } from '../../components/provider-quotation/provider-quotation.component';
 import dayjs from 'dayjs';
+import { ClientQuotation, Flight } from '@models/quotation.model';
+import { QuotationPreviewComponent } from '../../components/quotation-preview/quotation-preview.component';
 
 @Component({
   standalone: true,
@@ -67,20 +69,22 @@ import dayjs from 'dayjs';
     ProviderQuotationComponent,
     Checkbox,
     FormsModule,
+    QuotationPreviewComponent,
   ],
   templateUrl: './inquiry-form.component.html',
 })
 export class InquiryFormComponent implements OnInit {
-  fb = inject(FormBuilder);
+  fb = inject(NonNullableFormBuilder);
 
+  inquiryForm = this.buildForm();
   editMode = false;
   showEmailPreview = false;
+  showQuotationPreview = false;
   emailData: EmailData | null = null;
+  quotationData: ClientQuotation | null = null;
   isSending = false;
   packageOptions = PACKAGE_OPTIONS;
   auditFields: AuditFields = {};
-
-  inquiryForm = this.buildForm();
   countries: Country[] = [];
   providers: Provider[] = [];
   availableProviders: Provider[] = [];
@@ -113,6 +117,20 @@ export class InquiryFormComponent implements OnInit {
     return this.inquiryForm.get('travelDetails.children') as FormControl;
   }
 
+  get showFlightSection(): boolean {
+    const packageType = this.inquiryForm.get('packageType')?.value;
+
+    if (packageType === 'ALL_INCLUSIVE') {
+      return true;
+    } else if (packageType === 'CUSTOM') {
+      const packageOptions = this.inquiryForm.get('customPackageOptions')
+        ?.value as string[];
+      return packageOptions.length > 0 && packageOptions.includes('flight');
+    }
+
+    return false;
+  }
+
   getProviderQuotationControl(index: number): FormGroup {
     return this.quotations.at(index) as FormGroup;
   }
@@ -120,46 +138,28 @@ export class InquiryFormComponent implements OnInit {
   buildForm() {
     return this.fb.group({
       id: new FormControl<string | null>(null),
-      status: this.fb.nonNullable.control<string>('NEW', [Validators.required]),
-      date: this.fb.nonNullable.control<Date>(new Date(), [
-        Validators.required,
-      ]),
-      clientName: this.fb.nonNullable.control<string>('', [
-        Validators.required,
-      ]),
-      source: this.fb.nonNullable.control<string>('', [Validators.required]),
+      status: this.fb.control<string>('NEW', [Validators.required]),
+      date: this.fb.control<Date>(new Date(), [Validators.required]),
+      clientName: this.fb.control<string>('', [Validators.required]),
+      source: this.fb.control<string>('', [Validators.required]),
       travelDetails: this.fb.group({
-        countryId: this.fb.nonNullable.control<string>(null!, [
-          Validators.required,
-        ]),
-        destination: this.fb.nonNullable.control<string>('', [
-          Validators.required,
-        ]),
-        days: this.fb.nonNullable.control<number>(null!, [Validators.required]),
-        nights: this.fb.nonNullable.control<number>(null!, [
-          Validators.required,
-        ]),
-        startDate: this.fb.nonNullable.control<Date>(null!, [
-          Validators.required,
-        ]),
-        endDate: this.fb.nonNullable.control<Date>(null!, [
-          Validators.required,
-        ]),
-        preferredHotel: [''],
-        adults: this.fb.nonNullable.control<number>(null!, [
-          Validators.required,
-        ]),
-        children: this.fb.nonNullable.control<number>(null!, [
-          Validators.required,
-        ]),
-        childAges: new FormControl<string | null>(null),
+        countryId: this.fb.control<string>('', [Validators.required]),
+        destination: this.fb.control<string>('', [Validators.required]),
+        days: this.fb.control<number>(0, [Validators.required]),
+        nights: this.fb.control<number>(0, [Validators.required]),
+        startDate: this.fb.control<Date>(null!, [Validators.required]),
+        endDate: this.fb.control<Date>(null!, [Validators.required]),
+        preferredHotel: this.fb.control<string | null>(null),
+        adults: this.fb.control<number>(null!, [Validators.required]),
+        children: this.fb.control<number>(null!, [Validators.required]),
+        childAges: this.fb.control<string | null>(null),
       }),
-      packageType: this.fb.nonNullable.control<string>('ALL_INCLUSIVE', [
+      packageType: this.fb.control<string>('ALL_INCLUSIVE', [
         Validators.required,
       ]),
-      customPackageOptions: [[] as string[]],
-      quotations: this.fb.nonNullable.array<ProviderQuotation>([]),
-      remarks: new FormControl<string | null>(null),
+      customPackageOptions: this.fb.control<string[]>([]),
+      quotations: this.fb.array<ProviderQuotation>([]),
+      remarks: this.fb.control<string | null>(null),
     });
   }
 
@@ -185,14 +185,6 @@ export class InquiryFormComponent implements OnInit {
         updatedAt: this.currentInquiry.updatedAt,
       };
 
-      if (this.currentInquiry?.quotations) {
-        this.currentInquiry?.quotations.forEach((quotation) => {
-          const group = this.buildProviderQuotationForm(quotation);
-          this.quotations.push(group);
-          this.updateAvailableProviders();
-        });
-      }
-
       this.inquiryForm.patchValue({
         ...this.currentInquiry,
         date: new Date(this.currentInquiry.date),
@@ -204,6 +196,14 @@ export class InquiryFormComponent implements OnInit {
         customPackageOptions:
           this.currentInquiry.customPackageOptions?.split(';') || [],
       });
+
+      if (this.currentInquiry?.quotations) {
+        this.currentInquiry?.quotations.forEach((quotation) => {
+          const group = this.buildProviderQuotationForm(quotation);
+          this.quotations.push(group);
+          this.updateAvailableProviders();
+        });
+      }
     }
   }
 
@@ -298,6 +298,14 @@ export class InquiryFormComponent implements OnInit {
   }
 
   handleSendEmail() {
+    if (!this.inquiryId) {
+      this.toastService.warn(
+        'Inquiry not saved yet',
+        'Please save inquiry first before sending',
+      );
+      return;
+    }
+
     if (!this.emailData || !this.providerQuotationRequest) {
       this.toastService.warn('Validation Error', 'Email data not found');
       return;
@@ -328,6 +336,11 @@ export class InquiryFormComponent implements OnInit {
             }
           });
 
+          this.inquiryForm.get('status')?.setValue('PENDING');
+          this.inquiryService
+            .updateInquiryStatus(this.inquiryId!, 'PENDING')
+            .subscribe();
+
           this.toastService.success('Emails sent successfully');
           this.showEmailPreview = false;
         },
@@ -347,14 +360,66 @@ export class InquiryFormComponent implements OnInit {
         'Inquiry not saved yet',
         'Please save inquiry first before generating',
       );
+      return;
     }
 
-    this.router.navigate(['/quotations/new'], {
-      queryParams: {
-        fromInquiry: this.inquiryId,
-        fromProvider: providerQuotationId,
+    const inquiry = this.inquiryForm.getRawValue();
+    const providerQuotation = inquiry.quotations.find(
+      (quotation) => quotation.id === providerQuotationId,
+    );
+
+    if (!providerQuotation) {
+      this.toastService.warn(
+        'Provider quotation not found',
+        'Please save inquiry first before generating',
+      );
+      return;
+    }
+
+    const initialRatePerPax =
+      providerQuotation.currencyCode === 'PHP'
+        ? (providerQuotation.priceAmount ?? 0)
+        : (providerQuotation.phpEquivalentAmount ?? 0);
+    const flightPrice =
+      (providerQuotation.flightDetails?.departure?.price ?? 0) +
+      (providerQuotation.flightDetails?.arrival?.price ?? 0);
+    const totalRatePerPax = initialRatePerPax + flightPrice;
+    const childFlightPrice =
+      (providerQuotation.flightDetails?.departure?.childPrice ?? 0) +
+      (providerQuotation.flightDetails?.arrival?.childPrice ?? 0);
+    const initialRatePerChild =
+      providerQuotation.currencyCode === 'PHP'
+        ? (providerQuotation.childPriceAmount ?? 0)
+        : (providerQuotation.childPhpEquivalentAmount ?? 0);
+    const totalRatePerChild = initialRatePerChild + childFlightPrice;
+
+    this.quotationData = {
+      title: `${inquiry.travelDetails.days}D${inquiry.travelDetails.nights}N ${inquiry.travelDetails.destination} Package`,
+      travelDates: {
+        start: inquiry.travelDetails.startDate,
+        end: inquiry.travelDetails.endDate,
       },
-    });
+      noOfPax: inquiry.travelDetails.adults + inquiry.travelDetails.children,
+      ratePerPax: totalRatePerPax,
+      ratePerChild:
+        totalRatePerChild === 0 ? totalRatePerPax : totalRatePerChild,
+      flightDetails: {
+        departure: providerQuotation.flightDetails?.departure ?? null,
+        arrival: providerQuotation.flightDetails?.arrival ?? null,
+      },
+      inclusions: providerQuotation.inclusions?.split('\n') ?? [],
+      exclusions: providerQuotation.exclusions?.split('\n') ?? [],
+      optionalTours: providerQuotation.optionalTours?.split('\n') ?? [],
+    };
+
+    const status = this.inquiryForm.get('status');
+    if (status?.value === 'NEW' || status?.value === 'PENDING') {
+      status?.setValue('QUOTED');
+      this.inquiryService
+        .updateInquiryStatus(this.inquiryId, 'QUOTED')
+        .subscribe();
+    }
+    this.showQuotationPreview = true;
   }
 
   goBack() {
@@ -366,6 +431,7 @@ export class InquiryFormComponent implements OnInit {
       id: [quotation?.id ?? null],
       providerId: [quotation?.providerId ?? null],
       priceAmount: [quotation?.priceAmount ?? null],
+      childPriceAmount: [quotation?.childPriceAmount ?? null],
       currencyCode: [quotation?.currencyCode ?? 'PHP'],
       exchangeRate: [
         { value: quotation?.exchangeRate ?? null, disabled: true },
@@ -379,10 +445,41 @@ export class InquiryFormComponent implements OnInit {
       phpEquivalentAmount: [
         { value: quotation?.phpEquivalentAmount ?? null, disabled: true },
       ],
+      childPhpEquivalentAmount: [
+        { value: quotation?.childPhpEquivalentAmount ?? null, disabled: true },
+      ],
       internalRemarks: [quotation?.internalRemarks ?? null],
       emailQuotation: [quotation?.emailQuotation ?? null],
       sent: [quotation?.sent ?? false],
       status: [quotation?.status ?? 'PENDING'],
+      flightDetails: this.fb.group({
+        departure: this.buildFlightDetailsForm(
+          quotation?.flightDetails?.departure,
+        ),
+        arrival: this.buildFlightDetailsForm(quotation?.flightDetails?.arrival),
+      }),
+      inclusions: [quotation?.inclusions ?? null],
+      exclusions: [quotation?.exclusions ?? null],
+      optionalTours: [quotation?.optionalTours ?? null],
+    });
+  }
+
+  buildFlightDetailsForm(flightDetails?: Flight | null) {
+    const startDate = flightDetails?.startDate
+      ? new Date(flightDetails?.startDate)
+      : null;
+    const endDate = flightDetails?.endDate
+      ? new Date(flightDetails?.endDate)
+      : null;
+
+    return this.fb.group({
+      flightNumber: [flightDetails?.flightNumber ?? null],
+      airportCode: [flightDetails?.airportCode ?? 'MNL'],
+      startDate: [startDate],
+      endDate: [endDate],
+      airline: [flightDetails?.airline ?? null],
+      price: [flightDetails?.price ?? null],
+      childPrice: [flightDetails?.childPrice ?? null],
     });
   }
 

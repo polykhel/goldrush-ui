@@ -54,4 +54,8 @@ export class InquiryService {
   getInquiryStatuses() {
     return this.http.get<InquiryStatus[]>(`${this.baseUrl}/statuses`);
   }
+
+  updateInquiryStatus(id: string, status: string) {
+    return this.http.patch<Inquiry>(`${this.baseUrl}/${id}/status`, { status });
+  }
 }
