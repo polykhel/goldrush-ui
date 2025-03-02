@@ -27,6 +27,10 @@ jobs:
           touch .env
           echo NG_APP_BACKEND_URL = ${{ secrets.NG_APP_BACKEND_URL }} >> .env
           echo NG_APP_FILE_URL = ${{ secrets.NG_APP_FILE_URL }} >> .env
+          echo NG_APP_AUTH0_DOMAIN = ${{ secrets.NG_APP_AUTH0_DOMAIN }} >> .env
+          echo NG_APP_AUTH0_CLIENT_ID = ${{ secrets.NG_APP_AUTH0_CLIENT_ID }} >> .env
+          echo NG_APP_AUTH0_CALLBACK_URL = ${{ secrets.NG_APP_AUTH0_CALLBACK_URL }} >> .env
+          echo NG_APP_AUTH0_AUDIENCE = ${{ secrets.NG_APP_AUTH0_AUDIENCE }} >> .env
 
       - name: Build Angular app
         run: npm run build --omit=dev
