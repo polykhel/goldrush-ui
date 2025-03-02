@@ -1,4 +1,4 @@
-@if (isLoggedIn) {
+@if (auth.user$ | async) {
   <app-dashboard></app-dashboard>
 } @else {
   <app-login></app-login>

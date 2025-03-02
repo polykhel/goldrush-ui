@@ -1,31 +1,29 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { AuthService } from '@services/auth.service';
 import { DestroyService } from '@services/destroy.service';
 import { ToastService } from '@services/toast.service';
 import { LoginComponent } from '@shared/components/login/login.component';
 import { Toast } from 'primeng/toast';
 import { takeUntil } from 'rxjs';
 import { DashboardComponent } from '../dashboard/dashboard.component';
+import { AuthService } from '@auth0/auth0-angular';
+import { AsyncPipe } from '@angular/common';
 
 @Component({
   selector: 'app-home',
-  imports: [DashboardComponent, Toast, LoginComponent],
+  imports: [DashboardComponent, Toast, LoginComponent, AsyncPipe],
   templateUrl: './home.component.html',
 })
 export class HomeComponent implements OnInit {
-  isLoggedIn = false;
 
   constructor(
-    private authService: AuthService,
+    public auth: AuthService,
     private route: ActivatedRoute,
     private toastService: ToastService,
     private destroy$: DestroyService,
   ) {}
 
   ngOnInit(): void {
-    this.isLoggedIn = this.authService.isLoggedIn();
-
     this.route.queryParams
       .pipe(takeUntil(this.destroy$))
       .subscribe((params) => {

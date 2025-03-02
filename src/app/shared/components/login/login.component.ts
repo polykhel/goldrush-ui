@@ -1,17 +1,18 @@
 import { Component } from '@angular/core';
-import { environment } from '@env/environment';
 import { Button } from 'primeng/button';
+import { AuthService } from '@auth0/auth0-angular';
 
 @Component({
   selector: 'app-login',
   templateUrl: './login.component.html',
-  imports: [Button],
+  imports: [Button]
 })
 export class LoginComponent {
 
-  private baseUrl = environment.backendUrl;
+  constructor(private auth: AuthService) {
+  }
 
   login() {
-    window.location.href = `${this.baseUrl}/oauth2/authorization/google`;
+    this.auth.loginWithRedirect();
   }
 }
