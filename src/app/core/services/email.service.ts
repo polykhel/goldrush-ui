@@ -14,7 +14,7 @@ export interface EmailOptions {
 })
 export class EmailService {
   private http = inject(HttpClient);
-  private baseUrl = `${environment.backendUrl}/email`;
+  private baseUrl = `${environment.backendUrl}/api/email`;
 
   sendEmail(options: EmailOptions): Observable<void> {
     return this.http.post<void>(`${this.baseUrl}`, options);

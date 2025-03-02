@@ -25,7 +25,7 @@ export class ExchangeRateService {
   getExchangeRate(fromCurrency: string): Observable<number> {
     return this.http
       .get<ExchangeRateResponse>(
-        `${this.baseUrl}/exchange-rate/from/${fromCurrency}/to/PHP`,
+        `${this.baseUrl}/api/exchange-rate/from/${fromCurrency}/to/PHP`,
       )
       .pipe(map((response) => response.conversion_rate));
   }

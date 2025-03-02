@@ -25,7 +25,7 @@ export class AuthService implements OnDestroy {
   login(accessToken: string) {
     return this.http
       .get<Auth>(
-        `${this.baseUrl}/auth/callback?access_token=${accessToken}`,
+        `${this.baseUrl}/api/auth/callback?access_token=${accessToken}`,
         {
           context: new HttpContext().set(SKIP_AUTH, true),
         },

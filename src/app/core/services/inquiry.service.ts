@@ -17,7 +17,7 @@ type InquiryParams = PageParams & {
 })
 export class InquiryService {
   private http = inject(HttpClient);
-  private baseUrl = `${environment.backendUrl}/inquiry`;
+  private baseUrl = `${environment.backendUrl}/api/inquiry`;
 
   getInquiries(params: InquiryParams) {
     const sortDirection = params.sortOrder === 1 ? 'asc' : 'desc';

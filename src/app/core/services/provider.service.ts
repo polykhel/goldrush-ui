@@ -10,7 +10,7 @@ import { map } from 'rxjs/operators';
 })
 export class ProviderService {
   private http = inject(HttpClient);
-  private baseUrl: string = environment.backendUrl + '/provider';
+  private baseUrl: string = environment.backendUrl + '/api/provider';
 
   getProviders(): Observable<Provider[]> {
     return this.http.get<Provider[]>(`${this.baseUrl}`).pipe(
