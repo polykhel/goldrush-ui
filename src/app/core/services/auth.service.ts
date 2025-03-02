@@ -92,7 +92,7 @@ export class AuthService implements OnDestroy {
       return of(null);
     }
 
-    return this.http.get<User>(`${this.baseUrl}/api/auth/me`).pipe(
+    return this.http.get<User>(`${this.baseUrl}/auth/me`).pipe(
       tap((user) => {
         this.currentUserSubject.next(user);
       }),
