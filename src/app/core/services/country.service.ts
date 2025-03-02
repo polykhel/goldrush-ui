@@ -9,7 +9,7 @@ import { Observable } from 'rxjs';
 })
 export class CountryService {
   private http = inject(HttpClient);
-  private baseUrl: string = environment.backendUrl + '/api/country';
+  private baseUrl: string = environment.backendUrl + '/country';
 
   getCountries(): Observable<Country[]> {
     return this.http.get<Country[]>(`${this.baseUrl}`);

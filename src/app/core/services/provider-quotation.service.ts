@@ -11,7 +11,7 @@ import {
 })
 export class ProviderQuotationService {
   private http = inject(HttpClient);
-  private baseUrl = `${environment.backendUrl}/api/provider-quotation`;
+  private baseUrl = `${environment.backendUrl}/provider-quotation`;
 
   saveProviderQuotation(providerQuotation: ProviderQuotation) {
     return this.http.post<ProviderQuotation>(
