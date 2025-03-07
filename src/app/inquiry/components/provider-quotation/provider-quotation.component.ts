@@ -75,6 +75,11 @@ export class ProviderQuotationComponent implements OnInit {
     return this.showFlightDetails && (status === 'INFORMATION_REQUESTED' || status === 'ACKNOWLEDGED');
   }
 
+  get showAdditionalSection(): boolean {
+    const status = this.formGroup.get('status')?.value;
+    return status === 'INFORMATION_REQUESTED' || status === 'ACKNOWLEDGED';
+  }
+
   get isSent(): boolean {
     return this.formGroup.get('sent')?.value ?? false;
   }

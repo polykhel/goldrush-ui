@@ -197,14 +197,16 @@
             <textarea pTextarea formControlName="inclusions" id="inclusions"></textarea>
             <label for="inclusions">Inclusions</label>
           </p-float-label>
-          <p-float-label variant="on">
-            <textarea pTextarea formControlName="exclusions" id="exclusions"></textarea>
-            <label for="exclusions">Exclusions</label>
-          </p-float-label>
-          <p-float-label variant="on">
-            <textarea pTextarea formControlName="optionalTours" id="optionalTours"></textarea>
-            <label for="optionalTours">Optional Tours</label>
-          </p-float-label>
+          @if (showAdditionalSection) {
+            <p-float-label variant="on">
+              <textarea pTextarea formControlName="exclusions" id="exclusions"></textarea>
+              <label for="exclusions">Exclusions</label>
+            </p-float-label>
+            <p-float-label variant="on">
+              <textarea pTextarea formControlName="optionalTours" id="optionalTours"></textarea>
+              <label for="optionalTours">Optional Tours</label>
+            </p-float-label>
+          }
         </p-fluid>
       </div>
       <div class="flex justify-end">
