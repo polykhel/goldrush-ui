@@ -1,4 +1,4 @@
-import { NgClass, NgIf } from '@angular/common';
+import { NgClass } from '@angular/common';
 import { Component, inject } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ToastService } from '@services/toast.service';
@@ -30,14 +30,13 @@ interface Schedule {
     FloatLabel,
     Fluid,
     InputNumber,
-    NgIf,
     ReactiveFormsModule,
     TableModule,
     Select,
     Panel,
     Toast,
     NgClass,
-    SumPipe,
+    SumPipe
   ],
   templateUrl: './payment-scheduler.component.html',
 })

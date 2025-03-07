@@ -25,46 +25,55 @@
       <div class="bg-gray-50 p-2 rounded-lg">
         <div class="font-semibold">RATE PER PAX</div>
         @if (quotation.showPriceBreakdown && quotation.priceBreakdown) {
-          <div *ngFor="let breakdown of quotation.priceBreakdown">
-            <span class="font-semibold">{{ breakdown.label }}</span>
-            <span class="text-xl font-bold text-red-600">
-                {{ breakdown.amount | currency: 'PHP' }}
-              </span>
-          </div>
-        } @else {
-          <span class="text-xl font-bold text-red-600">
-          {{ quotation.ratePerPax | currency: 'PHP' }}
-          </span>
-        }
-        @if (quotation.ratePerPax !== quotation.ratePerChild) {
-          <div class="font-semibold">RATE PER CHILD</div>
-          @if (quotation.showPriceBreakdown && quotation.childPriceBreakdown) {
-            <div *ngFor="let breakdown of quotation.childPriceBreakdown">
+          @for (breakdown of quotation.priceBreakdown; track breakdown) {
+            <div>
               <span class="font-semibold">{{ breakdown.label }}</span>
               <span class="text-xl font-bold text-red-600">
                 {{ breakdown.amount | currency: 'PHP' }}
               </span>
             </div>
-          } @else {
-            <span *ngIf="quotation.ratePerChild" class="text-xl font-bold text-red-600">
-            {{ quotation.ratePerChild | currency: 'PHP' }}
+          }
+        } @else {
+          <span class="text-xl font-bold text-red-600">
+            {{ quotation.ratePerPax | currency: 'PHP' }}
           </span>
+        }
+        @if (quotation.ratePerPax !== quotation.ratePerChild) {
+          <div class="font-semibold">RATE PER CHILD</div>
+          @if (quotation.showPriceBreakdown && quotation.childPriceBreakdown) {
+            @for (breakdown of quotation.childPriceBreakdown; track breakdown) {
+              <div>
+                <span class="font-semibold">{{ breakdown.label }}</span>
+                <span class="text-xl font-bold text-red-600">
+                  {{ breakdown.amount | currency: 'PHP' }}
+                </span>
+              </div>
+            }
+          } @else {
+            @if (quotation.ratePerChild) {
+              <span class="text-xl font-bold text-red-600">
+                {{ quotation.ratePerChild | currency: 'PHP' }}
+              </span>
+            }
           }
         }
       </div>
 
       <!-- Flight Information -->
-      <div *ngIf="quotation.flightDetails" class="p-2 rounded-lg">
-        <div class="font-semibold">
-          FLIGHT DETAILS
-          <span *ngIf="getAirline()" class="text-sm text-gray-600 block">
-          via {{ getAirline() }}
-        </span>
-        </div>
-        <ul class="pl-4 space-y-1">
-          <li><span class="mr-2">•</span> {{
-              getFlightDetails(quotation.flightDetails.departure,
-                quotation.flightDetails.arrival?.airportCode)
+      @if (quotation.flightDetails) {
+        <div class="p-2 rounded-lg">
+          <div class="font-semibold">
+            FLIGHT DETAILS
+            @if (getAirline()) {
+              <span class="text-sm text-gray-600 block">
+                via {{ getAirline() }}
+              </span>
+            }
+          </div>
+          <ul class="pl-4 space-y-1">
+            <li><span class="mr-2">•</span> {{
+                getFlightDetails(quotation.flightDetails.departure,
+                  quotation.flightDetails.arrival?.airportCode)
             }}
           </li>
           <li><span class="mr-2">•</span> {{
@@ -72,9 +81,10 @@
                 quotation.flightDetails.departure?.airportCode)
             }}
           </li>
-          <span></span>
-        </ul>
-      </div>
+            <span></span>
+          </ul>
+        </div>
+      }
 
       <!-- Package Details -->
       <div class="bg-gray-50 p-2 rounded-lg">
@@ -89,32 +99,36 @@
           }
         </ul>
       </div>
-      <div *ngIf="quotation.exclusions ? quotation.exclusions.length > 0 : false"
-           class="p-2 rounded-lg">
-        <div class="font-semibold">EXCLUSIONS</div>
-        <ul class="space-y-1">
-          @for (exclusion of quotation.exclusions; track exclusion) {
-            <li class="flex items-start">
-              @if (exclusion) {
-                <span class="mr-2">•</span> {{ exclusion }}
-              }
-            </li>
-          }
-        </ul>
-      </div>
-      <div *ngIf="quotation.optionalTours ? quotation.optionalTours.length > 0 : false"
-           class="bg-gray-50 p-2 rounded-lg">
-        <div class="font-semibold">OPTIONAL ACTIVITIES</div>
-        <ul class="space-y-1">
-          @for (activity of quotation.optionalTours; track activity) {
-            <li class="flex items-start">
-              @if (activity) {
-                <span class="mr-2">•</span> {{ activity }}
-              }
-            </li>
-          }
-        </ul>
-      </div>
+      @if (quotation.exclusions ? quotation.exclusions.length > 0 : false) {
+        <div
+          class="p-2 rounded-lg">
+          <div class="font-semibold">EXCLUSIONS</div>
+          <ul class="space-y-1">
+            @for (exclusion of quotation.exclusions; track exclusion) {
+              <li class="flex items-start">
+                @if (exclusion) {
+                  <span class="mr-2">•</span> {{ exclusion }}
+                }
+              </li>
+            }
+          </ul>
+        </div>
+      }
+      @if (quotation.optionalTours ? quotation.optionalTours.length > 0 : false) {
+        <div
+          class="bg-gray-50 p-2 rounded-lg">
+          <div class="font-semibold">OPTIONAL ACTIVITIES</div>
+          <ul class="space-y-1">
+            @for (activity of quotation.optionalTours; track activity) {
+              <li class="flex items-start">
+                @if (activity) {
+                  <span class="mr-2">•</span> {{ activity }}
+                }
+              </li>
+            }
+          </ul>
+        </div>
+      }
     </div>
 
     <!-- Terms and Conditions -->

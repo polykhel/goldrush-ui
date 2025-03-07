@@ -1,10 +1,10 @@
 import { Component } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 
 @Component({
   selector: 'app-page-loader',
   standalone: true,
-  imports: [CommonModule],
+  imports: [],
   template: `
     <div class="loader-container">
       <div class="loader">

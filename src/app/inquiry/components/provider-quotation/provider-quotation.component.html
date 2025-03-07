@@ -1,355 +1,394 @@
-<div *ngIf="provider" [formGroup]="formGroup" class="mb-6 p-4 border rounded-lg bg-white">
-  <!-- Provider Header -->
-  <div class="flex items-center justify-between mb-4">
-    <div class="flex items-center gap-4">
-      <span class="font-medium text-lg">{{ provider.name }}</span>
-      <a [href]="provider.trackerLink" class="text-blue-500 hover:text-blue-700 text-sm"
-         target="_blank">
-        <i class="pi pi-external-link"></i> View Tracker
-      </a>
+@if (provider) {
+  <div [formGroup]="formGroup" class="mb-6 p-4 border rounded-lg bg-white">
+    <!-- Provider Header -->
+    <div class="flex items-center justify-between mb-4">
+      <div class="flex items-center gap-4">
+        <span class="font-medium text-lg">{{ provider.name }}</span>
+        <a [href]="provider.trackerLink" class="text-blue-500 hover:text-blue-700 text-sm"
+           target="_blank">
+          <i class="pi pi-external-link"></i> View Tracker
+        </a>
+      </div>
+      <div class="flex items-center gap-2">
+        <p-button (onClick)="remove()" [text]="true" icon="pi pi-trash"
+                  severity="danger"></p-button>
+        <p-select [options]="quotationStatuses"
+                  [styleClass]="'status-dropdown w-[200px]'"
+                  formControlName="status"
+                  optionLabel="label"
+                  optionValue="value"
+                  placeholder="Select Status">
+        </p-select>
+      </div>
     </div>
-    <div class="flex items-center gap-2">
-      <p-button (onClick)="remove()" [text]="true" icon="pi pi-trash" severity="danger"></p-button>
-      <p-select [options]="quotationStatuses"
-                [styleClass]="'status-dropdown w-[200px]'"
-                formControlName="status"
-                optionLabel="label"
-                optionValue="value"
-                placeholder="Select Status">
-      </p-select>
-    </div>
-  </div>
-
-  <div *ngIf="isEditMode" class="space-y-4">
-    @if (showQuotationSection) {
-      <!-- Pricing Section -->
-      <div class="p-4 border rounded bg-gray-50">
-        <h3 class="font-medium mb-3">Pricing Details</h3>
-        <div class="grid grid-cols-2 gap-4">
-          <div class="flex gap-2">
-            <p-select (onChange)="onCurrencyChange()"
-                      [options]="currencies"
-                      [styleClass]="'w-[120px]'"
-                      formControlName="currencyCode"
-                      placeholder="Currency">
-            </p-select>
-            <p-float-label class="flex-1" variant="on">
-              <p-input-number (onInput)="onPriceInput($event)"
-                              [currency]="formGroup.get('currencyCode')?.value || 'PHP'"
-                              [id]="'price-' + provider.name"
-                              class="w-full"
-                              fluid
-                              formControlName="priceAmount"
-                              mode="currency"/>
-              <label [for]="'price-' + provider.name">Price</label>
-            </p-float-label>
-          </div>
-          <!-- Price Breakdown Toggle -->
-          <div class="flex items-center gap-2">
-            <p-check-box [binary]="true"
-                         formControlName="showPriceBreakdown"
-                         inputId="showPriceBreakdown">
-            </p-check-box>
-            <label for="showPriceBreakdown">Show Price Breakdown</label>
-          </div>
-
-
-          <!-- Price Breakdown Section -->
-          <div *ngIf="formGroup.get('showPriceBreakdown')?.value" class="col-span-2 mt-2">
-            <div class="flex justify-between items-center mb-2">
-              <h4 class="text-sm font-medium">Price Breakdown</h4>
-              <p-button (onClick)="addPriceBreakdownItem()"
+    @if (isEditMode) {
+      <div class="space-y-4">
+        @if (showQuotationSection) {
+          <!-- Pricing Section -->
+          <div class="p-4 border rounded bg-gray-50">
+            <h3 class="font-medium mb-3">Pricing Details</h3>
+            <div class="grid grid-cols-2 gap-4">
+              <div class="flex gap-2">
+                <p-select (onChange)="onCurrencyChange()"
+                          [options]="currencies"
+                          [styleClass]="'w-[120px]'"
+                          formControlName="currencyCode"
+                          placeholder="Currency">
+                </p-select>
+                <p-float-label class="flex-1" variant="on">
+                  <p-input-number (onInput)="onPriceInput($event)"
+                                  [currency]="formGroup.get('currencyCode')?.value || 'PHP'"
+                                  [id]="'price-' + provider.name"
+                                  class="w-full"
+                                  fluid
+                                  formControlName="priceAmount"
+                                  mode="currency"/>
+                  <label [for]="'price-' + provider.name">Price</label>
+                </p-float-label>
+              </div>
+              <!-- Price Breakdown Toggle -->
+              <div class="flex items-center gap-2">
+                <p-check-box [binary]="true"
+                             formControlName="showPriceBreakdown"
+                             inputId="showPriceBreakdown">
+                </p-check-box>
+                <label for="showPriceBreakdown">Show Price Breakdown</label>
+              </div>
+              <!-- Price Breakdown Section -->
+              @if (formGroup.get('showPriceBreakdown')?.value) {
+                <div class="col-span-2 mt-2">
+                  <div class="flex justify-between items-center mb-2">
+                    <h4 class="text-sm font-medium">Price Breakdown</h4>
+                    <p-button (onClick)="addPriceBreakdownItem()"
                         [text]="true"
                         icon="pi pi-plus"
                         size="small"
                         label="Add Item">
-              </p-button>
-            </div>
-
-            <div formArrayName="priceBreakdown" class="space-y-2">
-              <div *ngFor="let item of priceBreakdownArray.controls; let i = index"
-                   [formGroupName]="i"
-                   class="flex gap-2 items-center">
-                <p-float-label class="flex-1" variant="on">
-                  <input type="text" pInputText id="label-{{i}}" formControlName="label" class="w-full"/>
-                  <label for="label-{{i}}">Label</label>
-                </p-float-label>
-                <p-float-label class="w-[200px]" variant="on">
-                  <p-input-number (onInput)="updatePriceBreakdown()"
-                                  [currency]="formGroup.get('currencyCode')?.value || 'PHP'"
-                                  [id]="'amount-' + i"
+                    </p-button>
+                  </div>
+                  <div formArrayName="priceBreakdown" class="space-y-2">
+                    @for (item of priceBreakdownArray.controls; track item; let i = $index) {
+                      <div
+                        [formGroupName]="i"
+                        class="flex gap-2 items-center">
+                        <p-float-label class="flex-1" variant="on">
+                          <input type="text" pInputText id="label-{{i}}" formControlName="label"
+                                 class="w-full"/>
+                          <label for="label-{{i}}">Label</label>
+                        </p-float-label>
+                        <p-float-label class="w-[200px]" variant="on">
+                          <p-input-number (onInput)="updatePriceBreakdown()"
+                                          [currency]="formGroup.get('currencyCode')?.value || 'PHP'"
+                                          [id]="'amount-' + i"
+                                          class="w-full"
+                                          formControlName="amount"
+                                          mode="currency"/>
+                          <label [for]="'amount-' + i">Amount</label>
+                        </p-float-label>
+                        <p-button (onClick)="removePriceBreakdownItem(i)"
+                                  [text]="true"
+                                  icon="pi pi-trash"
+                                  severity="danger"
+                                  size="small">
+                        </p-button>
+                      </div>
+                    }
+                  </div>
+                  @if (priceBreakdownArray.controls.length > 0) {
+                    <div class="flex justify-between mt-2 text-sm">
+                      <span>Total Breakdown:</span>
+                      <span
+                        [class.text-red-500]="breakdownTotal !== formGroup.get('priceAmount')?.value">
+                            {{
+                          breakdownTotal | currency: (formGroup.get('currencyCode')?.value || 'PHP')
+                        }}
+                          </span>
+                    </div>
+                  }
+                  @if (breakdownTotal !== formGroup.get('priceAmount')?.value
+                  && priceBreakdownArray.controls.length > 0) {
+                    <small
+                      class="text-red-500">
+                      Breakdown total doesn't match the price amount ({{
+                        formGroup.get('priceAmount')?.value | currency:(formGroup.get(
+                          'currencyCode')?.value || 'PHP')
+                      }})
+                    </small>
+                  }
+                </div>
+              }
+              <!-- End of Price Breakdown Section -->
+              @if (showChildPrices) {
+                <p-float-label variant="on">
+                  <p-input-number (onInput)="onChildPriceInput($event)"
+                                  [id]="'childPriceAmount-' + provider.name"
                                   class="w-full"
-                                  formControlName="amount"
+                                  formControlName="childPriceAmount"
+                                  [currency]="formGroup.get('currencyCode')?.value || 'PHP'"
                                   mode="currency"/>
-                  <label [for]="'amount-' + i">Amount</label>
+                  <label [for]="'childPriceAmount-' + provider.name">Child Price</label>
                 </p-float-label>
-                <p-button (onClick)="removePriceBreakdownItem(i)"
-                          [text]="true"
-                          icon="pi pi-trash"
-                          severity="danger"
-                          size="small">
-                </p-button>
-              </div>
-            </div>
-
-            <div *ngIf="priceBreakdownArray.controls.length > 0" class="flex justify-between mt-2 text-sm">
-              <span>Total Breakdown:</span>
-              <span [class.text-red-500]="breakdownTotal !== formGroup.get('priceAmount')?.value">
-                {{ breakdownTotal | currency: (formGroup.get('currencyCode')?.value || 'PHP') }}
-              </span>
-            </div>
-            <small *ngIf="breakdownTotal !== formGroup.get('priceAmount')?.value && priceBreakdownArray.controls.length > 0"
-                   class="text-red-500">
-              Breakdown total doesn't match the price amount ({{ formGroup.get('priceAmount')?.value | currency:(formGroup.get('currencyCode')?.value || 'PHP') }})
-            </small>
-          </div>
-          <!-- End of Price Breakdown Section -->
-
-          @if (showChildPrices) {
-            <p-float-label variant="on">
-              <p-input-number (onInput)="onChildPriceInput($event)"
-                              [id]="'childPriceAmount-' + provider.name"
-                              class="w-full"
-                              formControlName="childPriceAmount"
-                              [currency]="formGroup.get('currencyCode')?.value || 'PHP'"
-                              mode="currency"/>
-              <label [for]="'childPriceAmount-' + provider.name">Child Price</label>
-            </p-float-label>
-
-            <!-- Child Price Breakdown Section -->
-            <div *ngIf="formGroup.get('showPriceBreakdown')?.value" class="col-span-2 mt-2">
-              <div class="flex justify-between items-center mb-2">
-                <h4 class="text-sm font-medium">Child Price Breakdown</h4>
-                <p-button (onClick)="addChildPriceBreakdownItem()"
-                          [text]="true"
-                          icon="pi pi-plus"
-                          size="small"
-                          label="Add Item">
-                </p-button>
-              </div>
-
-              <div formArrayName="childPriceBreakdown" class="space-y-2">
-                <div *ngFor="let item of childPriceBreakdownArray.controls; let i = index"
-                     [formGroupName]="i"
-                     class="flex gap-2 items-center">
-                  <p-float-label class="flex-1" variant="on">
-                    <input type="text" pInputText id="childLabel-{{i}}" formControlName="label" class="w-full"/>
-                    <label for="childLabel-{{i}}">Label</label>
-                  </p-float-label>
-                  <p-float-label class="w-[200px]" variant="on">
-                    <p-input-number (onInput)="updateChildPriceBreakdown()"
+                <!-- Child Price Breakdown Section -->
+                @if (formGroup.get('showPriceBreakdown')?.value) {
+                  <div class="col-span-2 mt-2">
+                    <div class="flex justify-between items-center mb-2">
+                      <h4 class="text-sm font-medium">Child Price Breakdown</h4>
+                      <p-button (onClick)="addChildPriceBreakdownItem()"
+                                [text]="true"
+                                icon="pi pi-plus"
+                                size="small"
+                                label="Add Item">
+                      </p-button>
+                    </div>
+                    <div formArrayName="childPriceBreakdown" class="space-y-2">
+                      @for (item of childPriceBreakdownArray.controls; track item; let i = $index) {
+                        <div
+                          [formGroupName]="i"
+                          class="flex gap-2 items-center">
+                          <p-float-label class="flex-1" variant="on">
+                            <input type="text" pInputText id="childLabel-{{i}}"
+                                   formControlName="label" class="w-full"/>
+                            <label for="childLabel-{{i}}">Label</label>
+                          </p-float-label>
+                          <p-float-label class="w-[200px]" variant="on">
+                            <p-input-number (onInput)="updateChildPriceBreakdown()"
                                     [currency]="formGroup.get('currencyCode')?.value || 'PHP'"
                                     [id]="'childAmount-' + i"
                                     class="w-full"
                                     formControlName="amount"
                                     mode="currency"/>
-                    <label [for]="'childAmount-' + i">Amount</label>
-                  </p-float-label>
-                  <p-button (onClick)="removeChildPriceBreakdownItem(i)"
-                            [text]="true"
-                            icon="pi pi-trash"
-                            severity="danger"
-                            size="small">
-                  </p-button>
+                            <label [for]="'childAmount-' + i">Amount</label>
+                          </p-float-label>
+                          <p-button (onClick)="removeChildPriceBreakdownItem(i)"
+                                    [text]="true"
+                                    icon="pi pi-trash"
+                                    severity="danger"
+                                    size="small">
+                          </p-button>
+                        </div>
+                      }
+                    </div>
+                    @if (childPriceBreakdownArray.controls.length > 0) {
+                      <div class="flex justify-between mt-2 text-sm">
+                        <span>Total Child Breakdown:</span>
+                        <span
+                          [class.text-red-500]="childBreakdownTotal !== formGroup.get('childPriceAmount')?.value">
+                                  {{
+                            childBreakdownTotal | currency: (formGroup.get('currencyCode')?.value
+                              || 'PHP')
+                          }}
+                                </span>
+                      </div>
+                    }
+                    @if (childBreakdownTotal !== formGroup.get('childPriceAmount')?.value
+                    && childPriceBreakdownArray.controls.length > 0) {
+                      <small
+                        class="text-red-500">
+                        Child breakdown total doesn't match the child price amount ({{
+                          formGroup.get('childPriceAmount')?.value | currency:(formGroup.get(
+                            'currencyCode')?.value || 'PHP')
+                        }})
+                      </small>
+                    }
+                  </div>
+                }
+                <!-- End of Child Price Breakdown Section -->
+              }
+              @if (formGroup.get('currencyCode')?.value !== 'PHP') {
+                <div class="col-span-2">
+                  <p-inputgroup>
+                    <p-float-label class="flex-1" variant="on">
+                      <p-input-number [id]="'exchangeRate-' + provider.name"
+                                      [maxFractionDigits]="2"
+                                      [minFractionDigits]="2"
+                                      class="w-full"
+                                      (onInput)="calculatePhpEquivalent()"
+                                      formControlName="exchangeRate"
+                                      mode="decimal"/>
+                      <label [for]="'exchangeRate-' + provider.name">Exchange Rate</label>
+                    </p-float-label>
+                    <p-inputgroup-addon>
+                      <p-button (onClick)="fetchExchangeRate()"
+                                [disabled]="!formGroup.get('priceAmount')?.value"
+                                [loading]="isLoadingRate"
+                                [text]="true"
+                                icon="pi pi-refresh"
+                                severity="secondary"/>
+                    </p-inputgroup-addon>
+                  </p-inputgroup>
+                  @if (exchangeRateLastUpdated) {
+                    <small class="text-gray-500">
+                      Last updated: {{ exchangeRateLastUpdated | date:'medium' }}
+                    </small>
+                  }
                 </div>
-              </div>
-
-              <div *ngIf="childPriceBreakdownArray.controls.length > 0" class="flex justify-between mt-2 text-sm">
-                <span>Total Child Breakdown:</span>
-                <span [class.text-red-500]="childBreakdownTotal !== formGroup.get('childPriceAmount')?.value">
-                  {{ childBreakdownTotal | currency: (formGroup.get('currencyCode')?.value || 'PHP') }}
-                </span>
-              </div>
-              <small *ngIf="childBreakdownTotal !== formGroup.get('childPriceAmount')?.value && childPriceBreakdownArray.controls.length > 0"
-                     class="text-red-500">
-                Child breakdown total doesn't match the child price amount ({{ formGroup.get('childPriceAmount')?.value | currency:(formGroup.get('currencyCode')?.value || 'PHP') }})
-              </small>
-            </div>
-            <!-- End of Child Price Breakdown Section -->
-          }
-
-          @if (formGroup.get('currencyCode')?.value !== 'PHP') {
-            <div class="col-span-2">
-              <p-inputgroup>
-                <p-float-label class="flex-1" variant="on">
-                  <p-input-number [id]="'exchangeRate-' + provider.name"
-                                  [maxFractionDigits]="2"
-                                  [minFractionDigits]="2"
+                <p-float-label variant="on">
+                  <p-input-number [id]="'phpEquivalent-' + provider.name"
+                                  [readonly]="true"
                                   class="w-full"
-                                  (onInput)="calculatePhpEquivalent()"
-                                  formControlName="exchangeRate"
-                                  mode="decimal"/>
-                  <label [for]="'exchangeRate-' + provider.name">Exchange Rate</label>
+                                  currency="PHP"
+                                  formControlName="phpEquivalentAmount"
+                                  mode="currency"/>
+                  <label [for]="'phpEquivalent-' + provider.name">Price in PHP</label>
                 </p-float-label>
-                <p-inputgroup-addon>
-                  <p-button (onClick)="fetchExchangeRate()"
-                            [disabled]="!formGroup.get('priceAmount')?.value"
-                            [loading]="isLoadingRate"
-                            [text]="true"
-                            icon="pi pi-refresh"
-                            severity="secondary"/>
-                </p-inputgroup-addon>
-              </p-inputgroup>
-              <small *ngIf="exchangeRateLastUpdated" class="text-gray-500">
-                Last updated: {{ exchangeRateLastUpdated | date:'medium' }}
-              </small>
+                @if (showChildPrices) {
+                  <p-float-label variant="on">
+                    <p-input-number [id]="'childPhpEquivalent-' + provider.name"
+                                    [readonly]="true"
+                                    class="w-full"
+                                    currency="PHP"
+                                    formControlName="childPhpEquivalentAmount"
+                                    mode="currency"/>
+                    <label [for]="'phpEquivalent-' + provider.name">Child Price in PHP</label>
+                  </p-float-label>
+                }
+              }
             </div>
-
-            <p-float-label variant="on">
-              <p-input-number [id]="'phpEquivalent-' + provider.name"
-                              [readonly]="true"
-                              class="w-full"
-                              currency="PHP"
-                              formControlName="phpEquivalentAmount"
-                              mode="currency"/>
-              <label [for]="'phpEquivalent-' + provider.name">Price in PHP</label>
-            </p-float-label>
-
-            <p-float-label variant="on" *ngIf="showChildPrices">
-              <p-input-number [id]="'childPhpEquivalent-' + provider.name"
-                              [readonly]="true"
-                              class="w-full"
-                              currency="PHP"
-                              formControlName="childPhpEquivalentAmount"
-                              mode="currency"/>
-              <label [for]="'phpEquivalent-' + provider.name">Child Price in PHP</label>
-            </p-float-label>
+          </div>
+          @if (showFlightSection) {
+            <div formGroupName="flightDetails" class="p-4 border rounded bg-gray-50">
+              <h3 class="font-medium mb-3">Flight Details</h3>
+              <div class="grid grid-cols-2 gap-4">
+                <p-fluid formGroupName="departure" class="flex flex-col gap-2">
+                  <span class="font-semibold">Departure</span>
+                  <p-float-label variant="on">
+                    <input type="text" pInputText id="departureAirline" formControlName="airline"/>
+                    <label for="departureAirline">Airline</label>
+                  </p-float-label>
+                  <p-float-label variant="on">
+                    <input type="text" pInputText id="departureFlightNumber"
+                           formControlName="flightNumber"/>
+                    <label for="departureFlightNumber">Flight Number</label>
+                  </p-float-label>
+                  <p-float-label variant="on">
+                    <input type="text" pInputText id="departureAirportCode"
+                           formControlName="airportCode"/>
+                    <label for="departureAirportCode">Airport Code</label>
+                  </p-float-label>
+                  <div class="grid grid-cols-2 gap-1">
+                    <p-float-label variant="on">
+                      <p-date-picker id="departureStartDate" formControlName="startDate"
+                                     [showTime]="true"></p-date-picker>
+                      <label for="departureStartDate">Start Date</label>
+                    </p-float-label>
+                    <p-float-label variant="on">
+                      <p-date-picker id="departureEndDate" formControlName="endDate"
+                                     [showTime]="true"></p-date-picker>
+                      <label for="departureEndDate">End Date</label>
+                    </p-float-label>
+                  </div>
+                  <p-float-label variant="on">
+                    <p-input-number formControlName="price" id="price" mode="currency"
+                                    currency="PHP"
+                                    (onInput)="onFlightPriceInput($event, 'departure')"
+                                    [minFractionDigits]="2" [maxFractionDigits]="2"/>
+                    <label for="price">Price</label>
+                  </p-float-label>
+                  @if (showChildPrices) {
+                    <p-float-label variant="on">
+                      <p-input-number formControlName="childPrice" id="price" mode="currency"
+                                      currency="PHP"
+                                      [minFractionDigits]="2" [maxFractionDigits]="2"/>
+                      <label for="childPrice">Child Price</label>
+                    </p-float-label>
+                  }
+                </p-fluid>
+                <p-fluid formGroupName="arrival" class="flex flex-col gap-2">
+                  <span class="font-semibold">Arrival</span>
+                  <p-float-label variant="on">
+                    <input type="text" pInputText id="arrivalAirline" formControlName="airline"/>
+                    <label for="arrivalAirline">Airline</label>
+                  </p-float-label>
+                  <p-float-label variant="on">
+                    <input type="text" pInputText id="arrivalFlightNumber"
+                           formControlName="flightNumber"/>
+                    <label for="arrivalFlightNumber">Flight Number</label>
+                  </p-float-label>
+                  <p-float-label variant="on">
+                    <input type="text" pInputText id="arrivalAirportCode"
+                           formControlName="airportCode"/>
+                    <label for="arrivalAirportCode">Airport Code</label>
+                  </p-float-label>
+                  <div class="grid grid-cols-2 gap-1">
+                    <p-float-label variant="on">
+                      <p-date-picker id="arrivalStartDate" formControlName="startDate"
+                                     [showTime]="true"></p-date-picker>
+                      <label for="arrivalStartDate">Start Date</label>
+                    </p-float-label>
+                    <p-float-label variant="on">
+                      <p-date-picker id="arrivalEndDate" formControlName="endDate"
+                                     [showTime]="true"></p-date-picker>
+                      <label for="arrivalEndDate">End Date</label>
+                    </p-float-label>
+                  </div>
+                  <p-float-label variant="on">
+                    <p-input-number formControlName="price" id="price" mode="currency"
+                                    currency="PHP"
+                                    [minFractionDigits]="2" [maxFractionDigits]="2"
+                                    (onInput)="onFlightPriceInput($event, 'arrival')"/>
+                    <label for="price">Price</label>
+                  </p-float-label>
+                  @if (showChildPrices) {
+                    <p-float-label variant="on">
+                      <p-input-number formControlName="childPrice" id="childPrice" mode="currency"
+                                      currency="PHP"
+                                      [minFractionDigits]="2" [maxFractionDigits]="2"/>
+                      <label for="childPrice">Child Price</label>
+                    </p-float-label>
+                  }
+                </p-fluid>
+              </div>
+            </div>
           }
-        </div>
-      </div>
-      @if (showFlightSection) {
-        <div formGroupName="flightDetails" class="p-4 border rounded bg-gray-50">
-          <h3 class="font-medium mb-3">Flight Details</h3>
-          <div class="grid grid-cols-2 gap-4">
-            <p-fluid formGroupName="departure" class="flex flex-col gap-2">
-              <span class="font-semibold">Departure</span>
+          <div class="p-4 border rounded bg-gray-50">
+            <h3 class="font-medium mb-3">Additional Details</h3>
+            <p-fluid class="grid grid-cols-1 gap-4">
               <p-float-label variant="on">
-                <input type="text" pInputText id="departureAirline" formControlName="airline"/>
-                <label for="departureAirline">Airline</label>
+                <textarea pTextarea formControlName="inclusions" id="inclusions"></textarea>
+                <label for="inclusions">Inclusions</label>
               </p-float-label>
-              <p-float-label variant="on">
-                <input type="text" pInputText id="departureFlightNumber"
-                       formControlName="flightNumber"/>
-                <label for="departureFlightNumber">Flight Number</label>
-              </p-float-label>
-              <p-float-label variant="on">
-                <input type="text" pInputText id="departureAirportCode"
-                       formControlName="airportCode"/>
-                <label for="departureAirportCode">Airport Code</label>
-              </p-float-label>
-              <div class="grid grid-cols-2 gap-1">
+              @if (showAdditionalSection) {
                 <p-float-label variant="on">
-                  <p-date-picker id="departureStartDate" formControlName="startDate"
-                                 [showTime]="true"></p-date-picker>
-                  <label for="departureStartDate">Start Date</label>
+                  <textarea pTextarea formControlName="exclusions" id="exclusions"></textarea>
+                  <label for="exclusions">Exclusions</label>
                 </p-float-label>
                 <p-float-label variant="on">
-                  <p-date-picker id="departureEndDate" formControlName="endDate"
-                                 [showTime]="true"></p-date-picker>
-                  <label for="departureEndDate">End Date</label>
+                  <textarea pTextarea formControlName="optionalTours" id="optionalTours"></textarea>
+                  <label for="optionalTours">Optional Tours</label>
                 </p-float-label>
-              </div>
-              <p-float-label variant="on">
-                <p-input-number formControlName="price" id="price" mode="currency" currency="PHP" (onInput)="onFlightPriceInput($event, 'departure')"
-                                [minFractionDigits]="2" [maxFractionDigits]="2"/>
-                <label for="price">Price</label>
-              </p-float-label>
-              <p-float-label variant="on"  *ngIf="showChildPrices">
-                <p-input-number formControlName="childPrice" id="price" mode="currency" currency="PHP"
-                                [minFractionDigits]="2" [maxFractionDigits]="2"/>
-                <label for="childPrice">Child Price</label>
-              </p-float-label>
-            </p-fluid>
-            <p-fluid formGroupName="arrival" class="flex flex-col gap-2">
-              <span class="font-semibold">Arrival</span>
-              <p-float-label variant="on">
-                <input type="text" pInputText id="arrivalAirline" formControlName="airline"/>
-                <label for="arrivalAirline">Airline</label>
-              </p-float-label>
-              <p-float-label variant="on">
-                <input type="text" pInputText id="arrivalFlightNumber"
-                       formControlName="flightNumber"/>
-                <label for="arrivalFlightNumber">Flight Number</label>
-              </p-float-label>
-              <p-float-label variant="on">
-                <input type="text" pInputText id="arrivalAirportCode"
-                       formControlName="airportCode"/>
-                <label for="arrivalAirportCode">Airport Code</label>
-              </p-float-label>
-              <div class="grid grid-cols-2 gap-1">
-                <p-float-label variant="on">
-                  <p-date-picker id="arrivalStartDate" formControlName="startDate"
-                                 [showTime]="true"></p-date-picker>
-                  <label for="arrivalStartDate">Start Date</label>
-                </p-float-label>
-                <p-float-label variant="on">
-                  <p-date-picker id="arrivalEndDate" formControlName="endDate"
-                                 [showTime]="true"></p-date-picker>
-                  <label for="arrivalEndDate">End Date</label>
-                </p-float-label>
-              </div>
-              <p-float-label variant="on">
-                <p-input-number formControlName="price" id="price" mode="currency" currency="PHP"
-                                [minFractionDigits]="2" [maxFractionDigits]="2" (onInput)="onFlightPriceInput($event, 'arrival')"/>
-                <label for="price">Price</label>
-              </p-float-label>
-              <p-float-label variant="on" *ngIf="showChildPrices">
-                <p-input-number formControlName="childPrice" id="childPrice" mode="currency" currency="PHP"
-                                [minFractionDigits]="2" [maxFractionDigits]="2"/>
-                <label for="childPrice">Child Price</label>
-              </p-float-label>
+              }
             </p-fluid>
           </div>
-        </div>
-      }
-      <div class="p-4 border rounded bg-gray-50">
-        <h3 class="font-medium mb-3">Additional Details</h3>
-        <p-fluid class="grid grid-cols-1 gap-4">
-          <p-float-label variant="on">
-            <textarea pTextarea formControlName="inclusions" id="inclusions"></textarea>
-            <label for="inclusions">Inclusions</label>
-          </p-float-label>
-          @if (showAdditionalSection) {
+          <div class="flex justify-end">
+            <p-button (onClick)="generateQuotation()"
+                      [text]="true"
+                      icon="pi pi-file-export"
+                      label="Generate Quotation"/>
+          </div>
+        }
+        <!-- Email Section -->
+        @if (showEmailSection) {
+          <div class="p-4 border rounded bg-gray-50">
             <p-float-label variant="on">
-              <textarea pTextarea formControlName="exclusions" id="exclusions"></textarea>
-              <label for="exclusions">Exclusions</label>
+                                                <textarea [id]="'emailRemarks-' + provider.name"
+                                                          class="w-full"
+                                                          formControlName="emailQuotation"
+                                                          pTextarea
+                                                          rows="2"></textarea>
+              <label [for]="'emailRemarks-' + provider.name">Remarks to include in email</label>
             </p-float-label>
-            <p-float-label variant="on">
-              <textarea pTextarea formControlName="optionalTours" id="optionalTours"></textarea>
-              <label for="optionalTours">Optional Tours</label>
-            </p-float-label>
-          }
-        </p-fluid>
-      </div>
-      <div class="flex justify-end">
-        <p-button (onClick)="generateQuotation()"
-                  [text]="true"
-                  icon="pi pi-file-export"
-                  label="Generate Quotation"/>
-      </div>
-    }
-
-    <!-- Email Section -->
-    @if (showEmailSection) {
-      <div class="p-4 border rounded bg-gray-50">
-        <p-float-label variant="on">
-            <textarea [id]="'emailRemarks-' + provider.name"
-                      class="w-full"
-                      formControlName="emailQuotation"
-                      pTextarea
-                      rows="2"></textarea>
-          <label [for]="'emailRemarks-' + provider.name">Remarks to include in email</label>
-        </p-float-label>
-
-        <div class="flex justify-end">
-          <p-button (onClick)="sendQuotation()" [icon]="isSent ? 'pi pi-search-plus' : 'pi pi-send'"
-                    [label]="isSent ? 'Preview' : 'Sent'"
-                    [rounded]="true"
-                    [severity]="isSent ? 'info' : 'success'"
-                    class="transform transition-all duration-300 hover:scale-105"
-                    type="button"/>
-        </div>
+            <div class="flex justify-end">
+              <p-button (onClick)="sendQuotation()"
+                        [icon]="isSent ? 'pi pi-search-plus' : 'pi pi-send'"
+                        [label]="isSent ? 'Preview' : 'Sent'"
+                        [rounded]="true"
+                        [severity]="isSent ? 'info' : 'success'"
+                        class="transform transition-all duration-300 hover:scale-105"
+                        type="button"/>
+            </div>
+          </div>
+        }
       </div>
     }
   </div>
-</div>
+}

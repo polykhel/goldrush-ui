@@ -1,11 +1,4 @@
-import { CommonModule } from '@angular/common';
-import {
-  ChangeDetectionStrategy,
-  Component,
-  EventEmitter,
-  Input,
-  Output,
-} from '@angular/core';
+import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output } from '@angular/core';
 import { formatDateRange } from '@utils/date.util';
 import dayjs from 'dayjs';
 
@@ -16,11 +9,12 @@ import { Dialog } from 'primeng/dialog';
 import { Button } from 'primeng/button';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
+import { CurrencyPipe } from '@angular/common';
 
 @Component({
   selector: 'app-quotation-preview',
   standalone: true,
-  imports: [CommonModule, Dialog, Button],
+  imports: [Dialog, Button, CurrencyPipe],
   templateUrl: './quotation-preview.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

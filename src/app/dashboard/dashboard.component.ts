@@ -1,4 +1,4 @@
-import { NgForOf, NgOptimizedImage } from '@angular/common';
+import { NgOptimizedImage } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { Provider } from '@models/provider.model';
@@ -18,7 +18,7 @@ interface Activity {
   selector: 'app-dashboard',
   templateUrl: './dashboard.component.html',
   standalone: true,
-  imports: [ButtonModule, TableModule, RouterLink, NgOptimizedImage, NgForOf],
+  imports: [ButtonModule, TableModule, RouterLink, NgOptimizedImage]
 })
 export class DashboardComponent implements OnInit {
   recentActivities: Activity[] = [

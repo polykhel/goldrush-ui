@@ -1,4 +1,3 @@
-import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { EmailData } from '@utils/email.util';
 import { PrimeTemplate } from 'primeng/api';
@@ -10,7 +9,7 @@ import { TabsModule } from 'primeng/tabs';
 @Component({
   selector: 'app-email-preview-modal',
   standalone: true,
-  imports: [CommonModule, Dialog, TabsModule, Button, PrimeTemplate, Divider],
+  imports: [Dialog, TabsModule, Button, PrimeTemplate, Divider],
   templateUrl: './email-preview-modal.component.html',
 })
 export class EmailPreviewModalComponent {

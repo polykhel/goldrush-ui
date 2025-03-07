@@ -23,12 +23,14 @@
               </p-float-label>
               <p-float-label variant="on">
                 <p-input-number inputId="totalAmount" mode="currency" currency="PHP"
-                  formControlName="totalAmount"
-                  [ngClass]="{'ng-invalid ng-dirty': form.get('totalAmount')?.invalid && form.get('totalAmount')?.touched}"/>
+                                formControlName="totalAmount"
+                                [ngClass]="{'ng-invalid ng-dirty': form.get('totalAmount')?.invalid && form.get('totalAmount')?.touched}"/>
                 <label for="totalAmount">Total Amount</label>
-                <small class="p-error block" *ngIf="getFieldError('totalAmount')">
-                  {{ getFieldError('totalAmount') }}
-                </small>
+                @if (getFieldError('totalAmount')) {
+                  <small class="p-error block">
+                    {{ getFieldError('totalAmount') }}
+                  </small>
+                }
               </p-float-label>
             </div>
           </div>
@@ -39,36 +41,44 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
               <p-float-label variant="on">
                 <p-select inputId="paymentMethod" [options]="paymentMethods"
-                  formControlName="paymentMethod" [style]="{'width':'100%'}"
-                  optionLabel="label" optionValue="value">
+                          formControlName="paymentMethod" [style]="{'width':'100%'}"
+                          optionLabel="label" optionValue="value">
                 </p-select>
                 <label for="paymentMethod">Payment Method</label>
-                <small class="p-error block" *ngIf="getFieldError('paymentMethod')">
-                  {{ getFieldError('paymentMethod') }}
-                </small>
+                @if (getFieldError('paymentMethod')) {
+                  <small class="p-error block">
+                    {{ getFieldError('paymentMethod') }}
+                  </small>
+                }
               </p-float-label>
 
               <p-float-label variant="on">
                 <p-input-number inputId="downPaymentPercentage"
-                  formControlName="downPaymentPercentage"
-                  [min]="20" [max]="100" suffix="%"
-                  [ngClass]="{'ng-invalid ng-dirty': form.get('downPaymentPercentage')?.invalid && form.get('downPaymentPercentage')?.touched}"/>
+                                formControlName="downPaymentPercentage"
+                                [min]="20" [max]="100" suffix="%"
+                                [ngClass]="{'ng-invalid ng-dirty': form.get('downPaymentPercentage')?.invalid && form.get('downPaymentPercentage')?.touched}"/>
                 <label for="downPaymentPercentage">Down Payment Percentage</label>
-                <small class="p-error block" *ngIf="getFieldError('downPaymentPercentage')">
-                  {{ getFieldError('downPaymentPercentage') }}
-                </small>
+                @if (getFieldError('downPaymentPercentage')) {
+                  <small class="p-error block">
+                    {{ getFieldError('downPaymentPercentage') }}
+                  </small>
+                }
               </p-float-label>
 
-              <p-float-label variant="on" *ngIf="form.get('paymentMethod')?.value === 'bank'">
-                <p-input-number inputId="monthlyChargePercentage"
-                  formControlName="monthlyChargePercentage"
-                  [min]="0" [max]="100" suffix="%"
-                  [ngClass]="{'ng-invalid ng-dirty': form.get('monthlyChargePercentage')?.invalid && form.get('monthlyChargePercentage')?.touched}"/>
-                <label for="monthlyChargePercentage">Monthly Interest Rate</label>
-                <small class="p-error block" *ngIf="getFieldError('monthlyChargePercentage')">
-                  {{ getFieldError('monthlyChargePercentage') }}
-                </small>
-              </p-float-label>
+              @if (form.get('paymentMethod')?.value === 'bank') {
+                <p-float-label variant="on">
+                  <p-input-number inputId="monthlyChargePercentage"
+                                  formControlName="monthlyChargePercentage"
+                                  [min]="0" [max]="100" suffix="%"
+                                  [ngClass]="{'ng-invalid ng-dirty': form.get('monthlyChargePercentage')?.invalid && form.get('monthlyChargePercentage')?.touched}"/>
+                  <label for="monthlyChargePercentage">Monthly Interest Rate</label>
+                  @if (getFieldError('monthlyChargePercentage')) {
+                    <small class="p-error block">
+                      {{ getFieldError('monthlyChargePercentage') }}
+                    </small>
+                  }
+                </p-float-label>
+              }
             </div>
           </div>
 
@@ -78,14 +88,14 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
               <p-float-label variant="on">
                 <p-date-picker showIcon inputId="startDate" iconDisplay="input"
-                  formControlName="startDate" [minDate]="today" [maxDate]="minDate"/>
+                               formControlName="startDate" [minDate]="today" [maxDate]="minDate"/>
                 <label for="startDate">Down Payment Date</label>
               </p-float-label>
 
               <p-float-label variant="on">
                 <p-date-picker showIcon inputId="monthlyStartDate" iconDisplay="input"
-                  formControlName="monthlyStartDate"
-                  [minDate]="today" [maxDate]="minDate"/>
+                               formControlName="monthlyStartDate"
+                               [minDate]="today" [maxDate]="minDate"/>
                 <label for="monthlyStartDate">Monthly Payments Start Date</label>
               </p-float-label>
             </div>
@@ -94,57 +104,60 @@
           <!-- Add back the action buttons -->
           <div class="flex gap-4 justify-center items-center mt-4">
             <p-button label="Generate Schedule" icon="pi pi-check"
-              (onClick)="generateSchedule()" [disabled]="!form.valid"/>
+                      (onClick)="generateSchedule()" [disabled]="!form.valid"/>
             <p-button label="Clear" icon="pi pi-trash" severity="warn"
-              (onClick)="clear()"/>
+                      (onClick)="clear()"/>
           </div>
         </p-fluid>
       </form>
     </p-panel>
 
     <!-- Results Section - Always visible -->
-    <div class="mt-4" *ngIf="schedule.length">
-      <p-panel>
-        <ng-template pTemplate="header">
-          <div class="flex align-items-center gap-2">
-            <i class="pi pi-list"></i>
-            <span class="font-bold">Payment Schedule</span>
-          </div>
-        </ng-template>
-
-        <p-table [value]="schedule" styleClass="p-datatable-sm">
+    @if (schedule.length) {
+      <div class="mt-4">
+        <p-panel>
           <ng-template pTemplate="header">
-            <tr>
-              <th id="date">Date</th>
-              <th id="amount" class="text-right">Base Amount</th>
-              <th id="charge" class="text-right">Interest</th>
-              <th id="total" class="text-right">Total Amount</th>
-            </tr>
+            <div class="flex align-items-center gap-2">
+              <i class="pi pi-list"></i>
+              <span class="font-bold">Payment Schedule</span>
+            </div>
           </ng-template>
-          <ng-template pTemplate="body" let-payment>
-            <tr>
-              <td headers="date">{{payment.date}}</td>
-              <td headers="amount" class="text-right">₱ {{payment.amount}}</td>
-              <td headers="charge" class="text-right">₱ {{payment.charge}}</td>
-              <td headers="total" class="text-right">₱ {{payment.total}}</td>
-            </tr>
-          </ng-template>
-          <ng-template pTemplate="footer" *ngIf="schedule.length > 0">
-            <tr>
-              <td headers="date"><strong>Total</strong></td>
-              <td headers="amount" class="text-right">
-                <strong>₱ {{schedule | sum:'amount'}}</strong>
-              </td>
-              <td headers="charge" class="text-right">
-                <strong>₱ {{schedule | sum:'charge'}}</strong>
-              </td>
-              <td headers="total" class="text-right">
-                <strong>₱ {{schedule | sum:'total'}}</strong>
-              </td>
-            </tr>
-          </ng-template>
-        </p-table>
-      </p-panel>
-    </div>
+          <p-table [value]="schedule" styleClass="p-datatable-sm">
+            <ng-template pTemplate="header">
+              <tr>
+                <th id="date">Date</th>
+                <th id="amount" class="text-right">Base Amount</th>
+                <th id="charge" class="text-right">Interest</th>
+                <th id="total" class="text-right">Total Amount</th>
+              </tr>
+            </ng-template>
+            <ng-template pTemplate="body" let-payment>
+              <tr>
+                <td headers="date">{{ payment.date }}</td>
+                <td headers="amount" class="text-right">₱ {{ payment.amount }}</td>
+                <td headers="charge" class="text-right">₱ {{ payment.charge }}</td>
+                <td headers="total" class="text-right">₱ {{ payment.total }}</td>
+              </tr>
+            </ng-template>
+            @if (schedule.length > 0) {
+              <ng-template pTemplate="footer">
+                <tr>
+                  <td headers="date"><strong>Total</strong></td>
+                  <td headers="amount" class="text-right">
+                    <strong>₱ {{ schedule | sum:'amount' }}</strong>
+                  </td>
+                  <td headers="charge" class="text-right">
+                    <strong>₱ {{ schedule | sum:'charge' }}</strong>
+                  </td>
+                  <td headers="total" class="text-right">
+                    <strong>₱ {{ schedule | sum:'total' }}</strong>
+                  </td>
+                </tr>
+              </ng-template>
+            }
+          </p-table>
+        </p-panel>
+      </div>
+    }
   </div>
 </div>

@@ -75,12 +75,14 @@
         </p-float-label>
 
         <p-float-label variant="on">
-          <p-date-picker [showIcon]="true" dateFormat="mm/dd/y" formControlName="startDate" iconDisplay="input" (onSelect)="calculateTravelDuration()"/>
+          <p-date-picker [showIcon]="true" dateFormat="mm/dd/y" formControlName="startDate"
+                         iconDisplay="input" (onSelect)="calculateTravelDuration()"/>
           <label for="startDate">Start Date</label>
         </p-float-label>
 
         <p-float-label variant="on">
-          <p-date-picker [showIcon]="true" dateFormat="mm/dd/y" formControlName="endDate" iconDisplay="input" (onSelect)="calculateTravelDuration()"/>
+          <p-date-picker [showIcon]="true" dateFormat="mm/dd/y" formControlName="endDate"
+                         iconDisplay="input" (onSelect)="calculateTravelDuration()"/>
           <label for="endDate">End Date</label>
         </p-float-label>
       </p-fluid>
@@ -115,10 +117,12 @@
             <p-input-number [showButtons]="true" formControlName="children" inputId="children"/>
             <label for="children">Children</label>
           </p-float-label>
-          <p-float-label variant="on" *ngIf="childrenControl.value">
-            <input pInputText formControlName="childAges" id="childAges"/>
-            <label for="childAges">Child Age(s)</label>
-          </p-float-label>
+          @if (childrenControl.value) {
+            <p-float-label variant="on">
+              <input pInputText formControlName="childAges" id="childAges"/>
+              <label for="childAges">Child Age(s)</label>
+            </p-float-label>
+          }
         </p-fluid>
       </div>
     </section>
@@ -140,17 +144,21 @@
                 <p-radio-button formControlName="packageType" inputId="custom" value="CUSTOM"/>
                 <label for="custom">Custom Package</label>
               </div>
-              <div *ngIf="inquiryForm.controls.packageType.value === 'CUSTOM'"
-                   class="ml-6 flex flex-col gap-2">
-                <div *ngFor="let option of packageOptions" class="flex items-center gap-2">
-                  <p-checkbox
-                    [formControlName]="'customPackageOptions'"
-                    [inputId]="option.id"
-                    [value]="option.id">
-                  </p-checkbox>
-                  <label [for]="option.id" class="ml-2"> {{ option.label }} </label>
+              @if (inquiryForm.controls.packageType.value === 'CUSTOM') {
+                <div
+                  class="ml-6 flex flex-col gap-2">
+                  @for (option of packageOptions; track option) {
+                    <div class="flex items-center gap-2">
+                      <p-checkbox
+                        [formControlName]="'customPackageOptions'"
+                        [inputId]="option.id"
+                        [value]="option.id">
+                      </p-checkbox>
+                      <label [for]="option.id" class="ml-2"> {{ option.label }} </label>
+                    </div>
+                  }
                 </div>
-              </div>
+              }
             </div>
           </div>
         </div>
@@ -176,16 +184,17 @@
           </div>
 
           <div class="space-y-4">
-            <app-provider-quotation (onGenerateQuotation)="generateQuotation($event)"
-                                    *ngFor="let quotationControl of quotations.controls; let i = index"
-                                    [formGroup]="getProviderQuotationControl(i)"
-                                    [isEditMode]="editMode"
-                                    [showFlightDetails]="showFlightDetails"
-                                    [showChildPrices]="!!inquiryForm.get('travelDetails.children')?.value"
-                                    [provider]="providerMap.get(quotationControl.get('providerId')?.value)!"
-                                    (onSendEmail)="openEmailModal($event)"
-                                    (onRemove)="removeQuotation(i)">
-            </app-provider-quotation>
+            @for (quotationControl of quotations.controls; track quotationControl; let i = $index) {
+              <app-provider-quotation (onGenerateQuotation)="generateQuotation($event)"
+                                      [formGroup]="getProviderQuotationControl(i)"
+                                      [isEditMode]="editMode"
+                                      [showFlightDetails]="showFlightDetails"
+                                      [showChildPrices]="!!inquiryForm.get('travelDetails.children')?.value"
+                                      [provider]="providerMap.get(quotationControl.get('providerId')?.value)!"
+                                      (onSendEmail)="openEmailModal($event)"
+                                      (onRemove)="removeQuotation(i)">
+              </app-provider-quotation>
+            }
           </div>
         </div>
       </div>
@@ -205,28 +214,36 @@
     </div>
 
     <!-- Audit Information -->
-    <div *ngIf="editMode" class="mt-12 text-xs text-gray-500 border-t pt-4 bg-gray-50 p-4 rounded-lg">
-      <div class="grid grid-cols-2 gap-2">
-        <div>Created by {{ auditFields.createdBy }} on {{ auditFields.createdAt| date:'medium' }}</div>
-        <div>Last updated by {{ auditFields.updatedBy }} on {{ auditFields.updatedAt | date:'medium' }}</div>
+    @if (editMode) {
+      <div class="mt-12 text-xs text-gray-500 border-t pt-4 bg-gray-50 p-4 rounded-lg">
+        <div class="grid grid-cols-2 gap-2">
+          <div>Created by {{ auditFields.createdBy }}
+            on {{ auditFields.createdAt| date:'medium' }}
+          </div>
+          <div>Last updated by {{ auditFields.updatedBy }}
+            on {{ auditFields.updatedAt | date:'medium' }}
+          </div>
+        </div>
       </div>
-    </div>
+    }
 
-    <app-email-preview-modal
-      (send)="handleSendEmail()"
-      (cancel)="showEmailPreview = false"
-      *ngIf="emailData"
-      [(visible)]="showEmailPreview"
-      [emailData]="emailData"
-      [isSending]="isSending"
-    ></app-email-preview-modal>
+    @if (emailData) {
+      <app-email-preview-modal
+        (send)="handleSendEmail()"
+        (cancel)="showEmailPreview = false"
+        [(visible)]="showEmailPreview"
+        [emailData]="emailData"
+        [isSending]="isSending"
+      ></app-email-preview-modal>
+    }
 
-    <app-quotation-preview
-      (cancel)="showQuotationPreview = false"
-      *ngIf="quotationData"
-      [(visible)]="showQuotationPreview"
-      [quotation]="quotationData"
-    ></app-quotation-preview>
+    @if (quotationData) {
+      <app-quotation-preview
+        (cancel)="showQuotationPreview = false"
+        [(visible)]="showQuotationPreview"
+        [quotation]="quotationData"
+      ></app-quotation-preview>
+    }
   </form>
   <p-toast></p-toast>
 </section>

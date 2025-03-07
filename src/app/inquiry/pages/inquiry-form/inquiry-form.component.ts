@@ -1,4 +1,4 @@
-import { DatePipe, NgForOf, NgIf } from '@angular/common';
+import { DatePipe } from '@angular/common';
 import { Component, inject, OnInit } from '@angular/core';
 import {
   FormArray,
@@ -59,9 +59,7 @@ import {
     FloatLabel,
     InputText,
     InputNumber,
-    NgForOf,
     Button,
-    NgIf,
     Textarea,
     DropdownModule,
     Select,

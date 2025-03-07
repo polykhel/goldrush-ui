@@ -1,4 +1,4 @@
-import { CurrencyPipe, DatePipe, NgForOf, NgIf } from '@angular/common';
+import { CurrencyPipe, DatePipe } from '@angular/common';
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { FormArray, FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { Provider } from '@models/provider.model';
@@ -30,14 +30,12 @@ import { Checkbox } from 'primeng/checkbox';
     InputGroupAddon,
     InputNumber,
     InputText,
-    NgIf,
     ReactiveFormsModule,
     Select,
     Textarea,
     DatePicker,
     Fluid,
     CurrencyPipe,
-    NgForOf,
     Checkbox
   ]
 })

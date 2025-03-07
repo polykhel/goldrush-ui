@@ -79,10 +79,14 @@
   <div class="mb-8">
     <h2 class="text-xl font-semibold text-gray-800 mb-4">Provider Portals</h2>
     <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
-      <a *ngFor="let provider of providers" [href]="provider.trackerLink" target="_blank" class="bg-white p-4 rounded-lg shadow hover:shadow-md transition-shadow text-center">
-        <img [ngSrc]="provider.logo" [alt]="provider.name" class="h-8 mx-auto mb-2" width="32" height="32">
-        <span class="text-sm text-gray-600">{{provider.name}}</span>
-      </a>
+      @for (provider of providers; track provider) {
+        <a [href]="provider.trackerLink" target="_blank"
+           class="bg-white p-4 rounded-lg shadow hover:shadow-md transition-shadow text-center">
+          <img [ngSrc]="provider.logo" [alt]="provider.name" class="h-8 mx-auto mb-2" width="32"
+               height="32">
+          <span class="text-sm text-gray-600">{{ provider.name }}</span>
+        </a>
+      }
     </div>
   </div>
 
