@@ -7,8 +7,15 @@
       <app-sidebar class="fixed top-20 left-0 h-[calc(100vh-5rem)]"/>
     }
     <div [class.ml-24]="isLoggedIn" class="flex-1 mt-20 flex flex-col">
-      <main class="flex-1 p-8 rounded-tl-[30px] shadow-inner bg-gray-100 overflow-auto">
+      <main #mainContent class="flex-1 p-8 rounded-tl-[30px] shadow-inner bg-gray-100 overflow-auto relative" (scroll)="onScroll($event)">
         <router-outlet></router-outlet>
+        @if (showScrollButton) {
+          <button
+            (click)="mainContent.scrollTo({ top: 0, behavior: 'smooth' })"
+            class="fixed bottom-8 right-8 w-12 h-12 rounded-full bg-blue-500 hover:bg-blue-600 text-white shadow-lg flex items-center justify-center transition-all transform hover:scale-110">
+            <i class="pi pi-arrow-up text-xl"></i>
+          </button>
+        }
       </main>
       <footer class="py-4 px-6 bg-gray-100 text-gray-600 text-sm border-t">
         <div class="container mx-auto flex justify-between items-center">
