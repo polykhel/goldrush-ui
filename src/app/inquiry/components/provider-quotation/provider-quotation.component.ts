@@ -1,6 +1,6 @@
 import { CurrencyPipe, DatePipe, NgForOf, NgIf } from '@angular/common';
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
-import { FormGroup, ReactiveFormsModule, FormArray, FormBuilder } from '@angular/forms';
+import { FormArray, FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { Provider } from '@models/provider.model';
 import { ExchangeRateService } from '@services/exchange-rate.service';
 import { ToastService } from '@services/toast.service';
@@ -68,6 +68,12 @@ export class ProviderQuotationComponent implements OnInit {
     private fb: FormBuilder,
   ) {}
 
+  private cleanTextInput(text: string): string {
+    return text
+    .replace(/[^\x20-\x7E\n]/g, '') // Remove non-printable ASCII characters except newlines
+    .trim(); // Remove leading/trailing whitespace
+  }
+
   get showEmailSection(): boolean {
     const status = this.formGroup.get('status')?.value;
     return status === 'INFORMATION_REQUESTED';
@@ -104,6 +110,21 @@ export class ProviderQuotationComponent implements OnInit {
     this.exchangeRateLastUpdated = this.formGroup.get(
       'exchangeRateLastUpdated',
     )?.value;
+
+    // Add paste event listeners to textareas
+    ['inclusions', 'exclusions', 'optionalTours'].forEach(field => {
+      const control = this.formGroup.get(field);
+      if (control) {
+        control.valueChanges.subscribe(value => {
+          if (value) {
+            const cleanedValue = this.cleanTextInput(value);
+            if (cleanedValue !== value) {
+              control.setValue(cleanedValue, {emitEvent: false});
+            }
+          }
+        });
+      }
+    });
 
     // Calculate initial breakdown total
     this.updatePriceBreakdown();

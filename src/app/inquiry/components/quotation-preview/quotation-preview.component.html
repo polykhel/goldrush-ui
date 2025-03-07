@@ -80,27 +80,39 @@
       <div class="bg-gray-50 p-2 rounded-lg">
         <div class="font-semibold">INCLUSIONS</div>
         <ul class="space-y-1">
-          <li *ngFor="let inclusion of quotation.inclusions" class="flex items-start">
-            <span class="mr-2">•</span> {{ inclusion }}
-          </li>
+          @for (inclusion of quotation.inclusions; track inclusion) {
+            <li class="flex items-start">
+              @if (inclusion) {
+                <span class="mr-2">•</span> {{ inclusion }}
+              }
+            </li>
+          }
         </ul>
       </div>
       <div *ngIf="quotation.exclusions ? quotation.exclusions.length > 0 : false"
            class="p-2 rounded-lg">
         <div class="font-semibold">EXCLUSIONS</div>
         <ul class="space-y-1">
-          <li *ngFor="let exclusion of quotation.exclusions" class="flex items-start">
-            <span class="mr-2">•</span> {{ exclusion }}
-          </li>
+          @for (exclusion of quotation.exclusions; track exclusion) {
+            <li class="flex items-start">
+              @if (exclusion) {
+                <span class="mr-2">•</span> {{ exclusion }}
+              }
+            </li>
+          }
         </ul>
       </div>
       <div *ngIf="quotation.optionalTours ? quotation.optionalTours.length > 0 : false"
            class="bg-gray-50 p-2 rounded-lg">
         <div class="font-semibold">OPTIONAL ACTIVITIES</div>
         <ul class="space-y-1">
-          <li *ngFor="let activity of quotation.optionalTours" class="flex items-start">
-            <span class="mr-2">•</span> {{ activity }}
-          </li>
+          @for (activity of quotation.optionalTours; track activity) {
+            <li class="flex items-start">
+              @if (activity) {
+                <span class="mr-2">•</span> {{ activity }}
+              }
+            </li>
+          }
         </ul>
       </div>
     </div>
