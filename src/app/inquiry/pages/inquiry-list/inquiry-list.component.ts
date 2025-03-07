@@ -15,13 +15,8 @@ import { InputText } from 'primeng/inputtext';
 import { SelectButton } from 'primeng/selectbutton';
 import { TableModule } from 'primeng/table';
 import { Toast } from 'primeng/toast';
-import {
-  debounceTime,
-  distinctUntilChanged,
-  firstValueFrom,
-  Subject,
-  takeUntil,
-} from 'rxjs';
+import { Tooltip } from 'primeng/tooltip';
+import { debounceTime, distinctUntilChanged, firstValueFrom, Subject, takeUntil } from 'rxjs';
 
 @Component({
   selector: 'app-inquiry-list',
@@ -38,6 +33,7 @@ import {
     InputText,
     SelectButton,
     FormsModule,
+    Tooltip
   ],
   providers: [ConfirmationService],
   templateUrl: './inquiry-list.component.html',
@@ -127,6 +123,23 @@ export class InquiryListComponent implements OnInit, OnDestroy {
       this.loadInquiries();
     } catch (error) {
       this.toastService.error('Error', 'Failed to delete inquiry');
+    }
+  }
+
+  async duplicateInquiry(inquiry: Inquiry) {
+    try {
+      if (inquiry.id == null) {
+        this.toastService.error('Error', 'Cannot duplicate inquiry');
+        return;
+      }
+      this.loading = true;
+      const duplicatedInquiry = await firstValueFrom(
+        this.inquiryService.duplicateInquiry(inquiry.id)
+      );
+      await this.router.navigate(['/inquiries', duplicatedInquiry.id], {state: {duplicate: true}});
+    } catch (error) {
+      this.toastService.defaultError('Failed to duplicate inquiry');
+      this.loading = false;
     }
   }
 

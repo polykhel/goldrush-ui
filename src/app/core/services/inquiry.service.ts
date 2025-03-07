@@ -58,4 +58,8 @@ export class InquiryService {
   updateInquiryStatus(id: string, status: string) {
     return this.http.patch<Inquiry>(`${this.baseUrl}/${id}/status`, { status });
   }
+
+  duplicateInquiry(id: string): Observable<Inquiry> {
+    return this.http.post<Inquiry>(`${this.baseUrl}/${id}/duplicate`, {});
+  }
 }

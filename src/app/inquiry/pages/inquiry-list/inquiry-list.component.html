@@ -92,6 +92,14 @@
               [text]="true">
             </p-button>
             <p-button
+              icon="pi pi-copy"
+              severity="info"
+              (onClick)="duplicateInquiry(inquiry)"
+              [rounded]="true"
+              [text]="true"
+              pTooltip="Duplicate Inquiry">
+            </p-button>
+            <p-button
               icon="pi pi-trash"
               severity="danger"
               (onClick)="confirmDelete(inquiry)"

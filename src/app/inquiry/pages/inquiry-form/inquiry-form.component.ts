@@ -137,6 +137,11 @@ export class InquiryFormComponent implements OnInit {
   }
 
   ngOnInit() {
+    const state = this.router.lastSuccessfulNavigation?.extras?.state;
+    if (state?.['duplicate']) {
+      this.toastService.showDelayedMessage('success', 'Success', 'Inquiry duplicated successfully');
+    }
+
     this.loadInitialData();
     this.setupFormFromRoute()
   }
