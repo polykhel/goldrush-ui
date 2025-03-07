@@ -103,9 +103,7 @@ export class ProviderQuotationComponent implements OnInit {
       this.formGroup.get('phpEquivalentAmount')?.setValue(null);
     }
 
-    if (price && !this.formGroup.get('childPriceAmount')?.value) {
-      this.formGroup.get('childPriceAmount')?.setValue(price);
-    }
+    this.formGroup.get('childPriceAmount')?.setValue(price);
   }
 
   onChildPriceInput(event: InputNumberInputEvent) {
