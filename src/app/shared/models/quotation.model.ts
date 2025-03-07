@@ -2,6 +2,7 @@ import { DateRange } from '@models/date-range.model';
 import { Asset } from '@models/asset.model';
 
 export interface ClientQuotation {
+  clientName: string;
   title: string;
   travelDates: DateRange;
   noOfPax: number;

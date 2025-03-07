@@ -14,8 +14,8 @@ import { ClientQuotation, Flight } from '@models/quotation.model';
 import { formatPairedValues, formatValue } from '@utils/string.util';
 import { Dialog } from 'primeng/dialog';
 import { Button } from 'primeng/button';
-import { NgxPrintService, PrintOptions } from 'ngx-print';
 import html2canvas from 'html2canvas';
+import jsPDF from 'jspdf';
 
 @Component({
   selector: 'app-quotation-preview',
@@ -32,8 +32,6 @@ export class QuotationPreviewComponent {
   @Output() cancel = new EventEmitter<void>();
 
   today = dayjs().format('MMM DD, YYYY');
-
-  constructor(private printService: NgxPrintService) {}
 
   formatTravelDates(travelDates?: DateRange | null): string {
     return formatDateRange(travelDates);
@@ -78,24 +76,59 @@ export class QuotationPreviewComponent {
   generateDoc(type: string) {
     const element = document.getElementById('preview');
     if (element) {
+      // Common html2canvas options for both image and PDF
+      const canvasOptions = {
+        allowTaint: true,
+        useCORS: true,
+        scale: 2,
+        logging: false,
+        backgroundColor: '#ffffff'
+      };
+
       if (type === 'img') {
-        html2canvas(element, {
-          allowTaint: true,
-          useCORS: true,
-        }).then((canvas) => {
-          const imgData = canvas.toDataURL('image/png');
-          const link = document.createElement('a');
-          link.href = imgData;
-          link.download = this.quotation?.title + '.png';
-          link.click();
-        });
+       this.generateImage(element, canvasOptions);
       } else if (type === 'pdf') {
-        const printOptions = new PrintOptions({
-          printSectionId: 'preview',
-          useExistingCss: true,
-        });
-        this.printService.print(printOptions);
+        this.generatePDF(element, canvasOptions);
       }
     }
+  }
+
+  generateImage(element: HTMLElement, canvasOptions: any) {
+    html2canvas(element, canvasOptions).then((canvas) => {
+      const imgData = canvas.toDataURL('image/jpeg', 1.0);
+      const link = document.createElement('a');
+      link.href = imgData;
+      link.download = `${this.quotation.clientName}_${this.quotation?.title}.png`;
+      link.click();
+    });
+  }
+
+  generatePDF(element: HTMLElement, canvasOptions: any) {
+    html2canvas(element, canvasOptions).then(canvas => {
+      const imgData = canvas.toDataURL('image/jpeg', 1.0);
+
+      const imgWidth = 210;
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      let position = 0;
+
+      pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight);
+
+      const pdfHeight = pdf.internal.pageSize.getHeight();
+      if (imgHeight > pdfHeight) {
+        let heightLeft = imgHeight;
+
+        while (heightLeft > 0) {
+          position = heightLeft - imgHeight;
+          pdf.addPage();
+          pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight);
+          heightLeft -= pdfHeight;
+        }
+      }
+
+      const fileName = `${this.quotation.clientName}_${this.quotation?.title}.pdf`;
+      pdf.save(fileName);
+    });
   }
 }

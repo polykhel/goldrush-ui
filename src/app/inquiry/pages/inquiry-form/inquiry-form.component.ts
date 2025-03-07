@@ -357,6 +357,7 @@ export class InquiryFormComponent implements OnInit {
     const totalRatePerChild = initialRatePerChild + childFlightPrice;
 
     this.quotationData = {
+      clientName: inquiry.clientName,
       title: `${inquiry.travelDetails.days}D${inquiry.travelDetails.nights}N ${inquiry.travelDetails.destination} Package`,
       travelDates: {
         start: inquiry.travelDetails.startDate,
