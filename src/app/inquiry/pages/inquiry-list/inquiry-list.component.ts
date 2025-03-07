@@ -118,7 +118,7 @@ export class InquiryListComponent implements OnInit, OnDestroy {
 
   async deleteInquiry(inquiry: Inquiry) {
     try {
-      if (inquiry.status !== 'PENDING' || inquiry.id == null) {
+      if (inquiry.id == null) {
         this.toastService.error('Error', 'Cannot delete inquiry');
         return;
       }
