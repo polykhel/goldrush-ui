@@ -150,8 +150,8 @@ export class InquiryFormComponent implements OnInit {
         startDate: this.fb.control<Date>(null!, [Validators.required]),
         endDate: this.fb.control<Date>(null!, [Validators.required]),
         preferredHotel: this.fb.control<string | null>(null),
-        adults: this.fb.control<number>(null!, [Validators.required]),
-        children: this.fb.control<number>(null!, [Validators.required]),
+        adults: this.fb.control<number>(0, [Validators.required]),
+        children: this.fb.control<number>(0),
         childAges: this.fb.control<string | null>(null),
       }),
       packageType: this.fb.control<string>('ALL_INCLUSIVE', [
