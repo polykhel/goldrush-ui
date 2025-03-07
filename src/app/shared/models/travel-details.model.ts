@@ -3,8 +3,8 @@ export interface TravelDetails {
   destination: string;
   days: number;
   nights: number;
-  startDate: Date;
-  endDate: Date;
+  startDate: string;
+  endDate: string;
   preferredHotel: string | null;
   adults: number;
   children: number;

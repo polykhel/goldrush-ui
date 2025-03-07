@@ -212,6 +212,11 @@ export class InquiryFormComponent implements OnInit {
       const formValue = this.inquiryForm.getRawValue();
       const toSave = {
         ...formValue,
+        travelDetails: {
+          ...formValue.travelDetails,
+          startDate: dayjs(formValue.travelDetails.startDate).format('YYYY-MM-DD'),
+          endDate: dayjs(formValue.travelDetails.endDate).format('YYYY-MM-DD'),
+        },
         customPackageOptions: formValue.customPackageOptions?.join(';') ?? null,
       };
 
