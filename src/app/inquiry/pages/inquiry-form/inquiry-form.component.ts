@@ -428,7 +428,7 @@ export class InquiryFormComponent implements OnInit {
   }
 
   goBack() {
-    this.location.back();
+    this.router.navigate(['/inquiries']).then();
   }
 
   buildProviderQuotationForm(quotation?: ProviderQuotation) {
