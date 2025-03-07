@@ -117,7 +117,7 @@ export class InquiryFormComponent implements OnInit {
     return this.inquiryForm.get('travelDetails.children') as FormControl;
   }
 
-  get showFlightSection(): boolean {
+  get showFlightDetails(): boolean {
     const packageType = this.inquiryForm.get('packageType')?.value;
 
     if (packageType === 'ALL_INCLUSIVE') {
@@ -403,10 +403,10 @@ export class InquiryFormComponent implements OnInit {
       ratePerPax: totalRatePerPax,
       ratePerChild:
         totalRatePerChild === 0 ? totalRatePerPax : totalRatePerChild,
-      flightDetails: {
+      flightDetails: providerQuotation.status === 'INFORMATION_REQUESTED' ? {
         departure: providerQuotation.flightDetails?.departure ?? null,
         arrival: providerQuotation.flightDetails?.arrival ?? null,
-      },
+      } : null,
       inclusions: providerQuotation.inclusions?.split('\n') ?? [],
       exclusions: providerQuotation.exclusions?.split('\n') ?? [],
       optionalTours: providerQuotation.optionalTours?.split('\n') ?? [],

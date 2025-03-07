@@ -180,7 +180,7 @@
                                     *ngFor="let quotationControl of quotations.controls; let i = index"
                                     [formGroup]="getProviderQuotationControl(i)"
                                     [isEditMode]="editMode"
-                                    [showFlightSection]="showFlightSection"
+                                    [showFlightDetails]="showFlightDetails"
                                     [showChildPrices]="!!inquiryForm.get('travelDetails.children')?.value"
                                     [provider]="providerMap.get(quotationControl.get('providerId')?.value)!"
                                     (onSendEmail)="openEmailModal($event)"

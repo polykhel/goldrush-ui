@@ -43,7 +43,7 @@ export class ProviderQuotationComponent implements OnInit {
   @Input({ required: true }) provider!: Provider;
   @Input({ required: true }) formGroup!: FormGroup;
   @Input() isEditMode = false;
-  @Input() showFlightSection = false;
+  @Input() showFlightDetails = false;
   @Input() showChildPrices = false;
 
   @Output() onSendEmail = new EventEmitter<ProviderQuotation>();
@@ -62,12 +62,17 @@ export class ProviderQuotationComponent implements OnInit {
 
   get showEmailSection(): boolean {
     const status = this.formGroup.get('status')?.value;
-    return status === 'PENDING';
+    return status === 'INFORMATION_REQUESTED';
   }
 
   get showQuotationSection(): boolean {
     const status = this.formGroup.get('status')?.value;
-    return status === 'RECEIVED';
+    return status === 'PENDING' || status === 'INFORMATION_REQUESTED' || status === 'ACKNOWLEDGED';
+  }
+
+  get showFlightSection(): boolean {
+    const status = this.formGroup.get('status')?.value;
+    return this.showFlightDetails && (status === 'INFORMATION_REQUESTED' || status === 'ACKNOWLEDGED');
   }
 
   get isSent(): boolean {

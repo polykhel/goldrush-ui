@@ -21,27 +21,6 @@
   </div>
 
   <div *ngIf="isEditMode" class="space-y-4">
-    <!-- Email Section - Show when status is pending -->
-    <div *ngIf="showEmailSection" class="p-4 border rounded bg-gray-50">
-      <p-float-label variant="on">
-          <textarea [id]="'emailRemarks-' + provider.name"
-                    class="w-full"
-                    formControlName="emailQuotation"
-                    pTextarea
-                    rows="2"></textarea>
-        <label [for]="'emailRemarks-' + provider.name">Remarks to include in email</label>
-      </p-float-label>
-
-      <div class="flex justify-end">
-        <p-button (onClick)="sendQuotation()" [icon]="isSent ? 'pi pi-search-plus' : 'pi pi-send'"
-                  [label]="isSent ? 'Preview' : 'Sent'"
-                  [rounded]="true"
-                  [severity]="isSent ? 'info' : 'success'"
-                  class="transform transition-all duration-300 hover:scale-105"
-                  type="button"/>
-      </div>
-    </div>
-
     @if (showQuotationSection) {
       <!-- Pricing Section -->
       <div class="p-4 border rounded bg-gray-50">
@@ -233,6 +212,29 @@
                   [text]="true"
                   icon="pi pi-file-export"
                   label="Generate Quotation"/>
+      </div>
+    }
+
+    <!-- Email Section -->
+    @if (showEmailSection) {
+      <div class="p-4 border rounded bg-gray-50">
+        <p-float-label variant="on">
+            <textarea [id]="'emailRemarks-' + provider.name"
+                      class="w-full"
+                      formControlName="emailQuotation"
+                      pTextarea
+                      rows="2"></textarea>
+          <label [for]="'emailRemarks-' + provider.name">Remarks to include in email</label>
+        </p-float-label>
+
+        <div class="flex justify-end">
+          <p-button (onClick)="sendQuotation()" [icon]="isSent ? 'pi pi-search-plus' : 'pi pi-send'"
+                    [label]="isSent ? 'Preview' : 'Sent'"
+                    [rounded]="true"
+                    [severity]="isSent ? 'info' : 'success'"
+                    class="transform transition-all duration-300 hover:scale-105"
+                    type="button"/>
+        </div>
       </div>
     }
   </div>
