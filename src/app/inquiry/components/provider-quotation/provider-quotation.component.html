@@ -44,7 +44,68 @@
               <label [for]="'price-' + provider.name">Price</label>
             </p-float-label>
           </div>
-          <div *ngIf="showChildPrices">
+          <!-- Price Breakdown Toggle -->
+          <div class="flex items-center gap-2">
+            <p-check-box [binary]="true"
+                         formControlName="showPriceBreakdown"
+                         inputId="showPriceBreakdown">
+            </p-check-box>
+            <label for="showPriceBreakdown">Show Price Breakdown</label>
+          </div>
+
+
+          <!-- Price Breakdown Section -->
+          <div *ngIf="formGroup.get('showPriceBreakdown')?.value" class="col-span-2 mt-2">
+            <div class="flex justify-between items-center mb-2">
+              <h4 class="text-sm font-medium">Price Breakdown</h4>
+              <p-button (onClick)="addPriceBreakdownItem()"
+                        [text]="true"
+                        icon="pi pi-plus"
+                        size="small"
+                        label="Add Item">
+              </p-button>
+            </div>
+
+            <div formArrayName="priceBreakdown" class="space-y-2">
+              <div *ngFor="let item of priceBreakdownArray.controls; let i = index"
+                   [formGroupName]="i"
+                   class="flex gap-2 items-center">
+                <p-float-label class="flex-1" variant="on">
+                  <input type="text" pInputText id="label-{{i}}" formControlName="label" class="w-full"/>
+                  <label for="label-{{i}}">Label</label>
+                </p-float-label>
+                <p-float-label class="w-[200px]" variant="on">
+                  <p-input-number (onInput)="updatePriceBreakdown()"
+                                  [currency]="formGroup.get('currencyCode')?.value || 'PHP'"
+                                  [id]="'amount-' + i"
+                                  class="w-full"
+                                  formControlName="amount"
+                                  mode="currency"/>
+                  <label [for]="'amount-' + i">Amount</label>
+                </p-float-label>
+                <p-button (onClick)="removePriceBreakdownItem(i)"
+                          [text]="true"
+                          icon="pi pi-trash"
+                          severity="danger"
+                          size="small">
+                </p-button>
+              </div>
+            </div>
+
+            <div *ngIf="priceBreakdownArray.controls.length > 0" class="flex justify-between mt-2 text-sm">
+              <span>Total Breakdown:</span>
+              <span [class.text-red-500]="breakdownTotal !== formGroup.get('priceAmount')?.value">
+                {{ breakdownTotal | currency: (formGroup.get('currencyCode')?.value || 'PHP') }}
+              </span>
+            </div>
+            <small *ngIf="breakdownTotal !== formGroup.get('priceAmount')?.value && priceBreakdownArray.controls.length > 0"
+                   class="text-red-500">
+              Breakdown total doesn't match the price amount ({{ formGroup.get('priceAmount')?.value | currency:(formGroup.get('currencyCode')?.value || 'PHP') }})
+            </small>
+          </div>
+          <!-- End of Price Breakdown Section -->
+
+          @if (showChildPrices) {
             <p-float-label variant="on">
               <p-input-number (onInput)="onChildPriceInput($event)"
                               [id]="'childPriceAmount-' + provider.name"
@@ -54,7 +115,58 @@
                               mode="currency"/>
               <label [for]="'childPriceAmount-' + provider.name">Child Price</label>
             </p-float-label>
-          </div>
+
+            <!-- Child Price Breakdown Section -->
+            <div *ngIf="formGroup.get('showPriceBreakdown')?.value" class="col-span-2 mt-2">
+              <div class="flex justify-between items-center mb-2">
+                <h4 class="text-sm font-medium">Child Price Breakdown</h4>
+                <p-button (onClick)="addChildPriceBreakdownItem()"
+                          [text]="true"
+                          icon="pi pi-plus"
+                          size="small"
+                          label="Add Item">
+                </p-button>
+              </div>
+
+              <div formArrayName="childPriceBreakdown" class="space-y-2">
+                <div *ngFor="let item of childPriceBreakdownArray.controls; let i = index"
+                     [formGroupName]="i"
+                     class="flex gap-2 items-center">
+                  <p-float-label class="flex-1" variant="on">
+                    <input type="text" pInputText id="childLabel-{{i}}" formControlName="label" class="w-full"/>
+                    <label for="childLabel-{{i}}">Label</label>
+                  </p-float-label>
+                  <p-float-label class="w-[200px]" variant="on">
+                    <p-input-number (onInput)="updateChildPriceBreakdown()"
+                                    [currency]="formGroup.get('currencyCode')?.value || 'PHP'"
+                                    [id]="'childAmount-' + i"
+                                    class="w-full"
+                                    formControlName="amount"
+                                    mode="currency"/>
+                    <label [for]="'childAmount-' + i">Amount</label>
+                  </p-float-label>
+                  <p-button (onClick)="removeChildPriceBreakdownItem(i)"
+                            [text]="true"
+                            icon="pi pi-trash"
+                            severity="danger"
+                            size="small">
+                  </p-button>
+                </div>
+              </div>
+
+              <div *ngIf="childPriceBreakdownArray.controls.length > 0" class="flex justify-between mt-2 text-sm">
+                <span>Total Child Breakdown:</span>
+                <span [class.text-red-500]="childBreakdownTotal !== formGroup.get('childPriceAmount')?.value">
+                  {{ childBreakdownTotal | currency: (formGroup.get('currencyCode')?.value || 'PHP') }}
+                </span>
+              </div>
+              <small *ngIf="childBreakdownTotal !== formGroup.get('childPriceAmount')?.value && childPriceBreakdownArray.controls.length > 0"
+                     class="text-red-500">
+                Child breakdown total doesn't match the child price amount ({{ formGroup.get('childPriceAmount')?.value | currency:(formGroup.get('currencyCode')?.value || 'PHP') }})
+              </small>
+            </div>
+            <!-- End of Child Price Breakdown Section -->
+          }
 
           @if (formGroup.get('currencyCode')?.value !== 'PHP') {
             <div class="col-span-2">

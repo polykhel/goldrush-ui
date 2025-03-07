@@ -2,9 +2,9 @@
   (onHide)="onCancel()"
   [(visible)]="visible"
   [modal]="true"
-  class="p-4 font-roboto w-full"
-  [style]="{ maxWidth: '600px' }">
-  <section id="preview" class="relative">
+  [style]="{ maxWidth: '600px' }"
+  class="p-4 font-roboto w-full">
+  <section class="relative" id="preview">
     <!-- Header -->
     <div class="mb-6">
       <h2 class="text-2xl font-bold text-center text-blue-700 mb-2">{{ quotation.title }}</h2>
@@ -24,18 +24,32 @@
       </div>
       <div class="bg-gray-50 p-2 rounded-lg">
         <div class="font-semibold">RATE PER PAX</div>
-        <div>
-        <span *ngIf="quotation.ratePerPax" class="text-xl font-bold text-red-600">
+        @if (quotation.showPriceBreakdown && quotation.priceBreakdown) {
+          <div *ngFor="let breakdown of quotation.priceBreakdown">
+            <span class="font-semibold">{{ breakdown.label }}</span>
+            <span class="text-xl font-bold text-red-600">
+                {{ breakdown.amount | currency: 'PHP' }}
+              </span>
+          </div>
+        } @else {
+          <span class="text-xl font-bold text-red-600">
           {{ quotation.ratePerPax | currency: 'PHP' }}
-        </span>
-        </div>
+          </span>
+        }
         @if (quotation.ratePerPax !== quotation.ratePerChild) {
           <div class="font-semibold">RATE PER CHILD</div>
-          <div>
-          <span *ngIf="quotation.ratePerChild" class="text-xl font-bold text-red-600">
+          @if (quotation.showPriceBreakdown && quotation.childPriceBreakdown) {
+            <div *ngFor="let breakdown of quotation.childPriceBreakdown">
+              <span class="font-semibold">{{ breakdown.label }}</span>
+              <span class="text-xl font-bold text-red-600">
+                {{ breakdown.amount | currency: 'PHP' }}
+              </span>
+            </div>
+          } @else {
+            <span *ngIf="quotation.ratePerChild" class="text-xl font-bold text-red-600">
             {{ quotation.ratePerChild | currency: 'PHP' }}
           </span>
-          </div>
+          }
         }
       </div>
 
@@ -71,7 +85,8 @@
           </li>
         </ul>
       </div>
-      <div *ngIf="quotation.exclusions ? quotation.exclusions.length > 0 : false" class="p-2 rounded-lg">
+      <div *ngIf="quotation.exclusions ? quotation.exclusions.length > 0 : false"
+           class="p-2 rounded-lg">
         <div class="font-semibold">EXCLUSIONS</div>
         <ul class="space-y-1">
           <li *ngFor="let exclusion of quotation.exclusions" class="flex items-start">
@@ -79,7 +94,8 @@
           </li>
         </ul>
       </div>
-      <div *ngIf="quotation.optionalTours ? quotation.optionalTours.length > 0 : false" class="bg-gray-50 p-2 rounded-lg">
+      <div *ngIf="quotation.optionalTours ? quotation.optionalTours.length > 0 : false"
+           class="bg-gray-50 p-2 rounded-lg">
         <div class="font-semibold">OPTIONAL ACTIVITIES</div>
         <ul class="space-y-1">
           <li *ngFor="let activity of quotation.optionalTours" class="flex items-start">
@@ -111,14 +127,6 @@
           <span class="mr-2">•</span> Payment methods are cash or bank transfer only
         </li>
       </ul>
-    </div>
-
-    <!-- Images Gallery -->
-    <div class="grid grid-cols-4 gap-2">
-      <img *ngFor="let img of quotation.images"
-           [alt]="img.name"
-           [src]="img.url"
-           class="aspect-square object-cover rounded-lg shadow-sm">
     </div>
 
     <!-- Watermark -->

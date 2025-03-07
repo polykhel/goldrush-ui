@@ -1,6 +1,11 @@
 import { DateRange } from '@models/date-range.model';
 import { Flight } from '@models/quotation.model';
 
+export interface Breakdown {
+  label: string;
+  amount: number;
+}
+
 export interface ProviderQuotation {
   id: string;
   status: string;
@@ -22,6 +27,9 @@ export interface ProviderQuotation {
   inclusions: string | null;
   exclusions: string | null;
   optionalTours: string | null;
+  showPriceBreakdown: boolean;
+  priceBreakdown: Breakdown[] | null;
+  childPriceBreakdown: Breakdown[] | null;
 }
 
 export interface ProviderQuotationEmailRequest {

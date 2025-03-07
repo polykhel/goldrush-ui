@@ -1,6 +1,6 @@
-import { DatePipe, NgIf } from '@angular/common';
+import { CurrencyPipe, DatePipe, NgForOf, NgIf } from '@angular/common';
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
-import { FormGroup, ReactiveFormsModule } from '@angular/forms';
+import { FormGroup, ReactiveFormsModule, FormArray, FormBuilder } from '@angular/forms';
 import { Provider } from '@models/provider.model';
 import { ExchangeRateService } from '@services/exchange-rate.service';
 import { ToastService } from '@services/toast.service';
@@ -17,6 +17,7 @@ import { ProviderQuotation } from '@models/provider-quotation.model';
 import { ProviderQuotationService } from '@services/provider-quotation.service';
 import { DatePicker } from 'primeng/datepicker';
 import { Fluid } from 'primeng/fluid';
+import { Checkbox } from 'primeng/checkbox';
 
 @Component({
   selector: 'app-provider-quotation',
@@ -35,7 +36,10 @@ import { Fluid } from 'primeng/fluid';
     Textarea,
     DatePicker,
     Fluid,
-  ],
+    CurrencyPipe,
+    NgForOf,
+    Checkbox
+  ]
 })
 export class ProviderQuotationComponent implements OnInit {
   currencies = CURRENCIES;
@@ -54,10 +58,14 @@ export class ProviderQuotationComponent implements OnInit {
   exchangeRateLastUpdated: Date | null = null;
   quotationStatuses = PROVIDER_QUOTATION_STATUSES;
 
+  breakdownTotal = 0;
+  childBreakdownTotal = 0;
+
   constructor(
     private exchangeRateService: ExchangeRateService,
     private providerQuotationService: ProviderQuotationService,
     private toastService: ToastService,
+    private fb: FormBuilder,
   ) {}
 
   get showEmailSection(): boolean {
@@ -84,10 +92,22 @@ export class ProviderQuotationComponent implements OnInit {
     return this.formGroup.get('sent')?.value ?? false;
   }
 
+  get priceBreakdownArray(): FormArray {
+    return this.formGroup.get('priceBreakdown') as FormArray;
+  }
+
+  get childPriceBreakdownArray(): FormArray {
+    return this.formGroup.get('childPriceBreakdown') as FormArray;
+  }
+
   ngOnInit() {
     this.exchangeRateLastUpdated = this.formGroup.get(
       'exchangeRateLastUpdated',
     )?.value;
+
+    // Calculate initial breakdown total
+    this.updatePriceBreakdown();
+    this.updateChildPriceBreakdown();
   }
 
   onPriceInput(event: InputNumberInputEvent) {
@@ -104,6 +124,11 @@ export class ProviderQuotationComponent implements OnInit {
     }
 
     this.formGroup.get('childPriceAmount')?.setValue(price);
+
+    // Update breakdown items if price changes
+    if (this.priceBreakdownArray.length === 1) {
+      this.priceBreakdownArray.at(0).get('amount')?.setValue(price);
+    }
   }
 
   onChildPriceInput(event: InputNumberInputEvent) {
@@ -192,6 +217,12 @@ export class ProviderQuotationComponent implements OnInit {
   generateQuotation() {
     const value = this.formGroup.getRawValue();
 
+    // Validate breakdown total matches price amount
+    if (this.priceBreakdownArray.length > 0 && this.breakdownTotal !== value.priceAmount) {
+      this.toastService.warn('Warning', 'Price breakdown total does not match the price amount.');
+      return;
+    }
+
     this.providerQuotationService.saveProviderQuotation(value).subscribe({
       next: () => {
         this.toastService.success('Success', 'Quotation details saved.');
@@ -212,6 +243,66 @@ export class ProviderQuotationComponent implements OnInit {
 
     if (price) {
       this.formGroup.get(`flightDetails.${type}.childPrice`)?.setValue(price);
+    }
+  }
+
+  // Price breakdown methods
+  addPriceBreakdownItem() {
+    const remainingAmount = this.formGroup.get('priceAmount')?.value - this.breakdownTotal || 0;
+
+    this.priceBreakdownArray.push(
+      this.fb.group({
+        label: ['Item ' + (this.priceBreakdownArray.length + 1)],
+        amount: [remainingAmount > 0 ? remainingAmount : 0]
+      })
+    );
+
+    this.updatePriceBreakdown();
+  }
+
+  removePriceBreakdownItem(index: number) {
+    this.priceBreakdownArray.removeAt(index);
+    this.updatePriceBreakdown();
+  }
+
+  updatePriceBreakdown() {
+    this.breakdownTotal = 0;
+
+    if (this.priceBreakdownArray.length > 0) {
+      this.breakdownTotal = this.priceBreakdownArray.controls.reduce(
+        (sum, control) => sum + (control.get('amount')?.value || 0),
+        0
+      );
+    }
+  }
+
+  // Child price breakdown methods
+  addChildPriceBreakdownItem() {
+    const remainingAmount = this.formGroup.get('childPriceAmount')?.value - this.childBreakdownTotal || 0;
+
+    this.childPriceBreakdownArray.push(
+      this.fb.group({
+        label: ['Child Item ' + (this.childPriceBreakdownArray.length + 1)],
+        amount: [remainingAmount > 0 ? remainingAmount : 0]
+      })
+    );
+
+    this.updateChildPriceBreakdown();
+  }
+
+  removeChildPriceBreakdownItem(index: number) {
+    this.childPriceBreakdownArray.removeAt(index);
+    this.updateChildPriceBreakdown();
+  }
+
+  updateChildPriceBreakdown() {
+    this.childBreakdownTotal = 0;
+
+    if (this.childPriceBreakdownArray.length > 0) {
+      this.childBreakdownTotal = this.childPriceBreakdownArray.controls.reduce(
+        (sum, control) => sum + (control.get('amount')?.value || 0),
+        0
+      );
     }
   }
 }

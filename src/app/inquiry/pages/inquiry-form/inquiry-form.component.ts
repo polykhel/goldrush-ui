@@ -339,22 +339,12 @@ export class InquiryFormComponent implements OnInit {
       return;
     }
 
-    const initialRatePerPax =
-      providerQuotation.currencyCode === 'PHP'
-        ? (providerQuotation.priceAmount ?? 0)
-        : (providerQuotation.phpEquivalentAmount ?? 0);
-    const flightPrice =
-      (providerQuotation.flightDetails?.departure?.price ?? 0) +
-      (providerQuotation.flightDetails?.arrival?.price ?? 0);
-    const totalRatePerPax = initialRatePerPax + flightPrice;
-    const childFlightPrice =
-      (providerQuotation.flightDetails?.departure?.childPrice ?? 0) +
-      (providerQuotation.flightDetails?.arrival?.childPrice ?? 0);
-    const initialRatePerChild =
-      providerQuotation.currencyCode === 'PHP'
-        ? (providerQuotation.childPriceAmount ?? 0)
-        : (providerQuotation.childPhpEquivalentAmount ?? 0);
-    const totalRatePerChild = initialRatePerChild + childFlightPrice;
+    const totalRatePerPax = providerQuotation.currencyCode === 'PHP'
+      ? (providerQuotation.priceAmount ?? 0)
+      : (providerQuotation.phpEquivalentAmount ?? 0);
+    const totalRatePerChild = providerQuotation.currencyCode === 'PHP'
+      ? (providerQuotation.childPriceAmount ?? 0)
+      : (providerQuotation.childPhpEquivalentAmount ?? 0);
 
     this.quotationData = {
       clientName: inquiry.clientName,
@@ -367,6 +357,9 @@ export class InquiryFormComponent implements OnInit {
       ratePerPax: totalRatePerPax,
       ratePerChild:
         totalRatePerChild === 0 ? totalRatePerPax : totalRatePerChild,
+      showPriceBreakdown: providerQuotation.showPriceBreakdown,
+      priceBreakdown: providerQuotation.priceBreakdown,
+      childPriceBreakdown: providerQuotation.childPriceBreakdown,
       flightDetails: providerQuotation.status === 'INFORMATION_REQUESTED' ? {
         departure: providerQuotation.flightDetails?.departure ?? null,
         arrival: providerQuotation.flightDetails?.arrival ?? null
@@ -527,6 +520,19 @@ export class InquiryFormComponent implements OnInit {
       emailQuotation: [quotation?.emailQuotation ?? null],
       sent: [quotation?.sent ?? false],
       status: [quotation?.status ?? 'PENDING'],
+      showPriceBreakdown: [quotation?.showPriceBreakdown ?? false],
+      priceBreakdown: this.fb.array(
+        quotation?.priceBreakdown?.map(item => this.fb.group({
+          label: [item.label],
+          amount: [item.amount]
+        })) || []
+      ),
+      childPriceBreakdown: this.fb.array(
+        quotation?.childPriceBreakdown?.map(item => this.fb.group({
+          label: [item.label],
+          amount: [item.amount]
+        })) || []
+      ),
       flightDetails: this.fb.group({
         departure: this.buildFlightDetailsForm(
           quotation?.flightDetails?.departure
@@ -552,9 +558,7 @@ export class InquiryFormComponent implements OnInit {
       airportCode: [flightDetails?.airportCode ?? 'MNL'],
       startDate: [startDate],
       endDate: [endDate],
-      airline: [flightDetails?.airline ?? null],
-      price: [flightDetails?.price ?? null],
-      childPrice: [flightDetails?.childPrice ?? null]
+      airline: [flightDetails?.airline ?? null]
     });
   }
 

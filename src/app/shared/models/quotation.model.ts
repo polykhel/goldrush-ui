@@ -1,5 +1,5 @@
 import { DateRange } from '@models/date-range.model';
-import { Asset } from '@models/asset.model';
+import { Breakdown } from '@models/provider-quotation.model';
 
 export interface ClientQuotation {
   clientName: string;
@@ -15,7 +15,9 @@ export interface ClientQuotation {
   inclusions: string[] | null;
   exclusions: string[] | null;
   optionalTours: string[] | null;
-  images?: Asset[];
+  showPriceBreakdown: boolean;
+  priceBreakdown: Breakdown[] | null;
+  childPriceBreakdown: Breakdown[] | null;
 }
 
 export interface Flight {
@@ -24,6 +26,4 @@ export interface Flight {
   airportCode: string | null;
   startDate: string | null;
   endDate: string | null;
-  price: number | null;
-  childPrice: number | null;
 }
