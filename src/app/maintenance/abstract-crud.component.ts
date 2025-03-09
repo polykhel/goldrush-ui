@@ -23,7 +23,6 @@ export abstract class AbstractCrudComponent<T extends BaseModel> implements OnIn
 
   // Entity data
   entities: T[] = [];
-  entity!: T;
   columns: { field: string; header: string }[] = [];
 
   // Dialog state
@@ -70,14 +69,15 @@ export abstract class AbstractCrudComponent<T extends BaseModel> implements OnIn
     };
 
     this.service.getPaginated(pageRequest).subscribe(response => {
-      this.entities = response.content || response.data || [];
-      this.totalRecords = response.totalElements;
+      this.entities = response.content || [];
+      this.totalRecords = response.page.totalElements;
       this.loading = false;
     });
   }
 
   onSearch(event: any) {
     this.searchTerm = event.target.value;
+    console.log(event, this.searchTerm);
     this.searchSubject.next(this.searchTerm);
   }
 
@@ -90,19 +90,6 @@ export abstract class AbstractCrudComponent<T extends BaseModel> implements OnIn
   onPage(event: any) {
     this.first = event.first;
     this.rows = event.rows;
-    this.loadEntities();
-  }
-
-  onLazyLoad(event: TableLazyLoadEvent) {
-    // Handle all events in one place
-    this.first = event.first ?? 0;
-    this.rows = event.rows ?? 10;
-
-    if (event.sortField) {
-      this.sortField = event.sortField.toString();
-      this.sortOrder = event.sortOrder ?? -1;
-    }
-
     this.loadEntities();
   }
 

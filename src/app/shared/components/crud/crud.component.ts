@@ -6,8 +6,9 @@ import { Button } from 'primeng/button';
 import { InputText } from 'primeng/inputtext';
 import { FormsModule } from '@angular/forms';
 import { ConfirmDialog } from 'primeng/confirmdialog';
-import { InputGroup, InputGroupModule } from 'primeng/inputgroup';
-import { InputGroupAddon } from 'primeng/inputgroupaddon';
+import { InputGroupModule } from 'primeng/inputgroup';
+import { IconField } from 'primeng/iconfield';
+import { InputIcon } from 'primeng/inputicon';
 
 export interface ColumnConfig {
   field: string;
@@ -26,9 +27,9 @@ export interface ColumnConfig {
     InputText,
     FormsModule,
     ConfirmDialog,
-    InputGroup,
-    InputGroupModule,
-    InputGroupAddon
+    IconField,
+    InputIcon,
+    InputGroupModule
   ],
   standalone: true
 })
@@ -41,12 +42,13 @@ export class Crud<T> {
   @Input() sortField: string = 'createdAt';
   @Input() sortOrder: number = -1;
   @Input() searchTerm: string = '';
+  @Input() first: number = 0;
+  @Input() rows: number = 10;
 
   @Output() create = new EventEmitter<T>();
   @Output() update = new EventEmitter<T>();
   @Output() delete = new EventEmitter<T>();
   @Output() deleteMultiple = new EventEmitter<T[]>();
-  @Output() lazyLoad = new EventEmitter<TableLazyLoadEvent>();
   @Output() search = new EventEmitter<any>();
   @Output() sort = new EventEmitter<TableLazyLoadEvent>();
   @Output() page = new EventEmitter<any>();
@@ -80,10 +82,6 @@ export class Crud<T> {
 
   onGlobalFilter(event: Event) {
     this.search.emit(event);
-  }
-
-  onLazyLoad(event: TableLazyLoadEvent) {
-    this.lazyLoad.emit(event);
   }
 
   onSort(event: TableLazyLoadEvent) {

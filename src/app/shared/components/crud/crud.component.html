@@ -12,45 +12,35 @@
   </ng-template>
 </p-toolbar>
 
-<div class="flex justify-center items-center gap-2 mb-4">
-  <p-inputgroup>
-    <p-inputgroup-addon>
-      <i class="pi pi-search"></i>
-    </p-inputgroup-addon>
-    <input
-      pInputText
-      type="text"
-      (input)="onGlobalFilter($event)"
-      [value]="searchTerm"
-      placeholder="Search..."/>
-  </p-inputgroup>
-</div>
-
 <p-table
   #dt
   [value]="entities"
-  [lazy]="true"
-  (onLazyLoad)="onLazyLoad($event)"
-  [paginator]="true"
   [rows]="10"
-  [totalRecords]="totalRecords"
-  [loading]="loading"
-  [columns]="columns"
-  [globalFilterFields]="globalFilterFields"
-  [tableStyle]="{ 'min-width': '75rem' }"
-  [(selection)]="selectedEntities"
+  [paginator]="true"
   [rowHover]="true"
   dataKey="id"
+  [showCurrentPageReport]="true"
+  [loading]="loading"
+  currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
+  (onPage)="onPage($event)"
+  [rowsPerPageOptions]="[10, 25, 50]"
   [sortField]="sortField"
   [sortOrder]="sortOrder"
   (onSort)="onSort($event)"
-  (onPage)="onPage($event)"
-  currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
-  [showCurrentPageReport]="true"
-  [rowsPerPageOptions]="[10, 25, 50]">
+  [totalRecords]="totalRecords"
+  [lazy]="true"
+  [first]="first"
+  [columns]="columns"
+  [globalFilterFields]="globalFilterFields"
+  [tableStyle]="{ 'min-width': '75rem' }"
+  [(selection)]="selectedEntities">
   <ng-template pTemplate="caption">
     <div class="flex items-center justify-between">
       <h5 class="m-0">Manage {{ entityName }}</h5>
+      <p-icon-field>
+        <p-inputicon styleClass="pi pi-search"></p-inputicon>
+        <input pInputText type="text" (input)="onGlobalFilter($event)" placeholder="Search..."/>
+      </p-icon-field>
     </div>
   </ng-template>
   <ng-template pTemplate="header">

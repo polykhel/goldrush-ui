@@ -28,7 +28,7 @@ export abstract class AbstractCrudService<T extends BaseModel> {
     }
 
     if (pageRequest.searchTerm) {
-      params = params.set('search', pageRequest.searchTerm);
+      params = params.set('query', pageRequest.searchTerm);
     }
 
     return this.http.get<ListData<T>>(`${this.baseUrl}`, { params });
