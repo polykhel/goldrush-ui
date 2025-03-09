@@ -1,5 +1,5 @@
 @if (provider) {
-  <div [formGroup]="formGroup" class="mb-6 p-4 border rounded-lg bg-white">
+  <div [formGroup]="formGroup" class="mb-6">
     <!-- Provider Header -->
     <div class="flex items-center justify-between mb-4">
       <div class="flex items-center gap-4">
@@ -25,8 +25,8 @@
       <div class="space-y-4">
         @if (showQuotationSection) {
           <!-- Pricing Section -->
-          <div class="p-4 border rounded bg-gray-50">
-            <h3 class="font-medium mb-3">Pricing Details</h3>
+          <div class="p-4 border rounded">
+            <h5 class="font-medium mb-3">Pricing Details</h5>
             <div class="grid grid-cols-2 gap-4">
               <div class="flex gap-2">
                 <p-select (onChange)="onCurrencyChange()"
@@ -246,8 +246,8 @@
             </div>
           </div>
           @if (showFlightSection) {
-            <div formGroupName="flightDetails" class="p-4 border rounded bg-gray-50">
-              <h3 class="font-medium mb-3">Flight Details</h3>
+            <div formGroupName="flightDetails" class="p-4 border rounded">
+              <h5 class="font-medium mb-3">Flight Details</h5>
               <div class="grid grid-cols-2 gap-4">
                 <p-fluid formGroupName="departure" class="flex flex-col gap-2">
                   <span class="font-semibold">Departure</span>
@@ -340,8 +340,8 @@
               </div>
             </div>
           }
-          <div class="p-4 border rounded bg-gray-50">
-            <h3 class="font-medium mb-3">Additional Details</h3>
+          <div class="p-4 border rounded">
+            <h5 class="font-medium mb-3">Additional Details</h5>
             <p-fluid class="grid grid-cols-1 gap-4">
               <p-float-label variant="on">
                 <textarea pTextarea formControlName="inclusions" id="inclusions"></textarea>
@@ -368,7 +368,7 @@
         }
         <!-- Email Section -->
         @if (showEmailSection) {
-          <div class="p-4 border rounded bg-gray-50">
+          <div class="p-4 border rounded">
             <p-float-label variant="on">
                                                 <textarea [id]="'emailRemarks-' + provider.name"
                                                           class="w-full"

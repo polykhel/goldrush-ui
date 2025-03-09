@@ -6,6 +6,7 @@ import { ButtonModule } from 'primeng/button';
 import { MenuModule } from 'primeng/menu';
 import { MenubarModule } from 'primeng/menubar';
 import { AuthService } from '@auth0/auth0-angular';
+import { LayoutService } from '../layout.service';
 
 @Component({
   selector: 'app-navbar',
@@ -34,7 +35,16 @@ export class NavbarComponent {
     }
   ];
 
-  constructor(public auth: AuthService) {
+  constructor(public auth: AuthService,
+              public layoutService: LayoutService) {
+  }
+
+  toggleDarkMode() {
+    this.layoutService.layoutConfig.update((state) => ({...state, darkMode: !state.darkMode}));
+  }
+
+  login() {
+    this.auth.loginWithRedirect();
   }
 
   logout() {

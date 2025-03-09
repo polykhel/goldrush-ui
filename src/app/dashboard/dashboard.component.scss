@@ -1,0 +1,17 @@
+.dashboard-card {
+  background: var(--surface-card);
+  padding: 1rem;
+  border-radius: var(--content-border-radius);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  p, h3 {
+    margin: 0;
+  }
+}
+
+.provider-card {
+  background: var(--surface-card);
+  padding: 1rem;
+}

@@ -1,128 +1,83 @@
-<div class="p-6 bg-gray-50">
+<div class="flex flex-col gap-8">
   <!-- Quick Actions Section -->
-  <div class="mb-8">
-    <h2 class="text-xl font-semibold text-gray-800 mb-4">Quick Actions</h2>
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-      <p-button
-        fluid
-        styleClass="h-24"
-        routerLink="/inquiries/new">
-        <div class="flex flex-col items-center">
-          <i class="pi pi-plus-circle text-2xl mb-2"></i>
-          <span>New Inquiry</span>
-        </div>
-      </p-button>
-      <p-button
-        fluid
-        styleClass="h-24"
-        severity="info"
-        routerLink="/payments">
-        <div class="flex flex-col items-center">
-          <i class="pi pi-calendar text-2xl mb-2"></i>
-          <span>Payment Scheduler</span>
-        </div>
-      </p-button>
-      <p-button
-        fluid
-        styleClass="h-24"
-        severity="help"
-        routerLink="/customers">
-        <div class="flex flex-col items-center">
-          <i class="pi pi-users text-2xl mb-2"></i>
-          <span>Customer Database</span>
-        </div>
-      </p-button>
-    </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+    <p-button
+      fluid
+      routerLink="/inquiries/new"
+      styleClass="h-24">
+      <div class="flex flex-col items-center">
+        <i class="pi pi-plus-circle text-2xl mb-2"></i>
+        <span>New Inquiry</span>
+      </div>
+    </p-button>
+    <p-button
+      fluid
+      routerLink="/payments"
+      severity="info"
+      styleClass="h-24">
+      <div class="flex flex-col items-center">
+        <i class="pi pi-calendar text-2xl mb-2"></i>
+        <span>Payment Scheduler</span>
+      </div>
+    </p-button>
+    <p-button
+      fluid
+      routerLink="/customers"
+      severity="help"
+      styleClass="h-24">
+      <div class="flex flex-col items-center">
+        <i class="pi pi-users text-2xl mb-2"></i>
+        <span>Customer Database</span>
+      </div>
+    </p-button>
   </div>
 
   <!-- Dashboard Stats -->
-  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-    <div class="bg-white p-4 rounded-lg shadow">
-      <div class="flex items-center justify-between">
-        <div>
-          <p class="text-gray-500 text-sm">Open Inquiries</p>
-          <h3 class="text-2xl font-bold text-gray-800">{{ dashboard?.openInquiries ?? 0 }}</h3>
-        </div>
-        <i class="pi pi-inbox text-blue-500 text-3xl"></i>
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+    <div class="dashboard-card">
+      <div>
+        <p class="text-sm">Open Inquiries</p>
+        <h3 class="text-2xl font-bold">{{ dashboard?.openInquiries ?? 0 }}</h3>
       </div>
+      <i class="pi pi-inbox text-blue-500"></i>
     </div>
-    <div class="bg-white p-4 rounded-lg shadow">
-      <div class="flex items-center justify-between">
-        <div>
-          <p class="text-gray-500 text-sm">Pending Payments</p>
-          <h3 class="text-2xl font-bold text-gray-800">{{ dashboard?.pendingPayments ?? 0 }}</h3>
-        </div>
-        <i class="pi pi-clock text-orange-500 text-3xl"></i>
+    <div class="dashboard-card">
+      <div>
+        <p class="text-sm">Pending Payments</p>
+        <h3 class="text-2xl font-bold">{{ dashboard?.pendingPayments ?? 0 }}</h3>
       </div>
+      <i class="pi pi-clock text-orange-500"></i>
     </div>
-    <div class="bg-white p-4 rounded-lg shadow">
-      <div class="flex items-center justify-between">
-        <div>
-          <p class="text-gray-500 text-sm">Today's Appointments</p>
-          <h3 class="text-2xl font-bold text-gray-800">{{ dashboard?.todayAppointments ?? 0 }}</h3>
-        </div>
-        <i class="pi pi-calendar text-green-500 text-3xl"></i>
+    <div class="dashboard-card">
+      <div>
+        <p class="text-sm">Today's Appointments</p>
+        <h3 class="text-2xl font-bold">{{ dashboard?.todayAppointments ?? 0 }}</h3>
       </div>
+      <i class="pi pi-calendar text-green-500"></i>
     </div>
-    <div class="bg-white p-4 rounded-lg shadow">
-      <div class="flex items-center justify-between">
-        <div>
-          <p class="text-gray-500 text-sm">Active Customers</p>
-          <h3 class="text-2xl font-bold text-gray-800">{{ dashboard?.activeCustomers ?? 0 }}</h3>
-        </div>
-        <i class="pi pi-user text-purple-500 text-3xl"></i>
+    <div class="dashboard-card">
+      <div>
+        <p class="text-sm">Active Customers</p>
+        <h3 class="text-2xl font-bold">{{ dashboard?.activeCustomers ?? 0 }}</h3>
       </div>
+      <i class="pi pi-user text-purple-500"></i>
     </div>
   </div>
 
   <!-- External Tools -->
-  <div class="mb-8">
-    <h2 class="text-xl font-semibold text-gray-800 mb-4">Provider Portals</h2>
+  <div>
+    <h2 class="text-2xl font-bold mb-4">Provider Portals</h2>
     <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
       @for (provider of providers; track provider) {
         <a [href]="provider.trackerLink" target="_blank"
-           class="bg-white p-4 rounded-lg shadow hover:shadow-md transition-shadow text-center">
+           class="provider-card rounded-lg shadow hover:shadow-md transition-shadow text-center">
           <img [ngSrc]="provider.logo" [alt]="provider.name" class="h-8 mx-auto mb-2" width="32"
                height="32">
-          <span class="text-sm text-gray-600">{{ provider.name }}</span>
+          <span class="text-sm">{{ provider.name }}</span>
         </a>
       }
     </div>
   </div>
 
-  <!-- Recent Activity -->
-  <div>
-    <h2 class="text-xl font-semibold text-gray-800 mb-4">Recent Activity</h2>
-    <div class="bg-white rounded-lg shadow overflow-hidden">
-      <p-table [value]="recentActivities" [rows]="5" styleClass="p-datatable-sm">
-        <ng-template pTemplate="header">
-          <tr>
-            <th id="date">Date</th>
-            <th id="type">Type</th>
-            <th id="customer">Customer</th>
-            <th id="status">Status</th>
-            <th id="action">Action</th>
-          </tr>
-        </ng-template>
-        <ng-template pTemplate="body" let-activity>
-          <tr>
-            <td headers="date">{{activity.date}}</td>
-            <td headers="type">{{activity.type}}</td>
-            <td headers="customer">{{activity.customer}}</td>
-            <td headers="status">
-              <span [class]="'status-badge status-' + activity.status.toLowerCase()">
-                {{activity.status}}
-              </span>
-            </td>
-            <td headers="action">
-              <p-button type="button" icon="pi pi-eye"
-                class="p-button-text p-button-sm"
-                (click)="viewActivity(activity)">
-              </p-button>
-            </td>
-          </tr>
-        </ng-template>
-      </p-table>
-    </div>
-  </div>
 </div>

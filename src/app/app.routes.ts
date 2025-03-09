@@ -1,7 +1,7 @@
 import { Routes } from '@angular/router';
 import { authGuardFn } from '@auth0/auth0-angular';
-import { ForbiddenComponent } from '@shared/components/forbidden/forbidden.component';
 import { HomeComponent } from './home/home.component';
+import { ForbiddenComponent } from './pages/forbidden/forbidden.component';
 
 export const routes: Routes = [
   {

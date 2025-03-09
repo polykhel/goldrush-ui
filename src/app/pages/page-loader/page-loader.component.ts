@@ -1,6 +1,5 @@
 import { Component } from '@angular/core';
 
-
 @Component({
   selector: 'app-page-loader',
   standalone: true,
@@ -42,9 +41,14 @@ import { Component } from '@angular/core';
     }
 
     @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
+      0% {
+        transform: rotate(0deg);
+      }
+      100% {
+        transform: rotate(360deg);
+      }
     }
   `]
 })
-export class PageLoaderComponent {}
+export class PageLoaderComponent {
+}

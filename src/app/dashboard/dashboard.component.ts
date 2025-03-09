@@ -8,32 +8,15 @@ import { TableModule } from 'primeng/table';
 import { DashboardService } from '@services/dashboard.service';
 import { Dashboard } from '@models/dashboard.model';
 
-interface Activity {
-  date: string;
-  type: string;
-  customer: string;
-  status: string;
-  id: number;
-}
-
 @Component({
   selector: 'app-dashboard',
   templateUrl: './dashboard.component.html',
+  styleUrls: ['./dashboard.component.scss'],
   standalone: true,
   imports: [ButtonModule, TableModule, RouterLink, NgOptimizedImage]
 })
 export class DashboardComponent implements OnInit {
   dashboard: Dashboard | null = null;
-  recentActivities: Activity[] = [
-    {
-      date: '2024-03-20',
-      type: 'Inquiry',
-      customer: 'John Smith',
-      status: 'Pending',
-      id: 1
-    }
-    // Add more mock data as needed
-  ];
   providers: Provider[] = [];
 
   constructor(
@@ -50,10 +33,5 @@ export class DashboardComponent implements OnInit {
     this.providerService.getProviders().subscribe((providers) => {
       this.providers = providers;
     });
-  }
-
-  viewActivity(activity: Activity): void {
-    // Implement view logic
-    console.log('Viewing activity:', activity);
   }
 }

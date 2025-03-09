@@ -1,13 +1,14 @@
-<section class="container mx-auto max-w-5xl p-8 bg-white rounded-lg shadow-lg hover:shadow-xl border border-gray-100">
+<section
+  class="card container mx-auto max-w-5xl p-8 rounded-lg shadow-lg hover:shadow-xl border border-gray-100">
   <form [formGroup]="inquiryForm" class="max-w-5xl mx-auto">
     <div class="flex justify-between align-items-center mb-3">
       <p-button (click)="goBack()" [text]="true" icon="pi pi-arrow-left" label="Back"></p-button>
-      <h2 class="text-2xl font-bold">{{ editMode ? 'Edit' : 'New' }} Inquiry</h2>
+      <h2 class="font-bold">{{ editMode ? 'Edit' : 'New' }} Inquiry</h2>
     </div>
 
     <!-- Basic Information Section -->
-    <section class="mb-8 bg-gray-50 p-6 rounded-lg">
-      <h3 class="text-lg font-bold mb-4 text-gray-700 border-b pb-2">Basic Information</h3>
+    <section class="mb-8">
+      <h3 class="font-bold mb-4 border-b pb-2">Basic Information</h3>
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <p-float-label variant="on">
           <p-select
@@ -36,7 +37,7 @@
       </div>
 
       <div class="mt-4">
-        <label class="text-gray-700 font-semibold block mb-2">Source</label>
+        <label class="font-semibold block mb-2">Source</label>
         <div class="flex flex-wrap items-center gap-4">
           <div class="flex items-center">
             <p-radio-button formControlName="source" inputId="sourceFB" value="FB"/>
@@ -55,8 +56,8 @@
     </section>
 
     <!-- Travel Details Section -->
-    <section class="mb-8 bg-gray-50 p-6 rounded-lg" formGroupName="travelDetails">
-      <h3 class="text-lg font-bold mb-4 text-gray-700 border-b pb-2">Travel Details</h3>
+    <section class="mb-8" formGroupName="travelDetails">
+      <h3 class="font-bold mb-4 border-b pb-2">Travel Details</h3>
       <p-fluid class="grid grid-cols-2 gap-4 mb-4">
         <p-float-label variant="on">
           <p-select [options]="countries" formControlName="countryId" inputId="countryId" optionLabel="name"
@@ -107,7 +108,7 @@
       </div>
 
       <div class="mt-4">
-        <label class="text-gray-700 font-semibold block mb-2">Number of Travelers</label>
+        <label class="font-semibold block mb-2">Number of Travelers</label>
         <p-fluid class="grid grid-cols-2 gap-4">
           <p-float-label variant="on">
             <p-input-number [showButtons]="true" formControlName="adults" inputId="adults"/>
@@ -128,11 +129,11 @@
     </section>
 
     <!-- Package Details Section -->
-    <section class="mb-8 bg-gray-50 p-6 rounded-lg">
-      <h3 class="text-lg font-bold mb-4 text-gray-700 border-b pb-2">Package Details</h3>
+    <section class="mb-8">
+      <h3 class="font-bold mb-4 border-b pb-2">Package Details</h3>
       <div class="grid grid-cols-2 gap-4 mb-4">
         <div>
-          <label class="text-gray-700 font-semibold block mb-2">Package Type</label>
+          <label class="font-semibold block mb-2">Package Type</label>
           <div class="grid grid-cols-1 gap-2">
             <div class="flex items-center gap-2">
               <p-radio-button formControlName="packageType" inputId="allInclusive"
@@ -166,14 +167,14 @@
     </section>
 
     <!-- Pricing & Quotation Section -->
-    <section class="mb-8 bg-gray-50 p-6 rounded-lg">
-      <h3 class="text-lg font-bold mb-4 text-gray-700 border-b pb-2">Pricing & Quotation</h3>
+    <section class="mb-8">
+      <h3 class="font-bold mb-4 border-b pb-2">Pricing & Quotation</h3>
 
       <div class="space-y-6">
         <!-- Provider Price List -->
         <div formArrayName="quotations">
           <div class="flex justify-between items-center mb-4">
-            <label class="text-gray-700 font-semibold">Provider Quotations</label>
+            <label class="font-semibold">Provider Quotations</label>
             <div class="flex gap-2 items-center">
               <p-select [(ngModel)]="selectedProvider" [ngModelOptions]="{standalone: true}"
                         [options]="availableProviders" [placeholder]="'Select Provider'"
@@ -201,8 +202,8 @@
     </section>
 
     <!-- Remarks Section -->
-    <section class="mb-8 bg-gray-50 p-6 rounded-lg">
-      <h3 class="text-lg font-bold mb-4 text-gray-700 border-b pb-2">Remarks</h3>
+    <section class="mb-8">
+      <h3 class="font-bold mb-4 border-b pb-2">Remarks</h3>
       <textarea class="w-full" formControlName="remarks" id="remarks" pTextarea rows="4"></textarea>
     </section>
 
@@ -215,7 +216,7 @@
 
     <!-- Audit Information -->
     @if (editMode) {
-      <div class="mt-12 text-xs text-gray-500 border-t pt-4 bg-gray-50 p-4 rounded-lg">
+      <div class="mt-12 text-xs text-gray-500 border-t pt-4 p-4 rounded-lg">
         <div class="grid grid-cols-2 gap-2">
           <div>Created by {{ auditFields.createdBy }}
             on {{ auditFields.createdAt| date:'medium' }}
