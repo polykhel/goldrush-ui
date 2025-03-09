@@ -18,6 +18,8 @@ import { ProviderQuotationService } from '@services/provider-quotation.service';
 import { DatePicker } from 'primeng/datepicker';
 import { Fluid } from 'primeng/fluid';
 import { Checkbox } from 'primeng/checkbox';
+import { takeUntil } from 'rxjs';
+import { DestroyService } from '@services/destroy.service';
 
 @Component({
   selector: 'app-provider-quotation',
@@ -61,6 +63,7 @@ export class ProviderQuotationComponent implements OnInit {
     private providerQuotationService: ProviderQuotationService,
     private toastService: ToastService,
     private fb: FormBuilder,
+    private destroy$: DestroyService
   ) {}
 
   private cleanTextInput(text: string): string {
@@ -110,7 +113,9 @@ export class ProviderQuotationComponent implements OnInit {
     ['inclusions', 'exclusions', 'optionalTours'].forEach(field => {
       const control = this.formGroup.get(field);
       if (control) {
-        control.valueChanges.subscribe(value => {
+        control.valueChanges
+        .pipe(takeUntil(this.destroy$))
+        .subscribe(value => {
           if (value) {
             const cleanedValue = this.cleanTextInput(value);
             if (cleanedValue !== value) {
