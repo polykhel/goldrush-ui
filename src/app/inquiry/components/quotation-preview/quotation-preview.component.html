@@ -23,12 +23,20 @@
         <div>{{ quotation.noOfPax }}</div>
       </div>
       <div class="bg-gray-50 p-2 rounded-lg">
-        <div class="font-semibold">RATE PER PAX</div>
+        <div class="font-semibold">
+          RATE PER PAX
+          @if (quotation.showPriceBreakdown && quotation.priceBreakdown) {
+            <span class="text-xl font-bold text-red-600">
+            {{ quotation.ratePerPax | currency: 'PHP' }}
+            </span>
+          }
+        </div>
+
         @if (quotation.showPriceBreakdown && quotation.priceBreakdown) {
           @for (breakdown of quotation.priceBreakdown; track breakdown) {
             <div>
               <span class="font-semibold">{{ breakdown.label }}</span>
-              <span class="text-xl font-bold text-red-600">
+              <span class="font-bold text-red-600">
                 {{ breakdown.amount | currency: 'PHP' }}
               </span>
             </div>
@@ -39,12 +47,19 @@
           </span>
         }
         @if (quotation.ratePerPax !== quotation.ratePerChild) {
-          <div class="font-semibold">RATE PER CHILD</div>
+          <div class="font-semibold">
+            RATE PER CHILD
+            @if (quotation.showPriceBreakdown && quotation.childPriceBreakdown) {
+              <span class="text-xl font-bold text-red-600">
+                  {{ quotation.ratePerChild | currency: 'PHP' }}
+              </span>
+            }
+          </div>
           @if (quotation.showPriceBreakdown && quotation.childPriceBreakdown) {
             @for (breakdown of quotation.childPriceBreakdown; track breakdown) {
               <div>
                 <span class="font-semibold">{{ breakdown.label }}</span>
-                <span class="text-xl font-bold text-red-600">
+                <span class="font-bold text-red-600">
                   {{ breakdown.amount | currency: 'PHP' }}
                 </span>
               </div>
@@ -74,13 +89,13 @@
             <li><span class="mr-2">•</span> {{
                 getFlightDetails(quotation.flightDetails.departure,
                   quotation.flightDetails.arrival?.airportCode)
-            }}
-          </li>
-          <li><span class="mr-2">•</span> {{
-              getFlightDetails(quotation.flightDetails.arrival,
-                quotation.flightDetails.departure?.airportCode)
-            }}
-          </li>
+              }}
+            </li>
+            <li><span class="mr-2">•</span> {{
+                getFlightDetails(quotation.flightDetails.arrival,
+                  quotation.flightDetails.departure?.airportCode)
+              }}
+            </li>
             <span></span>
           </ul>
         </div>
