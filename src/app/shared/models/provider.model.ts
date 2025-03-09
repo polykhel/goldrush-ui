@@ -5,4 +5,5 @@ export interface Provider extends BaseModel {
   trackerLink: string;
   email: string;
   logo: string;
+  countries: string[];
 }

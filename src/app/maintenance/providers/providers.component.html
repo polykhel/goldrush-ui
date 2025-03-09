@@ -1,0 +1,65 @@
+<app-crud
+  [entities]="entities"
+  [columns]="columns"
+  [entityName]="'Provider'"
+  (create)="openDialog($event)"
+  (update)="openDialog($event)"
+  (delete)="deleteEntity($event)"
+  (deleteMultiple)="deleteSelectedEntities($event)"
+>
+</app-crud>
+
+<p-dialog [(visible)]="dialogVisible" [style]="{ width: '450px' }" header="Provider Details"
+          [modal]="true">
+  <ng-template pTemplate="content">
+    <form [formGroup]="form" class="flex flex-col gap-4 mt-3">
+      <p-float-label variant="on">
+        <input class="w-full" formControlName="name" id="name" pInputText
+               type="text">
+        <label for="name">Name</label>
+        <small class="text-red-500" *ngIf="submitted && form.get('name')?.invalid">Name is
+          required.</small>
+      </p-float-label>
+      <p-float-label variant="on">
+        <input class="w-full" formControlName="trackerLink" id="trackerLink" pInputText
+               type="text">
+        <label for="trackerLink">Tracker Link</label>
+        <small class="text-red-500" *ngIf="submitted && form.get('trackerLink')?.invalid">Tracker
+          Link is required.</small>
+      </p-float-label>
+      <p-float-label variant="on">
+        <input class="w-full" formControlName="email" id="email" pInputText
+               type="email">
+        <label for="email">Email</label>
+        <small class="text-red-500" *ngIf="submitted && form.get('email')?.invalid">
+          Email is required and must be a valid email address.
+        </small>
+      </p-float-label>
+      <p-float-label variant="on">
+        <input class="w-full" formControlName="logo" id="logo" pInputText
+               type="text">
+        <label for="logo">Logo</label>
+      </p-float-label>
+      <div class="field">
+        <label for="countries">Countries</label>
+        <p-multiSelect
+          [options]="availableCountries"
+          [(ngModel)]="selectedCountries"
+          [ngModelOptions]="{standalone: true}"
+          optionLabel="name"
+          placeholder="Select Countries"
+          [style]="{'width': '100%'}"
+          (onChange)="onCountrySelectionChange($event)"
+          [filter]="true"
+          appendTo="body"
+        ></p-multiSelect>
+      </div>
+    </form>
+  </ng-template>
+  <ng-template pTemplate="footer">
+    <p-button label="Cancel" icon="pi pi-times" text (click)="hideDialog()"/>
+    <p-button label="Save" icon="pi pi-check" (click)="saveEntity()"/>
+  </ng-template>
+</p-dialog>
+
+<p-toast></p-toast>

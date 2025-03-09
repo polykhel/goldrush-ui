@@ -4,16 +4,17 @@ import { environment } from '@env/environment';
 import { Provider } from '@models/provider.model';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
+import { AbstractCrudService } from './abstract-crud.service';
 
 @Injectable({
   providedIn: 'root',
 })
-export class ProviderService {
-  private http = inject(HttpClient);
-  private baseUrl: string = environment.backendUrl + '/api/provider';
+export class ProviderService extends AbstractCrudService<Provider> {
+  protected http = inject(HttpClient);
+  protected baseUrl: string = environment.backendUrl + '/api/provider';
 
   getProviders(): Observable<Provider[]> {
-    return this.http.get<Provider[]>(`${this.baseUrl}`).pipe(
+    return this.getAll().pipe(
       map((response) =>
         response.map((provider) => {
           return {
