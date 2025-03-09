@@ -10,8 +10,6 @@ export interface ListData<T extends BaseModel> {
 
 export interface BaseModel {
   id: string | null;
-  //TODO: Delete
-  documentId?: string;
   createdAt?: Date | null;
   updatedAt?: Date | null;
 }
