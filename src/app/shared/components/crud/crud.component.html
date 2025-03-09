@@ -12,27 +12,45 @@
   </ng-template>
 </p-toolbar>
 
+<div class="flex justify-center items-center gap-2 mb-4">
+  <p-inputgroup>
+    <p-inputgroup-addon>
+      <i class="pi pi-search"></i>
+    </p-inputgroup-addon>
+    <input
+      pInputText
+      type="text"
+      (input)="onGlobalFilter($event)"
+      [value]="searchTerm"
+      placeholder="Search..."/>
+  </p-inputgroup>
+</div>
+
 <p-table
   #dt
   [value]="entities"
+  [lazy]="true"
+  (onLazyLoad)="onLazyLoad($event)"
   [paginator]="true"
   [rows]="10"
+  [totalRecords]="totalRecords"
+  [loading]="loading"
   [columns]="columns"
   [globalFilterFields]="globalFilterFields"
   [tableStyle]="{ 'min-width': '75rem' }"
   [(selection)]="selectedEntities"
   [rowHover]="true"
   dataKey="id"
+  [sortField]="sortField"
+  [sortOrder]="sortOrder"
+  (onSort)="onSort($event)"
+  (onPage)="onPage($event)"
   currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
   [showCurrentPageReport]="true"
   [rowsPerPageOptions]="[10, 25, 50]">
   <ng-template pTemplate="caption">
     <div class="flex items-center justify-between">
       <h5 class="m-0">Manage {{ entityName }}</h5>
-      <p-icon-field>
-        <p-inputicon styleClass="pi pi-search"></p-inputicon>
-        <input pInputText type="text" (input)="onGlobalFilter(dt, $event)" placeholder="Search..."/>
-      </p-icon-field>
     </div>
   </ng-template>
   <ng-template pTemplate="header">
@@ -62,6 +80,20 @@
                   (click)="onEdit(entity)"/>
         <p-button icon="pi pi-trash" severity="danger" [rounded]="true" [outlined]="true"
                   (click)="onDelete(entity)"/>
+      </td>
+    </tr>
+  </ng-template>
+  <ng-template pTemplate="loadingbody">
+    <tr>
+      <td colspan="100%">
+        Loading data. Please wait...
+      </td>
+    </tr>
+  </ng-template>
+  <ng-template pTemplate="emptymessage">
+    <tr>
+      <td colspan="100%">
+        No records found.
       </td>
     </tr>
   </ng-template>

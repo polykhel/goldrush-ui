@@ -2,8 +2,10 @@ import { Component, inject, OnInit } from '@angular/core';
 import { FormGroup, NonNullableFormBuilder } from '@angular/forms';
 import { ConfirmationService } from 'primeng/api';
 import { BaseModel } from '@shared/models/base.model';
-import { AbstractCrudService } from '@core/services/abstract-crud.service';
+import { AbstractCrudService, PageRequest } from '@core/services/abstract-crud.service';
 import { ToastService } from '@services/toast.service';
+import { TableLazyLoadEvent } from 'primeng/table';
+import { Subject, debounceTime, distinctUntilChanged } from 'rxjs';
 
 @Component({
   template: ''
@@ -19,19 +21,89 @@ export abstract class AbstractCrudComponent<T extends BaseModel> implements OnIn
 
   abstract form: FormGroup;
 
+  // Entity data
   entities: T[] = [];
+  entity!: T;
   columns: { field: string; header: string }[] = [];
+
+  // Dialog state
   dialogVisible = false;
   submitted = false;
 
+  // Pagination and sorting properties
+  first = 0;
+  rows = 10;
+  totalRecords: number = 0;
+  loading: boolean = false;
+  sortField: string = 'createdAt';
+  sortOrder: number = -1; // -1 for descending, 1 for ascending
+
+  // Search
+  searchTerm: string = '';
+  protected searchSubject = new Subject<string>();
+
   ngOnInit() {
-    this.fetchEntities();
+    this.setupSearch();
+    // Initial load
+    this.loadEntities();
   }
 
-  fetchEntities() {
-    this.service.getAll().subscribe(entities => {
-      this.entities = entities;
+  setupSearch() {
+    this.searchSubject.pipe(
+      debounceTime(300),
+      distinctUntilChanged()
+    ).subscribe(() => {
+      this.first = 0; // Reset to first page when searching
+      this.loadEntities();
     });
+  }
+
+  loadEntities() {
+    this.loading = true;
+
+    const pageRequest: PageRequest = {
+      page: this.first / this.rows,
+      size: this.rows,
+      sort: this.sortField,
+      direction: this.sortOrder === 1 ? 'asc' : 'desc',
+      searchTerm: this.searchTerm
+    };
+
+    this.service.getPaginated(pageRequest).subscribe(response => {
+      this.entities = response.content || response.data || [];
+      this.totalRecords = response.totalElements;
+      this.loading = false;
+    });
+  }
+
+  onSearch(event: any) {
+    this.searchTerm = event.target.value;
+    this.searchSubject.next(this.searchTerm);
+  }
+
+  onSort(event: TableLazyLoadEvent) {
+    this.sortField = event.sortField?.toString() ?? 'createdAt';
+    this.sortOrder = event.sortOrder ?? -1;
+    this.loadEntities();
+  }
+
+  onPage(event: any) {
+    this.first = event.first;
+    this.rows = event.rows;
+    this.loadEntities();
+  }
+
+  onLazyLoad(event: TableLazyLoadEvent) {
+    // Handle all events in one place
+    this.first = event.first ?? 0;
+    this.rows = event.rows ?? 10;
+
+    if (event.sortField) {
+      this.sortField = event.sortField.toString();
+      this.sortOrder = event.sortOrder ?? -1;
+    }
+
+    this.loadEntities();
   }
 
   openDialog(selectedEntity: T) {
@@ -57,7 +129,7 @@ export abstract class AbstractCrudComponent<T extends BaseModel> implements OnIn
       next: () => {
         this.hideDialog();
         this.toastService.success(`${this.getEntityName()} Saved`, `The ${this.getEntityName().toLowerCase()} has been saved successfully`);
-        this.fetchEntities();
+        this.loadEntities();
       }
     });
   }
@@ -72,7 +144,7 @@ export abstract class AbstractCrudComponent<T extends BaseModel> implements OnIn
               this.toastService.success(
                 `${this.getEntityName()} Deleted`,
                 `The ${this.getEntityName().toLowerCase()} ${this.getEntityDisplayName(entity)} has been deleted successfully`);
-              this.fetchEntities();
+              this.loadEntities();
             }
           });
         }
@@ -90,7 +162,7 @@ export abstract class AbstractCrudComponent<T extends BaseModel> implements OnIn
             this.toastService.success(
               `${this.getEntityName()}s Deleted`,
               `The ${this.getEntityName().toLowerCase()}s have been deleted successfully`);
-            this.fetchEntities();
+            this.loadEntities();
           }
         });
       }
@@ -98,6 +170,5 @@ export abstract class AbstractCrudComponent<T extends BaseModel> implements OnIn
   }
 
   abstract getEntityName(): string;
-
   abstract getEntityDisplayName(entity: T): string;
 }

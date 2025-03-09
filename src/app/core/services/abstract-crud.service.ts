@@ -1,6 +1,14 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { BaseModel } from '@models/base.model';
+import { BaseModel, ListData } from '@models/base.model';
+
+export interface PageRequest {
+  page: number;
+  size: number;
+  sort?: string;
+  direction?: 'asc' | 'desc';
+  searchTerm?: string;
+}
 
 export abstract class AbstractCrudService<T extends BaseModel> {
   protected abstract http: HttpClient;
@@ -8,6 +16,22 @@ export abstract class AbstractCrudService<T extends BaseModel> {
 
   getAll(): Observable<T[]> {
     return this.http.get<T[]>(`${this.baseUrl}`);
+  }
+
+  getPaginated(pageRequest: PageRequest): Observable<ListData<T>> {
+    let params = new HttpParams()
+      .set('page', pageRequest.page.toString())
+      .set('size', pageRequest.size.toString());
+
+    if (pageRequest.sort) {
+      params = params.set('sort', `${pageRequest.sort},${pageRequest.direction ?? 'asc'}`);
+    }
+
+    if (pageRequest.searchTerm) {
+      params = params.set('search', pageRequest.searchTerm);
+    }
+
+    return this.http.get<ListData<T>>(`${this.baseUrl}`, { params });
   }
 
   getById(id: string): Observable<T> {

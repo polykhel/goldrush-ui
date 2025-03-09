@@ -2,10 +2,19 @@
   [entities]="entities"
   [columns]="columns"
   [entityName]="'Country'"
+  [totalRecords]="totalRecords"
+  [loading]="loading"
+  [sortField]="sortField"
+  [sortOrder]="sortOrder"
+  [searchTerm]="searchTerm"
   (create)="openDialog($event)"
   (update)="openDialog($event)"
   (delete)="deleteEntity($event)"
   (deleteMultiple)="deleteSelectedEntities($event)"
+  (lazyLoad)="onLazyLoad($event)"
+  (search)="onSearch($event)"
+  (sort)="onSort($event)"
+  (page)="onPage($event)"
 >
 </app-crud>
 
