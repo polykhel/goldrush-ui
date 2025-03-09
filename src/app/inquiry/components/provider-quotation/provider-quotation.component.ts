@@ -1,4 +1,4 @@
-import { CurrencyPipe, DatePipe } from '@angular/common';
+import { DatePipe } from '@angular/common';
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { FormArray, FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { Provider } from '@models/provider.model';
@@ -35,7 +35,6 @@ import { Checkbox } from 'primeng/checkbox';
     Textarea,
     DatePicker,
     Fluid,
-    CurrencyPipe,
     Checkbox
   ]
 })
@@ -55,9 +54,7 @@ export class ProviderQuotationComponent implements OnInit {
   isLoadingRate = false;
   exchangeRateLastUpdated: Date | null = null;
   quotationStatuses = PROVIDER_QUOTATION_STATUSES;
-
-  breakdownTotal = 0;
-  childBreakdownTotal = 0;
+  breakdownItems = ['Flight', 'Land Arrangement', 'Hotel', 'Airport Transfer', 'Other'];
 
   constructor(
     private exchangeRateService: ExchangeRateService,
@@ -236,12 +233,6 @@ export class ProviderQuotationComponent implements OnInit {
   generateQuotation() {
     const value = this.formGroup.getRawValue();
 
-    // Validate breakdown total matches price amount
-    if (this.priceBreakdownArray.length > 0 && this.breakdownTotal !== value.priceAmount) {
-      this.toastService.warn('Warning', 'Price breakdown total does not match the price amount.');
-      return;
-    }
-
     this.providerQuotationService.saveProviderQuotation(value).subscribe({
       next: () => {
         this.toastService.success('Success', 'Quotation details saved.');
@@ -257,26 +248,14 @@ export class ProviderQuotationComponent implements OnInit {
     this.onRemove.emit();
   }
 
-  onFlightPriceInput(event: InputNumberInputEvent, type: string) {
-    const price = event.value;
-
-    if (price) {
-      this.formGroup.get(`flightDetails.${type}.childPrice`)?.setValue(price);
-    }
-  }
-
   // Price breakdown methods
   addPriceBreakdownItem() {
-    const remainingAmount = this.formGroup.get('priceAmount')?.value - this.breakdownTotal || 0;
-
     this.priceBreakdownArray.push(
       this.fb.group({
-        label: ['Item ' + (this.priceBreakdownArray.length + 1)],
-        amount: [remainingAmount > 0 ? remainingAmount : 0]
+        label: [this.breakdownItems[this.priceBreakdownArray.length]],
+        amount: [0]
       })
     );
-
-    this.updatePriceBreakdown();
   }
 
   removePriceBreakdownItem(index: number) {
@@ -285,28 +264,23 @@ export class ProviderQuotationComponent implements OnInit {
   }
 
   updatePriceBreakdown() {
-    this.breakdownTotal = 0;
-
     if (this.priceBreakdownArray.length > 0) {
-      this.breakdownTotal = this.priceBreakdownArray.controls.reduce(
+      const breakdownTotal = this.priceBreakdownArray.controls.reduce(
         (sum, control) => sum + (control.get('amount')?.value || 0),
         0
       );
+      this.formGroup.get('priceAmount')?.setValue(breakdownTotal);
     }
   }
 
   // Child price breakdown methods
   addChildPriceBreakdownItem() {
-    const remainingAmount = this.formGroup.get('childPriceAmount')?.value - this.childBreakdownTotal || 0;
-
     this.childPriceBreakdownArray.push(
       this.fb.group({
-        label: ['Child Item ' + (this.childPriceBreakdownArray.length + 1)],
-        amount: [remainingAmount > 0 ? remainingAmount : 0]
+        label: [this.breakdownItems[this.childPriceBreakdownArray.length]],
+        amount: [0]
       })
     );
-
-    this.updateChildPriceBreakdown();
   }
 
   removeChildPriceBreakdownItem(index: number) {
@@ -315,13 +289,12 @@ export class ProviderQuotationComponent implements OnInit {
   }
 
   updateChildPriceBreakdown() {
-    this.childBreakdownTotal = 0;
-
     if (this.childPriceBreakdownArray.length > 0) {
-      this.childBreakdownTotal = this.childPriceBreakdownArray.controls.reduce(
+      const breakdownTotal = this.childPriceBreakdownArray.controls.reduce(
         (sum, control) => sum + (control.get('amount')?.value || 0),
         0
       );
+      this.formGroup.get('childPriceAmount')?.setValue(breakdownTotal);
     }
   }
 }

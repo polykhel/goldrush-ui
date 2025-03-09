@@ -94,27 +94,6 @@
                       </div>
                     }
                   </div>
-                  @if (priceBreakdownArray.controls.length > 0) {
-                    <div class="flex justify-between mt-2 text-sm">
-                      <span>Total Breakdown:</span>
-                      <span
-                        [class.text-red-500]="breakdownTotal !== formGroup.get('priceAmount')?.value">
-                            {{
-                          breakdownTotal | currency: (formGroup.get('currencyCode')?.value || 'PHP')
-                        }}
-                          </span>
-                    </div>
-                  }
-                  @if (breakdownTotal !== formGroup.get('priceAmount')?.value
-                  && priceBreakdownArray.controls.length > 0) {
-                    <small
-                      class="text-red-500">
-                      Breakdown total doesn't match the price amount ({{
-                        formGroup.get('priceAmount')?.value | currency:(formGroup.get(
-                          'currencyCode')?.value || 'PHP')
-                      }})
-                    </small>
-                  }
                 </div>
               }
               <!-- End of Price Breakdown Section -->
@@ -168,28 +147,6 @@
                         </div>
                       }
                     </div>
-                    @if (childPriceBreakdownArray.controls.length > 0) {
-                      <div class="flex justify-between mt-2 text-sm">
-                        <span>Total Child Breakdown:</span>
-                        <span
-                          [class.text-red-500]="childBreakdownTotal !== formGroup.get('childPriceAmount')?.value">
-                                  {{
-                            childBreakdownTotal | currency: (formGroup.get('currencyCode')?.value
-                              || 'PHP')
-                          }}
-                                </span>
-                      </div>
-                    }
-                    @if (childBreakdownTotal !== formGroup.get('childPriceAmount')?.value
-                    && childPriceBreakdownArray.controls.length > 0) {
-                      <small
-                        class="text-red-500">
-                        Child breakdown total doesn't match the child price amount ({{
-                          formGroup.get('childPriceAmount')?.value | currency:(formGroup.get(
-                            'currencyCode')?.value || 'PHP')
-                        }})
-                      </small>
-                    }
                   </div>
                 }
                 <!-- End of Child Price Breakdown Section -->
@@ -277,21 +234,6 @@
                       <label for="departureEndDate">End Date</label>
                     </p-float-label>
                   </div>
-                  <p-float-label variant="on">
-                    <p-input-number formControlName="price" id="price" mode="currency"
-                                    currency="PHP"
-                                    (onInput)="onFlightPriceInput($event, 'departure')"
-                                    [minFractionDigits]="2" [maxFractionDigits]="2"/>
-                    <label for="price">Price</label>
-                  </p-float-label>
-                  @if (showChildPrices) {
-                    <p-float-label variant="on">
-                      <p-input-number formControlName="childPrice" id="price" mode="currency"
-                                      currency="PHP"
-                                      [minFractionDigits]="2" [maxFractionDigits]="2"/>
-                      <label for="childPrice">Child Price</label>
-                    </p-float-label>
-                  }
                 </p-fluid>
                 <p-fluid formGroupName="arrival" class="flex flex-col gap-2">
                   <span class="font-semibold">Arrival</span>
@@ -321,21 +263,6 @@
                       <label for="arrivalEndDate">End Date</label>
                     </p-float-label>
                   </div>
-                  <p-float-label variant="on">
-                    <p-input-number formControlName="price" id="price" mode="currency"
-                                    currency="PHP"
-                                    [minFractionDigits]="2" [maxFractionDigits]="2"
-                                    (onInput)="onFlightPriceInput($event, 'arrival')"/>
-                    <label for="price">Price</label>
-                  </p-float-label>
-                  @if (showChildPrices) {
-                    <p-float-label variant="on">
-                      <p-input-number formControlName="childPrice" id="childPrice" mode="currency"
-                                      currency="PHP"
-                                      [minFractionDigits]="2" [maxFractionDigits]="2"/>
-                      <label for="childPrice">Child Price</label>
-                    </p-float-label>
-                  }
                 </p-fluid>
               </div>
             </div>
