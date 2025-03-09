@@ -96,6 +96,7 @@ export class InquiryFormComponent implements OnInit {
   saving = false;
   selectedProvider: string | null = null;
   providerQuotationRequest: ProviderQuotationEmailRequest | null = null;
+  defaultDate = new Date();
 
   constructor(
     private providerService: ProviderService,
@@ -108,6 +109,10 @@ export class InquiryFormComponent implements OnInit {
     private route: ActivatedRoute,
     private router: Router
   ) {
+  }
+
+  get startDate(): Date {
+    return this.inquiryForm.get('travelDetails.startDate')?.value ?? this.defaultDate;
   }
 
   get quotations(): FormArray {
@@ -473,11 +478,11 @@ export class InquiryFormComponent implements OnInit {
     return this.fb.group({
       id: new FormControl<string | null>(null),
       status: this.fb.control<string>('NEW', [Validators.required]),
-      date: this.fb.control<Date>(new Date(), [Validators.required]),
+      date: this.fb.control<Date>(this.defaultDate, [Validators.required]),
       clientName: this.fb.control<string>('', [Validators.required]),
       source: this.fb.control<string>('', [Validators.required]),
       travelDetails: this.fb.group({
-        countryId: this.fb.control<string>('', [Validators.required]),
+        countryId: this.fb.control<string>(null!, [Validators.required]),
         destination: this.fb.control<string>('', [Validators.required]),
         days: this.fb.control<number>(0, [Validators.required]),
         nights: this.fb.control<number>(0, [Validators.required]),

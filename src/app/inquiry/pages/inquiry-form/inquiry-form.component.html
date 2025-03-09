@@ -80,9 +80,9 @@
                          iconDisplay="input" (onSelect)="calculateTravelDuration()"/>
           <label for="startDate">Start Date</label>
         </p-float-label>
-
         <p-float-label variant="on">
           <p-date-picker [showIcon]="true" dateFormat="mm/dd/y" formControlName="endDate"
+                         [minDate]="startDate" [defaultDate]="startDate"
                          iconDisplay="input" (onSelect)="calculateTravelDuration()"/>
           <label for="endDate">End Date</label>
         </p-float-label>
