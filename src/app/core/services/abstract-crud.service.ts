@@ -15,7 +15,7 @@ export abstract class AbstractCrudService<T extends BaseModel> {
   protected abstract baseUrl: string;
 
   getAll(): Observable<T[]> {
-    return this.http.get<T[]>(`${this.baseUrl}`);
+    return this.http.get<T[]>(`${this.baseUrl}/all`);
   }
 
   getPaginated(pageRequest: PageRequest): Observable<ListData<T>> {
