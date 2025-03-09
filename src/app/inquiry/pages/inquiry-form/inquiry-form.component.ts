@@ -31,7 +31,7 @@ import { Fluid } from 'primeng/fluid';
 import { InputNumber } from 'primeng/inputnumber';
 import { InputText } from 'primeng/inputtext';
 import { RadioButton } from 'primeng/radiobutton';
-import { Select } from 'primeng/select';
+import { Select, SelectChangeEvent } from 'primeng/select';
 import { Textarea } from 'primeng/textarea';
 import { Toast } from 'primeng/toast';
 import { finalize, of, switchMap, takeUntil } from 'rxjs';
@@ -434,6 +434,14 @@ export class InquiryFormComponent implements OnInit {
         travelDetails.get('nights')?.setValue(nights);
       }
     }
+  }
+
+  updateProviders(event: SelectChangeEvent) {
+    this.providerService.getProviderByCountryId(event.value)
+    .subscribe(providers => {
+      this.providers = providers;
+      this.updateAvailableProviders();
+    });
   }
 
   private updateAvailableProviders() {

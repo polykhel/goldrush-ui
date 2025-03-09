@@ -24,4 +24,8 @@ export class ProviderService {
       ),
     );
   }
+
+  getProviderByCountryId(countryId: string): Observable<Provider[]> {
+    return this.http.get<Provider[]>(`${this.baseUrl}/country/${countryId}`);
+  }
 }

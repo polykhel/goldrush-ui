@@ -61,7 +61,7 @@
       <p-fluid class="grid grid-cols-2 gap-4 mb-4">
         <p-float-label variant="on">
           <p-select [options]="countries" formControlName="countryId" inputId="countryId" optionLabel="name"
-                    optionValue="id">
+                    optionValue="id" (onChange)="updateProviders($event)">
             <ng-template pTemplate="dropdownicon">
               <i class="pi pi-map"></i>
             </ng-template>
