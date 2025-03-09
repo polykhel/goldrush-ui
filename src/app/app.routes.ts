@@ -32,6 +32,12 @@ export const routes: Routes = [
       import('./tools/tools.routes').then((m) => m.TOOLS_ROUTES)
   },
   {
+    path: 'maintenance',
+    canActivate: [authGuardFn],
+    loadChildren: () =>
+      import('./maintenance/maintenance.routes').then((m) => m.MAINTENANCE_ROUTES)
+  },
+  {
     path: 'forbidden',
     component: ForbiddenComponent
   },

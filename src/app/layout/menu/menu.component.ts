@@ -41,6 +41,26 @@ export class MenuComponent implements OnInit {
             routerLink: ['/bookings']
           }
         ]
+      },
+      {
+        label: 'Maintenance',
+        items: [
+          {
+            label: 'Providers',
+            icon: 'pi pi-user-edit',
+            routerLink: ['/maintenance/providers']
+          },
+          {
+            label: 'Countries',
+            icon: 'pi pi-globe',
+            routerLink: ['/maintenance/countries']
+          },
+          {
+            label: 'Tools',
+            icon: 'pi pi-wrench',
+            routerLink: ['/tools']
+          }
+        ]
       }
     ];
   }

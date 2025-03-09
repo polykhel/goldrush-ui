@@ -1,0 +1,37 @@
+<app-crud
+  [entities]="countries"
+  [columns]="columns"
+  [entityName]="'Country'"
+  (create)="openDialog($event)"
+  (update)="openDialog($event)"
+  (delete)="deleteCountry($event)"
+  (deleteMultiple)="deleteSelectedCountries($event)"
+>
+</app-crud>
+
+<p-dialog [(visible)]="dialogVisible" [style]="{ width: '450px' }" header="Country Details"
+          [modal]="true">
+  <ng-template pTemplate="content">
+    <form [formGroup]="form" class="flex flex-col gap-4 mt-3">
+      <p-float-label variant="on">
+        <input class="w-full" formControlName="name" id="name" pInputText
+               type="text">
+        <label for="name">Name</label>
+        <small class="text-red-500" *ngIf="submitted && !country.name">Name is required.</small>
+      </p-float-label>
+      <p-float-label variant="on">
+        <input class="w-full" formControlName="code" id="code" pInputText
+               type="text">
+        <label for="code">Code</label>
+        <small class="text-red-500" *ngIf="submitted && !country.code">Code is required.</small>
+      </p-float-label>
+    </form>
+  </ng-template>
+  <ng-template pTemplate="footer">
+    <p-button label="Cancel" icon="pi pi-times" text (click)="hideDialog()"/>
+    <p-button label="Save" icon="pi pi-check" (click)="saveCountry()"/>
+  </ng-template>
+</p-dialog>
+
+<p-toast></p-toast>
+

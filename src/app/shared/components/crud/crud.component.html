@@ -1,0 +1,70 @@
+<p-toolbar>
+  <ng-template pTemplate="start">
+    <p-button label="New" icon="pi pi-plus" severity="secondary" class="mr-2"
+              (onClick)="onCreateNew()"></p-button>
+    <p-button label="Delete" icon="pi pi-trash" severity="secondary" outlined
+              (onClick)="onDeleteSelected()"
+              [disabled]="!selectedEntities || !selectedEntities.length"></p-button>
+  </ng-template>
+
+  <ng-template pTemplate="end">
+    <p-button label="Export" icon="pi pi-upload" severity="secondary" (onClick)="exportCSV()"/>
+  </ng-template>
+</p-toolbar>
+
+<p-table
+  #dt
+  [value]="entities"
+  [paginator]="true"
+  [rows]="10"
+  [columns]="columns"
+  [globalFilterFields]="globalFilterFields"
+  [tableStyle]="{ 'min-width': '75rem' }"
+  [(selection)]="selectedEntities"
+  [rowHover]="true"
+  dataKey="id"
+  currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
+  [showCurrentPageReport]="true"
+  [rowsPerPageOptions]="[10, 25, 50]">
+  <ng-template pTemplate="caption">
+    <div class="flex items-center justify-between">
+      <h5 class="m-0">Manage {{ entityName }}</h5>
+      <p-icon-field>
+        <p-inputicon styleClass="pi pi-search"></p-inputicon>
+        <input pInputText type="text" (input)="onGlobalFilter(dt, $event)" placeholder="Search..."/>
+      </p-icon-field>
+    </div>
+  </ng-template>
+  <ng-template pTemplate="header">
+    <tr>
+      <th id="checkbox" style="width: 3rem">
+        <p-tableHeaderCheckbox/>
+      </th>
+      @for (col of columns; track col.field) {
+        <th [pSortableColumn]="col.field" id="col.field">
+          {{ col.header }}
+          <p-sortIcon [field]="col.field"></p-sortIcon>
+        </th>
+      }
+      <th id="actions"></th>
+    </tr>
+  </ng-template>
+  <ng-template pTemplate="body" let-entity>
+    <tr>
+      <td>
+        <p-tableCheckbox [value]="entity"></p-tableCheckbox>
+      </td>
+      @for (col of columns; track col.field) {
+        <td>{{ entity[col.field] }}</td>
+      }
+      <td>
+        <p-button icon="pi pi-pencil" class="mr-2" [rounded]="true" [outlined]="true"
+                  (click)="onEdit(entity)"/>
+        <p-button icon="pi pi-trash" severity="danger" [rounded]="true" [outlined]="true"
+                  (click)="onDelete(entity)"/>
+      </td>
+    </tr>
+  </ng-template>
+
+  <p-confirm-dialog [style]="{ width: '450px' }"/>
+</p-table>
