@@ -77,7 +77,6 @@ export abstract class AbstractCrudComponent<T extends BaseModel> implements OnIn
 
   onSearch(event: any) {
     this.searchTerm = event.target.value;
-    console.log(event, this.searchTerm);
     this.searchSubject.next(this.searchTerm);
   }
 

@@ -51,6 +51,9 @@ export class ProvidersComponent extends AbstractCrudComponent<Provider> {
     {field: 'trackerLink', header: 'Tracker Link'}
   ];
 
+  override sortField = 'name';
+  override sortOrder = 1;
+
   availableCountries: Country[] = [];
   selectedCountries: Country[] = [];
 

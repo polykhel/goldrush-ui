@@ -51,6 +51,9 @@ export class CountriesComponent extends AbstractCrudComponent<Country> {
     {field: 'code', header: 'Code'}
   ];
 
+  override sortField = 'name';
+  override sortOrder = 1;
+
   constructor(
     protected override readonly confirmationService: ConfirmationService,
     protected override readonly toastService: ToastService,
