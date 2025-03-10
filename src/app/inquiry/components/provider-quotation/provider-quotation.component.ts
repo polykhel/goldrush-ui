@@ -68,8 +68,7 @@ export class ProviderQuotationComponent implements OnInit {
 
   private cleanTextInput(text: string): string {
     return text
-    .replace(/[^\x20-\x7E\n]/g, '') // Remove non-printable ASCII characters except newlines
-    .trim(); // Remove leading/trailing whitespace
+    .replace(/[^\x20-\x7E\n]/g, ''); // Remove non-printable ASCII characters except newlines
   }
 
   get showEmailSection(): boolean {
