@@ -2,7 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { environment } from '@env/environment';
 import { ListData } from '@models/base.model';
-import { Inquiry, InquiryStatus } from '@models/inquiry.model';
+import { Inquiry, Status } from '@models/inquiry.model';
 import { PageParams } from '@models/params.model';
 import qs from 'qs';
 import { Observable } from 'rxjs';
@@ -52,7 +52,7 @@ export class InquiryService {
   }
 
   getInquiryStatuses() {
-    return this.http.get<InquiryStatus[]>(`${this.baseUrl}/statuses`);
+    return this.http.get<Status[]>(`${this.baseUrl}/statuses`);
   }
 
   updateInquiryStatus(id: string, status: string) {

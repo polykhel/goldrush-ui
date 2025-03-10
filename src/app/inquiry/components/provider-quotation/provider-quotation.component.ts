@@ -4,7 +4,7 @@ import { FormArray, FormBuilder, FormGroup, ReactiveFormsModule } from '@angular
 import { Provider } from '@models/provider.model';
 import { ExchangeRateService } from '@services/exchange-rate.service';
 import { ToastService } from '@services/toast.service';
-import { CURRENCIES, PROVIDER_QUOTATION_STATUSES } from '@utils/constants.util';
+import { CURRENCIES } from '@utils/constants.util';
 import { Button } from 'primeng/button';
 import { FloatLabel } from 'primeng/floatlabel';
 import { InputGroup } from 'primeng/inputgroup';
@@ -20,6 +20,7 @@ import { Fluid } from 'primeng/fluid';
 import { Checkbox } from 'primeng/checkbox';
 import { takeUntil } from 'rxjs';
 import { DestroyService } from '@services/destroy.service';
+import { Status } from '@models/inquiry.model';
 
 @Component({
   selector: 'app-provider-quotation',
@@ -55,7 +56,7 @@ export class ProviderQuotationComponent implements OnInit {
 
   isLoadingRate = false;
   exchangeRateLastUpdated: Date | null = null;
-  quotationStatuses = PROVIDER_QUOTATION_STATUSES;
+  quotationStatuses: Status[] = [];
   breakdownItems = ['Flight', 'Land Arrangement', 'Hotel', 'Airport Transfer', 'Other'];
 
   constructor(
@@ -73,22 +74,22 @@ export class ProviderQuotationComponent implements OnInit {
 
   get showEmailSection(): boolean {
     const status = this.formGroup.get('status')?.value;
-    return status === 'INFORMATION_REQUESTED';
+    return status === 'PENDING';
   }
 
   get showQuotationSection(): boolean {
     const status = this.formGroup.get('status')?.value;
-    return status === 'PENDING' || status === 'INFORMATION_REQUESTED' || status === 'ACKNOWLEDGED';
+    return status === 'RECEIVED';
   }
 
   get showFlightSection(): boolean {
     const status = this.formGroup.get('status')?.value;
-    return this.showFlightDetails && (status === 'INFORMATION_REQUESTED' || status === 'ACKNOWLEDGED');
+    return this.showFlightDetails && (status === 'RECEIVED');
   }
 
   get showAdditionalSection(): boolean {
     const status = this.formGroup.get('status')?.value;
-    return status === 'INFORMATION_REQUESTED' || status === 'ACKNOWLEDGED';
+    return status === 'RECEIVED';
   }
 
   get isSent(): boolean {
@@ -107,6 +108,12 @@ export class ProviderQuotationComponent implements OnInit {
     this.exchangeRateLastUpdated = this.formGroup.get(
       'exchangeRateLastUpdated',
     )?.value;
+
+    this.providerQuotationService.getQuotationStatuses()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(statuses => {
+        this.quotationStatuses = statuses;
+      });
 
     // Add paste event listeners to textareas
     ['inclusions', 'exclusions', 'optionalTours'].forEach(field => {

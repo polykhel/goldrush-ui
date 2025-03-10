@@ -12,7 +12,7 @@ import {
 import { ActivatedRoute, Router } from '@angular/router';
 import { AuditFields } from '@models/base.model';
 import { Country } from '@models/country.model';
-import { Inquiry, InquiryStatus } from '@models/inquiry.model';
+import { Inquiry, Status } from '@models/inquiry.model';
 import { Provider } from '@models/provider.model';
 import { CountryService } from '@services/country.service';
 import { DestroyService } from '@services/destroy.service';
@@ -48,6 +48,7 @@ import { ClientQuotation, Flight } from '@models/quotation.model';
 import {
   QuotationPreviewComponent
 } from '../../components/quotation-preview/quotation-preview.component';
+import { ConfirmationService } from 'primeng/api';
 
 @Component({
   standalone: true,
@@ -72,7 +73,8 @@ import {
     FormsModule,
     QuotationPreviewComponent
   ],
-  templateUrl: './inquiry-form.component.html'
+  templateUrl: './inquiry-form.component.html',
+  providers: [ConfirmationService],
 })
 export class InquiryFormComponent implements OnInit {
   fb = inject(NonNullableFormBuilder);
@@ -90,7 +92,7 @@ export class InquiryFormComponent implements OnInit {
   providers: Provider[] = [];
   availableProviders: Provider[] = [];
   providerMap = new Map<string, Provider>();
-  statusOptions: InquiryStatus[] = [];
+  statusOptions: Status[] = [];
   currentInquiry: Inquiry | null = null;
   inquiryId: string | null = null;
   saving = false;
@@ -107,7 +109,8 @@ export class InquiryFormComponent implements OnInit {
     private emailService: EmailService,
     private toastService: ToastService,
     private route: ActivatedRoute,
-    private router: Router
+    private router: Router,
+    private confirmationService: ConfirmationService,
   ) {
   }
 
@@ -186,11 +189,29 @@ export class InquiryFormComponent implements OnInit {
         customPackageOptions: formValue.customPackageOptions?.join(';') ?? null
       };
 
+      if (!this.editMode) {
+        toSave.quotations = toSave.quotations.map(quotation => {
+          quotation.status = 'PENDING'
+          return quotation;
+        });
+      }
+
       this.saving = true;
       this.toastService.info(
         'Saving',
         `${this.editMode ? 'Updating' : 'Creating'} inquiry...`
       );
+
+      if (toSave.status === 'CUSTOMER_ACCEPTED_QUOTE') {
+        this.confirmationService.confirm({
+          message: 'This will create a booking for the customer. Are you sure you want to continue?',
+          header: 'Accept Quote',
+          icon: 'pi pi-exclamation-triangle',
+          accept: () => {
+            // TODO: add a booking
+          }
+        })
+      }
 
       this.inquiryService
       .saveInquiry(toSave)
@@ -535,7 +556,7 @@ export class InquiryFormComponent implements OnInit {
       internalRemarks: [quotation?.internalRemarks ?? null],
       emailQuotation: [quotation?.emailQuotation ?? null],
       sent: [quotation?.sent ?? false],
-      status: [quotation?.status ?? 'PENDING'],
+      status: [quotation?.status ?? 'NEW'],
       showPriceBreakdown: [quotation?.showPriceBreakdown ?? false],
       priceBreakdown: this.fb.array(
         quotation?.priceBreakdown?.map(item => this.fb.group({

@@ -2,7 +2,7 @@ import { DatePipe } from '@angular/common';
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { Inquiry, InquiryStatus } from '@models/inquiry.model';
+import { Inquiry, Status } from '@models/inquiry.model';
 import { InquiryService } from '@services/inquiry.service';
 import { ToastService } from '@services/toast.service';
 import { ConfirmationService } from 'primeng/api';
@@ -47,7 +47,7 @@ export class InquiryListComponent implements OnInit, OnDestroy {
   sortField: string = 'createdAt';
   sortOrder: number = -1;
   searchTerm: string = '';
-  statusOptions: InquiryStatus[] = [];
+  statusOptions: Status[] = [];
   selectedStatus = '';
   private searchSubject = new Subject<string>();
   private currentPage = 0;
