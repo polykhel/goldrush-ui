@@ -74,7 +74,7 @@ import { ConfirmationService } from 'primeng/api';
     QuotationPreviewComponent
   ],
   templateUrl: './inquiry-form.component.html',
-  providers: [ConfirmationService],
+  providers: [ConfirmationService]
 })
 export class InquiryFormComponent implements OnInit {
   fb = inject(NonNullableFormBuilder);
@@ -109,9 +109,12 @@ export class InquiryFormComponent implements OnInit {
     private emailService: EmailService,
     private toastService: ToastService,
     private route: ActivatedRoute,
-    private router: Router,
-    private confirmationService: ConfirmationService,
+    private router: Router
   ) {
+  }
+
+  get status() {
+    return this.inquiryForm.get('status')?.value;
   }
 
   get startDate(): Date {
@@ -201,17 +204,6 @@ export class InquiryFormComponent implements OnInit {
         'Saving',
         `${this.editMode ? 'Updating' : 'Creating'} inquiry...`
       );
-
-      if (toSave.status === 'CUSTOMER_ACCEPTED_QUOTE') {
-        this.confirmationService.confirm({
-          message: 'This will create a booking for the customer. Are you sure you want to continue?',
-          header: 'Accept Quote',
-          icon: 'pi pi-exclamation-triangle',
-          accept: () => {
-            // TODO: add a booking
-          }
-        })
-      }
 
       this.inquiryService
       .saveInquiry(toSave)

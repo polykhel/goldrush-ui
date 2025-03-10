@@ -60,10 +60,10 @@
                   <div class="flex justify-between items-center mb-2">
                     <h4 class="text-sm font-medium">Price Breakdown</h4>
                     <p-button (onClick)="addPriceBreakdownItem()"
-                        [text]="true"
-                        icon="pi pi-plus"
-                        size="small"
-                        label="Add Item">
+                              [text]="true"
+                              icon="pi pi-plus"
+                              size="small"
+                              label="Add Item">
                     </p-button>
                   </div>
                   <div formArrayName="priceBreakdown" class="space-y-2">
@@ -131,11 +131,11 @@
                           </p-float-label>
                           <p-float-label class="w-[200px]" variant="on">
                             <p-input-number (onInput)="updateChildPriceBreakdown()"
-                                    [currency]="formGroup.get('currencyCode')?.value || 'PHP'"
-                                    [id]="'childAmount-' + i"
-                                    class="w-full"
-                                    formControlName="amount"
-                                    mode="currency"/>
+                                            [currency]="formGroup.get('currencyCode')?.value || 'PHP'"
+                                            [id]="'childAmount-' + i"
+                                            class="w-full"
+                                            formControlName="amount"
+                                            mode="currency"/>
                             <label [for]="'childAmount-' + i">Amount</label>
                           </p-float-label>
                           <p-button (onClick)="removeChildPriceBreakdownItem(i)"
@@ -291,6 +291,12 @@
                       [text]="true"
                       icon="pi pi-file-export"
                       label="Generate Quotation"/>
+
+            @if (inquiryStatus === 'QUOTED') {
+              <p-button (onClick)="createBooking()" [rounded]="true"
+                        icon="pi pi-calendar-plus" label="Create Booking"
+                        type="button"/>
+            }
           </div>
         }
         <!-- Email Section -->
@@ -319,3 +325,4 @@
     }
   </div>
 }
+<p-confirmDialog header="Save Confirmation" icon="pi pi-exclamation-triangle"></p-confirmDialog>

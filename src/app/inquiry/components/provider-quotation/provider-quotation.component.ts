@@ -21,6 +21,10 @@ import { Checkbox } from 'primeng/checkbox';
 import { takeUntil } from 'rxjs';
 import { DestroyService } from '@services/destroy.service';
 import { Status } from '@models/inquiry.model';
+import { ConfirmDialog } from 'primeng/confirmdialog';
+import { ConfirmationService } from 'primeng/api';
+import { BookingService } from '@services/booking.service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-provider-quotation',
@@ -38,8 +42,10 @@ import { Status } from '@models/inquiry.model';
     Textarea,
     DatePicker,
     Fluid,
-    Checkbox
-  ]
+    Checkbox,
+    ConfirmDialog
+  ],
+  providers: [ConfirmationService]
 })
 export class ProviderQuotationComponent implements OnInit {
   currencies = CURRENCIES;
@@ -49,6 +55,8 @@ export class ProviderQuotationComponent implements OnInit {
   @Input() isEditMode = false;
   @Input() showFlightDetails = false;
   @Input() showChildPrices = false;
+  @Input() inquiryStatus = '';
+  @Input() inquiryId: string | null = null;
 
   @Output() onSendEmail = new EventEmitter<ProviderQuotation>();
   @Output() onGenerateQuotation = new EventEmitter<string>();
@@ -64,7 +72,10 @@ export class ProviderQuotationComponent implements OnInit {
     private providerQuotationService: ProviderQuotationService,
     private toastService: ToastService,
     private fb: FormBuilder,
-    private destroy$: DestroyService
+    private destroy$: DestroyService,
+    private confirmationService: ConfirmationService,
+    private bookingService: BookingService,
+    private router: Router,
   ) {}
 
   private cleanTextInput(text: string): string {
@@ -307,5 +318,35 @@ export class ProviderQuotationComponent implements OnInit {
       );
       this.formGroup.get('childPriceAmount')?.setValue(breakdownTotal);
     }
+  }
+
+  createBooking() {
+    this.confirmationService.confirm({
+      message: 'This will create a booking for this inquiry. Are you sure you want to proceed?',
+      header: 'Create Booking',
+      icon: 'pi pi-exclamation-triangle',
+      accept: () => {
+        if (this.formGroup.valid && this.formGroup.get('priceAmount')?.value) {
+          this.toastService.info(
+            'Creating Booking',
+            'Creating booking...'
+          );
+
+          this.bookingService.createBookingFromInquiry(this.inquiryId!, this.formGroup.get('id')?.value).subscribe({
+            next: (booking) => {
+              this.router.navigate(['/bookings', booking.id]);
+            },
+            error: (error) => {
+              this.toastService.error(
+                'Error Creating Booking',
+                error.message || 'An error occurred while creating the booking'
+              );
+            }
+          });
+        } else {
+          this.toastService.warn('Validation Error', 'Please fill in all required fields');
+        }
+      }
+    });
   }
 }

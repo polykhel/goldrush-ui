@@ -189,6 +189,8 @@
               <app-provider-quotation (onGenerateQuotation)="generateQuotation($event)"
                                       [formGroup]="getProviderQuotationControl(i)"
                                       [isEditMode]="editMode"
+                                      [inquiryId]="inquiryId"
+                                      [inquiryStatus]="status ?? 'NEW'"
                                       [showFlightDetails]="showFlightDetails"
                                       [showChildPrices]="!!inquiryForm.get('travelDetails.children')?.value"
                                       [provider]="providerMap.get(quotationControl.get('providerId')?.value)!"
@@ -207,11 +209,11 @@
       <textarea class="w-full" formControlName="remarks" id="remarks" pTextarea rows="4"></textarea>
     </section>
 
-    <div class="flex justify-end">
+    <div class="flex justify-end gap-2">
       <p-button (onClick)="saveInquiry()" [loading]="saving" [rounded]="true"
                 class="transform transition-all duration-300 hover:scale-105"
                 icon="pi pi-save" label="Save" severity="info"
-                type="button"/>
+                type="button" />
     </div>
 
     <!-- Audit Information -->
