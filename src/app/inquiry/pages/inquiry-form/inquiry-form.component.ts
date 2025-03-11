@@ -79,6 +79,7 @@ import { ConfirmationService } from 'primeng/api';
 export class InquiryFormComponent implements OnInit {
   fb = inject(NonNullableFormBuilder);
 
+  defaultDate = new Date();
   inquiryForm = this.buildForm();
   editMode = false;
   showEmailPreview = false;
@@ -98,7 +99,6 @@ export class InquiryFormComponent implements OnInit {
   saving = false;
   selectedProvider: string | null = null;
   providerQuotationRequest: ProviderQuotationEmailRequest | null = null;
-  defaultDate = new Date();
 
   constructor(
     private providerService: ProviderService,
@@ -186,8 +186,8 @@ export class InquiryFormComponent implements OnInit {
         ...formValue,
         travelDetails: {
           ...formValue.travelDetails,
-          startDate: dayjs(formValue.travelDetails.startDate).format('YYYY-MM-DD'),
-          endDate: dayjs(formValue.travelDetails.endDate).format('YYYY-MM-DD')
+          startDate: formValue.travelDetails.startDate ? dayjs(formValue.travelDetails.startDate).format('YYYY-MM-DD') : '',
+          endDate: formValue.travelDetails.endDate ? dayjs(formValue.travelDetails.endDate).format('YYYY-MM-DD') : ''
         },
         customPackageOptions: formValue.customPackageOptions?.join(';') ?? null
       };
@@ -247,6 +247,11 @@ export class InquiryFormComponent implements OnInit {
 
       if (!provider) {
         this.toastService.warn('Validation Error', 'Provider not found.');
+        return;
+      }
+
+      if (inquiry.travelDetails.startDate === null || inquiry.travelDetails.endDate === null) {
+        this.toastService.warn('Validation Error', 'Please select start and end date.');
         return;
       }
 
@@ -357,6 +362,11 @@ export class InquiryFormComponent implements OnInit {
         'Provider quotation not found',
         'Please save inquiry first before generating'
       );
+      return;
+    }
+
+    if (inquiry.travelDetails.startDate === null || inquiry.travelDetails.endDate === null) {
+      this.toastService.warn('Validation Error', 'Please select start and end date.');
       return;
     }
 
@@ -501,16 +511,16 @@ export class InquiryFormComponent implements OnInit {
       status: this.fb.control<string>('NEW', [Validators.required]),
       date: this.fb.control<Date>(this.defaultDate, [Validators.required]),
       clientName: this.fb.control<string>('', [Validators.required]),
-      source: this.fb.control<string>('', [Validators.required]),
+      source: this.fb.control<string>(''),
       travelDetails: this.fb.group({
-        countryId: this.fb.control<string>(null!, [Validators.required]),
-        destination: this.fb.control<string>('', [Validators.required]),
+        countryId: this.fb.control<string>(null!),
+        destination: this.fb.control<string>(''),
         days: this.fb.control<number>(0, [Validators.required]),
         nights: this.fb.control<number>(0, [Validators.required]),
-        startDate: this.fb.control<Date>(null!, [Validators.required]),
-        endDate: this.fb.control<Date>(null!, [Validators.required]),
+        startDate: this.fb.control<Date | null>(null),
+        endDate: this.fb.control<Date | null>(null),
         preferredHotel: this.fb.control<string | null>(null),
-        adults: this.fb.control<number>(0, [Validators.required]),
+        adults: this.fb.control<number>(0),
         children: this.fb.control<number>(0),
         childAges: this.fb.control<string | null>(null)
       }),
