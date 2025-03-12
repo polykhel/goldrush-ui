@@ -38,8 +38,6 @@ import { AbstractCrudComponent } from '../abstract-crud.component';
   providers: [ConfirmationService]
 })
 export class CountriesComponent extends AbstractCrudComponent<Country> {
-  protected override fb = inject(NonNullableFormBuilder);
-
   override form = this.fb.group({
     id: new FormControl<string | null>(null),
     name: ['', [Validators.required]],

@@ -1,45 +1,52 @@
-<p-toolbar>
-  <ng-template pTemplate="start">
-    <p-button label="New" icon="pi pi-plus" severity="secondary" class="mr-2"
-              (onClick)="onCreateNew()"></p-button>
-    <p-button label="Delete" icon="pi pi-trash" severity="secondary" outlined
-              (onClick)="onDeleteSelected()"
-              [disabled]="!selectedEntities || !selectedEntities.length"></p-button>
-  </ng-template>
+@if (showNew || showDelete || showExport) {
+  <p-toolbar>
+    <ng-template pTemplate="start">
+      @if (showNew) {
+        <p-button label="New" icon="pi pi-plus" severity="secondary" class="mr-2"
+                  (onClick)="onCreateNew()"></p-button>
+      }
+      @if (showDelete) {
+        <p-button label="Delete" icon="pi pi-trash" severity="secondary" outlined
+                  (onClick)="onDeleteSelected()"
+                  [disabled]="!selectedEntities || !selectedEntities.length"></p-button>
+      }
+    </ng-template>
 
-  <ng-template pTemplate="end">
-    <p-button label="Export" icon="pi pi-upload" severity="secondary" (onClick)="exportCSV()"/>
-  </ng-template>
-</p-toolbar>
-
+    <ng-template pTemplate="end">
+      @if (showExport) {
+        <p-button (onClick)="exportCSV()" icon="pi pi-upload" label="Export" severity="secondary"/>
+      }
+    </ng-template>
+  </p-toolbar>
+}
 <p-table
   #dt
-  [value]="entities"
-  [rows]="10"
+  (onPage)="onPage($event)"
+  (onSort)="onSort($event)"
+  [(selection)]="selectedEntities"
+  [columns]="columns"
+  [first]="first"
+  [globalFilterFields]="globalFilterFields"
+  [lazy]="true"
+  [loading]="loading"
   [paginator]="true"
   [rowHover]="true"
-  dataKey="id"
-  [showCurrentPageReport]="true"
-  [loading]="loading"
-  currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
-  (onPage)="onPage($event)"
   [rowsPerPageOptions]="[10, 25, 50]"
+  [rows]="10"
+  [showCurrentPageReport]="true"
   [sortField]="sortField"
   [sortOrder]="sortOrder"
-  (onSort)="onSort($event)"
-  [totalRecords]="totalRecords"
-  [lazy]="true"
-  [first]="first"
-  [columns]="columns"
-  [globalFilterFields]="globalFilterFields"
   [tableStyle]="{ 'min-width': '75rem' }"
-  [(selection)]="selectedEntities">
+  [totalRecords]="totalRecords"
+  [value]="entities"
+  currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
+  dataKey="id">
   <ng-template pTemplate="caption">
     <div class="flex items-center justify-between">
       <h5 class="m-0">Manage {{ entityName }}</h5>
       <p-icon-field>
         <p-inputicon styleClass="pi pi-search"></p-inputicon>
-        <input pInputText type="text" (input)="onGlobalFilter($event)" placeholder="Search..."/>
+        <input (input)="onGlobalFilter($event)" pInputText placeholder="Search..." type="text"/>
       </p-icon-field>
     </div>
   </ng-template>
@@ -57,7 +64,7 @@
       <th id="actions" style="min-width: 10rem"></th>
     </tr>
   </ng-template>
-  <ng-template pTemplate="body" let-entity>
+  <ng-template let-entity pTemplate="body">
     <tr>
       <td>
         <p-tableCheckbox [value]="entity"></p-tableCheckbox>
@@ -66,10 +73,14 @@
         <td>{{ entity[col.field] }}</td>
       }
       <td>
-        <p-button icon="pi pi-pencil" class="mr-2" [rounded]="true" [outlined]="true"
-                  (click)="onEdit(entity)"/>
-        <p-button icon="pi pi-trash" severity="danger" [rounded]="true" [outlined]="true"
-                  (click)="onDelete(entity)"/>
+        @if (showEdit) {
+          <p-button (click)="onEdit(entity)" [outlined]="true" [rounded]="true" class="mr-2"
+                    icon="pi pi-pencil"/>
+        }
+        @if (showDelete) {
+          <p-button (click)="onDelete(entity)" [outlined]="true" [rounded]="true" icon="pi pi-trash"
+                    severity="danger"/>
+        }
       </td>
     </tr>
   </ng-template>

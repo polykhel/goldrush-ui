@@ -56,9 +56,9 @@ export class MenuComponent implements OnInit {
             routerLink: ['/maintenance/countries']
           },
           {
-            label: 'Tools',
-            icon: 'pi pi-wrench',
-            routerLink: ['/tools']
+            label: 'Emails',
+            icon: 'pi pi-envelope',
+            routerLink: ['/maintenance/emails']
           }
         ]
       }

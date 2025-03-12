@@ -44,6 +44,10 @@ export class Crud<T> {
   @Input() searchTerm: string = '';
   @Input() first: number = 0;
   @Input() rows: number = 10;
+  @Input() showNew = false;
+  @Input() showDelete = false;
+  @Input() showExport = false;
+  @Input() showEdit = false;
 
   @Output() create = new EventEmitter<T>();
   @Output() update = new EventEmitter<T>();

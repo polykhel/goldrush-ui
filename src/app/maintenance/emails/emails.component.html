@@ -7,9 +7,6 @@
   [sortField]="sortField"
   [sortOrder]="sortOrder"
   [searchTerm]="searchTerm"
-  [showNew]="true"
-  [showDelete]="true"
-  [showExport]="true"
   [showEdit]="true"
   (create)="openDialog($event)"
   (update)="openDialog($event)"
@@ -26,24 +23,29 @@
   <ng-template pTemplate="content">
     <form [formGroup]="form" class="flex flex-col gap-4 mt-3">
       <p-float-label variant="on">
-        <input class="w-full" formControlName="name" id="name" pInputText
+        <input class="w-full" formControlName="to" id="to" pInputText
                type="text">
-        <label for="name">Name</label>
-        <small class="text-red-500" *ngIf="submitted && form.get('name')?.invalid">Name is
+        <label for="to">To</label>
+        <small class="text-red-500" *ngIf="submitted && form.get('to')?.invalid">To is
           required.</small>
       </p-float-label>
       <p-float-label variant="on">
-        <input class="w-full" formControlName="code" id="code" pInputText
+        <input class="w-full" formControlName="subject" id="subject" pInputText
                type="text">
-        <label for="code">Code</label>
-        <small class="text-red-500" *ngIf="submitted && form.get('code')?.invalid">Code is
+        <label for="subject">Subject</label>
+        <small class="text-red-500" *ngIf="submitted && form.get('subject')?.invalid">Subject is
+          required.</small>
+      </p-float-label>
+      <p-float-label variant="on">
+        <textarea pTextarea formControlName="body" id="body" fluid></textarea>
+        <label for="body">Body</label>
+        <small class="text-red-500" *ngIf="submitted && form.get('body')?.invalid">Body is
           required.</small>
       </p-float-label>
     </form>
   </ng-template>
   <ng-template pTemplate="footer">
-    <p-button label="Cancel" icon="pi pi-times" text (click)="hideDialog()"/>
-    <p-button label="Save" icon="pi pi-check" (click)="saveEntity()"/>
+    <p-button label="Close" icon="pi pi-times" text (click)="hideDialog()"/>
   </ng-template>
 </p-dialog>
 
