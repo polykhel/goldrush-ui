@@ -114,7 +114,9 @@ export class BookingFormComponent implements OnInit {
 
     this.loading = true;
 
-    this.bookingService.save(this.bookingForm.get('remarks')?.value)
+    const remarks = this.bookingForm.get('remarks');
+
+    this.bookingService.updateRemarks(this.bookingId!, remarks?.value)
     .pipe(finalize(() => this.loading = false))
     .subscribe({
       next: () => {
@@ -198,11 +200,23 @@ export class BookingFormComponent implements OnInit {
     .pipe(finalize(() => this.loading = false))
     .subscribe({
       next: (response) => {
-        this.bookingForm.patchValue({
-          statementOfAccountUrl: response.url
-        });
+        if (response?.status !== 200 || !response.body || response.body.size === 0) {
+          this.toastService.warn('Warning', 'No data found for Statement of Account');
+          return;
+        }
+
+        const fileName = response.headers.get('Content-Disposition')?.split(';')[1]?.split('=')[1];
+
         this.toastService.success('Success', 'Statement of Account generated successfully');
-        window.open(response.url, '_blank');
+        const fileURL = URL.createObjectURL(response.body);
+        const a = document.createElement('a');
+        a.href = fileURL;
+        a.target = '_blank';
+        a.download = fileName ?? 'statement-of-account.pdf';
+        document.body.appendChild(a); // Required for Firefox
+        a.click();
+        document.body.removeChild(a); // Clean up
+        URL.revokeObjectURL(fileURL); // Release the object URL
       },
       error: (error) => {
         this.toastService.error('Error', 'Failed to generate Statement of Account');

@@ -1,4 +1,4 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpResponse } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { AbstractCrudService } from './abstract-crud.service';
 import { Booking, BookingStatus } from '@models/booking.model';
@@ -28,7 +28,7 @@ export class BookingService extends AbstractCrudService<Booking> {
     return this.http.patch<Booking>(`${this.baseUrl}/${id}/remarks`, { remarks });
   }
 
-  generateStatementOfAccount(id: string): Observable<{ url: string }> {
-    return this.http.post<{ url: string }>(`${this.baseUrl}/${id}/statement-of-account`, {});
+  generateStatementOfAccount(id: string): Observable<HttpResponse<Blob>> {
+    return this.http.get(`${this.baseUrl}/${id}/statement-of-account`, { responseType: 'blob', observe: 'response' });
   }
 }

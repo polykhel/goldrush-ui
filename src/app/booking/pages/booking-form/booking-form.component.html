@@ -132,12 +132,6 @@
         <h4 class="font-semibold mb-2">Documents</h4>
         <p-button label="Generate Statement of Account" icon="pi pi-file-pdf" styleClass="p-button-info w-full mb-2"
           (onClick)="generateStatementOfAccount()" [disabled]="loading"></p-button>
-
-        <div *ngIf="bookingForm.get('statementOfAccountUrl')?.value" class="mb-3">
-          <a [href]="bookingForm.get('statementOfAccountUrl')?.value" target="_blank" class="text-primary flex items-center">
-            <i class="pi pi-external-link mr-1"></i>View Statement of Account
-          </a>
-        </div>
       </div>
 
       <div>
