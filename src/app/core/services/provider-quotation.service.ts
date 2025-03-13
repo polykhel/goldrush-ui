@@ -5,7 +5,8 @@ import {
   ProviderQuotation,
   ProviderQuotationUpdateRequest,
 } from '@models/provider-quotation.model';
-import { Status } from '@models/inquiry.model';
+
+import { Option } from '@models/option';
 
 @Injectable({
   providedIn: 'root',
@@ -26,9 +27,5 @@ export class ProviderQuotationService {
       `${this.baseUrl}/provider-quotation/${id}`,
       request,
     );
-  }
-
-  getQuotationStatuses() {
-    return this.http.get<Status[]>(`${this.baseUrl}/statuses`);
   }
 }

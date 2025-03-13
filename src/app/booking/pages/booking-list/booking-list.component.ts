@@ -64,7 +64,7 @@ export class BookingListComponent extends AbstractCrudComponent<Booking> {
     {field: 'destination', header: 'Destination'},
     {field: 'totalAmount', header: 'Total Amount'},
     {field: 'paidAmount', header: 'Paid Amount'},
-    {field: 'status', header: 'Status'}
+    {field: 'status', header: 'OptionsModel'}
   ];
 
   statusOptions = BOOKING_STATUS_OPTIONS;

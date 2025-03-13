@@ -2,7 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { environment } from '@env/environment';
 import { ListData } from '@models/base.model';
-import { Inquiry, Status } from '@models/inquiry.model';
+import { Inquiry } from '@models/inquiry.model';
 import { PageParams } from '@models/params.model';
 import qs from 'qs';
 import { Observable } from 'rxjs';
@@ -51,12 +51,8 @@ export class InquiryService {
     return this.http.delete<Inquiry>(`${this.baseUrl}/${id}`);
   }
 
-  getInquiryStatuses() {
-    return this.http.get<Status[]>(`${this.baseUrl}/statuses`);
-  }
-
   updateInquiryStatus(id: string, status: string) {
-    return this.http.patch<Inquiry>(`${this.baseUrl}/${id}/status`, { status });
+    return this.http.patch<Inquiry>(`${this.baseUrl}/${id}/status`, {status});
   }
 
   duplicateInquiry(id: string): Observable<Inquiry> {

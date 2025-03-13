@@ -12,12 +12,14 @@ import {
 import { ActivatedRoute, Router } from '@angular/router';
 import { AuditFields } from '@models/base.model';
 import { Country } from '@models/country.model';
-import { Inquiry, Status } from '@models/inquiry.model';
+import { Inquiry } from '@models/inquiry.model';
 import { Provider } from '@models/provider.model';
+import { Option } from '@models/option';
 import { CountryService } from '@services/country.service';
 import { DestroyService } from '@services/destroy.service';
 import { EmailService } from '@services/email.service';
 import { InquiryService } from '@services/inquiry.service';
+import { OptionsService } from '@services/options.service';
 import { ProviderService } from '@services/provider.service';
 import { ToastService } from '@services/toast.service';
 import { EmailData, prepareProviderEmail } from '@utils/email.util';
@@ -93,7 +95,7 @@ export class InquiryFormComponent implements OnInit {
   providers: Provider[] = [];
   availableProviders: Provider[] = [];
   providerMap = new Map<string, Provider>();
-  statusOptions: Status[] = [];
+  statusOptions: Option[] = [];
   currentInquiry: Inquiry | null = null;
   inquiryId: string | null = null;
   saving = false;
@@ -107,6 +109,7 @@ export class InquiryFormComponent implements OnInit {
     private inquiryService: InquiryService,
     private providerQuotationService: ProviderQuotationService,
     private emailService: EmailService,
+    private optionsService: OptionsService,
     private toastService: ToastService,
     private route: ActivatedRoute,
     private router: Router
@@ -485,7 +488,7 @@ export class InquiryFormComponent implements OnInit {
       this.countries = countries;
     });
 
-    this.inquiryService.getInquiryStatuses()
+    this.optionsService.getInquiryStatuses()
     .pipe(takeUntil(this.destroy$))
     .subscribe(statuses => {
       this.statusOptions = statuses;

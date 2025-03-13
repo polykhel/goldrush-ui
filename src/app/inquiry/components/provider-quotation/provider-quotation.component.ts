@@ -2,7 +2,9 @@ import { DatePipe } from '@angular/common';
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { FormArray, FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { Provider } from '@models/provider.model';
+import { Option } from '@models/option';
 import { ExchangeRateService } from '@services/exchange-rate.service';
+import { OptionsService } from '@services/options.service';
 import { ToastService } from '@services/toast.service';
 import { CURRENCIES } from '@utils/constants.util';
 import { Button } from 'primeng/button';
@@ -20,7 +22,6 @@ import { Fluid } from 'primeng/fluid';
 import { Checkbox } from 'primeng/checkbox';
 import { takeUntil } from 'rxjs';
 import { DestroyService } from '@services/destroy.service';
-import { Status } from '@models/inquiry.model';
 import { ConfirmDialog } from 'primeng/confirmdialog';
 import { ConfirmationService } from 'primeng/api';
 import { BookingService } from '@services/booking.service';
@@ -64,12 +65,13 @@ export class ProviderQuotationComponent implements OnInit {
 
   isLoadingRate = false;
   exchangeRateLastUpdated: Date | null = null;
-  quotationStatuses: Status[] = [];
+  quotationStatuses: Option[] = [];
   breakdownItems = ['Flight', 'Land Arrangement', 'Hotel', 'Airport Transfer', 'Other'];
 
   constructor(
     private exchangeRateService: ExchangeRateService,
     private providerQuotationService: ProviderQuotationService,
+    private optionsService: OptionsService,
     private toastService: ToastService,
     private fb: FormBuilder,
     private destroy$: DestroyService,
@@ -120,7 +122,7 @@ export class ProviderQuotationComponent implements OnInit {
       'exchangeRateLastUpdated',
     )?.value;
 
-    this.providerQuotationService.getQuotationStatuses()
+    this.optionsService.getQuotationStatuses()
       .pipe(takeUntil(this.destroy$))
       .subscribe(statuses => {
         this.quotationStatuses = statuses;

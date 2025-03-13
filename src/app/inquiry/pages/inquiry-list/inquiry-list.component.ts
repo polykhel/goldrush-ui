@@ -2,8 +2,10 @@ import { DatePipe } from '@angular/common';
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { Inquiry, Status } from '@models/inquiry.model';
+import { Inquiry } from '@models/inquiry.model';
+import { Option } from '@models/option';
 import { InquiryService } from '@services/inquiry.service';
+import { OptionsService } from '@services/options.service';
 import { ToastService } from '@services/toast.service';
 import { ConfirmationService } from 'primeng/api';
 import { Button } from 'primeng/button';
@@ -47,7 +49,7 @@ export class InquiryListComponent implements OnInit, OnDestroy {
   sortField: string = 'createdAt';
   sortOrder: number = -1;
   searchTerm: string = '';
-  statusOptions: Status[] = [];
+  statusOptions: Option[] = [];
   selectedStatus = '';
   private searchSubject = new Subject<string>();
   private currentPage = 0;
@@ -55,6 +57,7 @@ export class InquiryListComponent implements OnInit, OnDestroy {
 
   constructor(
     private inquiryService: InquiryService,
+    private optionsService: OptionsService,
     private router: Router,
     private toastService: ToastService,
     private confirmationService: ConfirmationService,
@@ -63,7 +66,7 @@ export class InquiryListComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
-    this.inquiryService
+    this.optionsService
       .getInquiryStatuses()
       .subscribe((data) => (this.statusOptions = data));
 

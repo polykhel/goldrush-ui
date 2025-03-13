@@ -1,6 +1,6 @@
-import { AuditedBaseModel } from './base.model';
 import { ProviderQuotation } from '@models/provider-quotation.model';
 import { TravelDetails } from '@models/travel-details.model';
+import { AuditedBaseModel } from './base.model';
 
 export interface Inquiry extends AuditedBaseModel {
   status: string;
@@ -14,7 +14,3 @@ export interface Inquiry extends AuditedBaseModel {
   remarks: string | null;
 }
 
-export interface Status {
-  label: string;
-  value: string;
-}

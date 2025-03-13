@@ -1,4 +1,4 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, HostListener, inject, OnInit } from '@angular/core';
 import {
   FormGroup,
   NonNullableFormBuilder,
@@ -6,8 +6,10 @@ import {
   Validators
 } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Booking, BOOKING_STATUS_OPTIONS, BookingStatus } from '@models/booking.model';
+import { Booking, BOOKING_STATUS_OPTIONS, BookingStatus, PaymentHistory, PriceBreakdown } from '@models/booking.model';
+import { Option } from '@models/option';
 import { BookingService } from '@services/booking.service';
+import { OptionsService } from '@services/options.service';
 import { ToastService } from '@services/toast.service';
 import { ConfirmationService } from 'primeng/api';
 import { ButtonModule } from 'primeng/button';
@@ -19,8 +21,8 @@ import { InputNumberModule } from 'primeng/inputnumber';
 import { InputTextModule } from 'primeng/inputtext';
 import { ToastModule } from 'primeng/toast';
 import { ToolbarModule } from 'primeng/toolbar';
-import { NgIf } from '@angular/common';
-import { finalize } from 'rxjs';
+import { DecimalPipe, NgIf } from '@angular/common';
+import { finalize, Observable } from 'rxjs';
 import { FloatLabel } from 'primeng/floatlabel';
 import { Textarea } from 'primeng/textarea';
 import { DatePicker } from 'primeng/datepicker';
@@ -28,6 +30,9 @@ import { Select } from 'primeng/select';
 import { Checkbox } from 'primeng/checkbox';
 import { RadioButton } from 'primeng/radiobutton';
 import { PACKAGE_OPTIONS } from '@utils/package.util';
+import { TableModule } from 'primeng/table';
+import { DialogModule } from 'primeng/dialog';
+import { CanComponentDeactivate } from '@core/guards/can-deactivate.guard';
 
 @Component({
   standalone: true,
@@ -50,30 +55,84 @@ import { PACKAGE_OPTIONS } from '@utils/package.util';
     DatePicker,
     Select,
     Checkbox,
-    RadioButton
+    RadioButton,
+    TableModule,
+    DialogModule,
+    DecimalPipe
   ],
   providers: [ConfirmationService]
 })
-export class BookingFormComponent implements OnInit {
+export class BookingFormComponent implements OnInit, CanComponentDeactivate {
   fb = inject(NonNullableFormBuilder);
 
   bookingForm = this.buildForm();
+  paymentForm = this.buildPaymentForm();
+  priceBreakdownForm = this.buildPriceBreakdownForm();
+
   booking: Booking | null = null;
   bookingId: string | null = null;
   loading = false;
   statusOptions = BOOKING_STATUS_OPTIONS;
+
+  priceBreakdownDialogVisible = false;
+
+  // Local copies for editing
+  localPaymentHistory: PaymentHistory[] = [];
+  localPriceBreakdown: PriceBreakdown[] = [];
+  hasUnsavedChanges = false;
+
+  paymentMethods: Option[] = [];
+
+  isEditingPayment = false;
+  editingPaymentIndex: number | null = null;
 
   constructor(
     private route: ActivatedRoute,
     private router: Router,
     private bookingService: BookingService,
     private toastService: ToastService,
-    private confirmationService: ConfirmationService
+    private confirmationService: ConfirmationService,
+    private optionsService: OptionsService,
   ) {
     this.bookingForm = this.buildForm();
   }
 
+  // Handle browser navigation/refresh/close
+  @HostListener('window:beforeunload', ['$event'])
+  handleBeforeUnload(event: BeforeUnloadEvent): void {
+    if (this.hasUnsavedChanges) {
+      event.preventDefault();
+      // noinspection JSDeprecatedSymbols
+      event.returnValue = 'You have unsaved changes. Are you sure you want to leave?';
+    }
+  }
+
+  // Method for CanDeactivate guard
+  canDeactivate(): Observable<boolean> | Promise<boolean> | boolean {
+    if (!this.hasUnsavedChanges) {
+      return true;
+    }
+
+    return new Promise<boolean>(resolve => {
+      this.confirmationService.confirm({
+        message: 'You have unsaved changes. Are you sure you want to leave?',
+        header: 'Unsaved Changes',
+        icon: 'pi pi-exclamation-triangle',
+        accept: () => {
+          resolve(true);
+        },
+        reject: () => {
+          resolve(false);
+        }
+      });
+    });
+  }
+
   ngOnInit(): void {
+    this.optionsService
+      .getPaymentMethods()
+      .subscribe((data) => (this.paymentMethods = data));
+
     this.route.paramMap.subscribe(params => {
       this.bookingId = params.get('id');
       if (this.bookingId) {
@@ -89,6 +148,9 @@ export class BookingFormComponent implements OnInit {
     .subscribe({
       next: (booking) => {
         this.booking = booking;
+        this.localPaymentHistory = [...(booking.paymentHistory || [])];
+        this.localPriceBreakdown = [...(booking.priceBreakdown || [])];
+
         this.bookingForm.patchValue({
           ...booking,
           bookingDate: new Date(booking.bookingDate),
@@ -97,7 +159,9 @@ export class BookingFormComponent implements OnInit {
           customPackageOptions:
             booking.customPackageOptions?.split(';') || []
         });
-        this.calculateRemainingAmount();
+
+        this.calculateTotals();
+        this.hasUnsavedChanges = false;
       },
       error: (error) => {
         this.toastService.error('Error', 'Failed to load booking details');
@@ -106,88 +170,170 @@ export class BookingFormComponent implements OnInit {
     });
   }
 
-  updateRemarks(): void {
+  saveBooking(): void {
     if (this.bookingForm.invalid) {
       this.toastService.warn('Validation Error', 'Please fill in all required fields correctly');
       return;
     }
 
+    if (!this.bookingId || !this.booking) return;
+
     this.loading = true;
 
-    const remarks = this.bookingForm.get('remarks');
+    const updatedBooking = {
+      remarks: this.bookingForm.get('remarks')?.value,
+      paymentHistory: this.localPaymentHistory,
+      priceBreakdown: this.localPriceBreakdown,
+      totalAmount: this.calculateTotalAmount(),
+      paidAmount: this.calculatePaidAmount(),
+      remainingAmount: this.calculateRemainingAmount(),
+      status: this.determineBookingStatus()
+    };
 
-    this.bookingService.updateRemarks(this.bookingId!, remarks?.value)
+    this.bookingService.update(this.bookingId, updatedBooking)
     .pipe(finalize(() => this.loading = false))
     .subscribe({
-      next: () => {
+      next: (booking: Booking) => {
+        this.booking = booking;
+        this.localPaymentHistory = [...(booking.paymentHistory || [])];
+        this.localPriceBreakdown = [...(booking.priceBreakdown || [])];
+
+        this.bookingForm.patchValue({
+          ...booking,
+          totalAmount: booking.totalAmount,
+          paidAmount: booking.paidAmount,
+          remainingAmount: booking.remainingAmount,
+          status: booking.status
+        });
+
+        this.hasUnsavedChanges = false;
         this.toastService.success('Success', 'Booking saved successfully');
-        this.router.navigate(['/bookings']);
       },
-      error: (error) => {
+      error: (error: any) => {
         this.toastService.error('Error', 'Failed to save booking');
         console.error('Error saving booking:', error);
       }
     });
   }
 
-  updateStatus(status: BookingStatus): void {
-    if (!this.bookingId) return;
+  openPriceBreakdownDialog(): void {
+    this.priceBreakdownForm = this.buildPriceBreakdownForm();
+    this.priceBreakdownDialogVisible = true;
+  }
+
+  resetPaymentForm(): void {
+    this.isEditingPayment = false;
+    this.editingPaymentIndex = null;
+    this.paymentForm.reset();
+    this.paymentForm.patchValue({
+      date: new Date(),
+      paymentMethod: 'CASH',
+      amount: 0,
+      remarks: ''
+    });
+  }
+
+  openEditPaymentDialog(payment: PaymentHistory, index: number): void {
+    // Only allow editing payments without an ID (new payments not yet saved to server)
+    if (payment.id) {
+      this.toastService.warn('Cannot Edit', 'Payments already saved to the server cannot be edited');
+      return;
+    }
+
+    this.isEditingPayment = true;
+    this.editingPaymentIndex = index;
+
+    // Populate the form with existing payment data
+    this.paymentForm.patchValue({
+      date: new Date(payment.date),
+      amount: payment.amount,
+      paymentMethod: payment.paymentMethod,
+      remarks: payment.remarks || ''
+    });
+  }
+
+  deletePayment(index: number): void {
+    const payment = this.localPaymentHistory[index];
+
+    // Only allow deleting payments without an ID (new payments not yet saved to server)
+    if (payment.id) {
+      this.toastService.warn('Cannot Delete', 'Payments already saved to the server cannot be deleted');
+      return;
+    }
 
     this.confirmationService.confirm({
-      message: `Are you sure you want to update the status to ${this.getStatusLabel(status)}?`,
-      header: 'Update Status',
+      message: 'Are you sure you want to delete this payment?',
+      header: 'Delete Confirmation',
       icon: 'pi pi-exclamation-triangle',
       accept: () => {
-        this.loading = true;
-        this.bookingService.updateStatus(this.bookingId!, status)
-        .pipe(finalize(() => this.loading = false))
-        .subscribe({
-          next: (booking) => {
-            this.booking = booking;
-            this.bookingForm.patchValue({
-              ...booking,
-              status: booking.status
-            });
-            this.toastService.success('Success', `Status updated to ${this.getStatusLabel(status)}`);
-          },
-          error: (error) => {
-            this.toastService.error('Error', 'Failed to update status');
-            console.error('Error updating status:', error);
-          }
-        });
+        this.localPaymentHistory.splice(index, 1);
+        this.calculateTotals();
+        this.hasUnsavedChanges = true;
+        this.toastService.info('Info', 'Payment deleted. Remember to save your changes.');
       }
     });
   }
 
-  updatePayment(): void {
-    if (!this.bookingId) return;
+  addPayment(): void {
+    if (this.paymentForm.invalid) {
+      this.toastService.warn('Validation Error', 'Please fill in all required fields correctly');
+      return;
+    }
 
-    const paidAmount = this.bookingForm.get('paidAmount')?.value;
+    const payment: PaymentHistory = {
+      id: null,
+      date: this.formatDate(this.paymentForm.get('date')?.value),
+      amount: this.paymentForm.get('amount')?.value || 0,
+      paymentMethod: this.paymentForm.get('paymentMethod')?.value,
+      remarks: this.paymentForm.get('remarks')?.value
+    };
 
+    if (this.isEditingPayment && this.editingPaymentIndex !== null) {
+      // Update existing payment
+      this.localPaymentHistory[this.editingPaymentIndex] = payment;
+      this.isEditingPayment = false;
+      this.editingPaymentIndex = null;
+    } else {
+      // Add new payment
+      this.localPaymentHistory.push(payment);
+    }
+
+    this.calculateTotals();
+    this.hasUnsavedChanges = true;
+    this.resetPaymentForm(); // Reset the form after adding
+    this.toastService.info('Info', `Payment ${this.isEditingPayment ? 'updated' : 'added'}. Remember to save your changes.`);
+  }
+
+  addPriceBreakdown(): void {
+    if (this.priceBreakdownForm.invalid) {
+      this.toastService.warn('Validation Error', 'Please fill in all required fields correctly');
+      return;
+    }
+
+    const priceBreakdown: PriceBreakdown = {
+      label: this.priceBreakdownForm.get('label')?.value,
+      amount: this.priceBreakdownForm.get('amount')?.value || 0,
+      quantity: this.priceBreakdownForm.get('quantity')?.value || 1,
+      total: this.priceBreakdownForm.get('total')?.value || 0
+    };
+
+    this.localPriceBreakdown.push(priceBreakdown);
+    this.calculateTotals();
+    this.hasUnsavedChanges = true;
+    this.priceBreakdownDialogVisible = false;
+    this.toastService.info('Info', 'Price breakdown added. Remember to save your changes.');
+  }
+
+  deletePriceBreakdown(index: number): void {
     this.confirmationService.confirm({
-      message: `Are you sure you want to update the payment amount to ${paidAmount}?`,
-      header: 'Update Payment',
+      message: 'Are you sure you want to delete this price breakdown item?',
+      header: 'Delete Confirmation',
       icon: 'pi pi-exclamation-triangle',
       accept: () => {
-        this.loading = true;
-        this.bookingService.updatePayment(this.bookingId!, paidAmount)
-        .pipe(finalize(() => this.loading = false))
-        .subscribe({
-          next: (booking) => {
-            this.booking = booking;
-            this.bookingForm.patchValue({
-              ...booking,
-              paidAmount: booking.paidAmount,
-              remainingAmount: booking.remainingAmount,
-              status: booking.status
-            });
-            this.toastService.success('Success', 'Payment updated successfully');
-          },
-          error: (error) => {
-            this.toastService.error('Error', 'Failed to update payment');
-            console.error('Error updating payment:', error);
-          }
-        });
+        this.localPriceBreakdown.splice(index, 1);
+        this.calculateTotals();
+        this.hasUnsavedChanges = true;
+        this.toastService.info('Info', 'Price breakdown deleted. Remember to save your changes.');
       }
     });
   }
@@ -225,23 +371,73 @@ export class BookingFormComponent implements OnInit {
     });
   }
 
-  calculateRemainingAmount(): void {
-    const totalAmount = this.bookingForm.get('totalAmount')?.value || 0;
-    const paidAmount = this.bookingForm.get('paidAmount')?.value || 0;
+  calculateTotals(): void {
+    const totalAmount = this.calculateTotalAmount();
+    const paidAmount = this.calculatePaidAmount();
     const remainingAmount = Math.max(0, totalAmount - paidAmount);
+    const status = this.determineBookingStatus();
 
     this.bookingForm.patchValue({
-      remainingAmount
+      totalAmount,
+      paidAmount,
+      remainingAmount,
+      status
     });
   }
 
-  getStatusLabel(status: string): string {
-    const option = this.statusOptions.find(opt => opt.value === status);
-    return option ? option.label : status;
+  calculateTotalAmount(): number {
+    return this.localPriceBreakdown.reduce((total, item) => {
+      return total + item.total;
+    }, 0);
+  }
+
+  calculatePaidAmount(): number {
+    return this.localPaymentHistory.reduce((total, payment) => {
+      return total + payment.amount;
+    }, 0);
+  }
+
+  calculateRemainingAmount(): number {
+    const totalAmount = this.calculateTotalAmount();
+    const paidAmount = this.calculatePaidAmount();
+    return Math.max(0, totalAmount - paidAmount);
+  }
+
+  determineBookingStatus(): BookingStatus {
+    const totalAmount = this.calculateTotalAmount();
+    const paidAmount = this.calculatePaidAmount();
+
+    if (paidAmount <= 0) {
+      return BookingStatus.PENDING_PAYMENT;
+    } else if (paidAmount >= totalAmount) {
+      return BookingStatus.FULLY_PAID;
+    } else {
+      return BookingStatus.PARTIALLY_PAID;
+    }
   }
 
   goBack(): void {
-    this.router.navigate(['/bookings']);
+    if (this.hasUnsavedChanges) {
+      this.confirmationService.confirm({
+        message: 'You have unsaved changes. Are you sure you want to leave?',
+        header: 'Unsaved Changes',
+        icon: 'pi pi-exclamation-triangle',
+        accept: () => {
+          this.router.navigate(['/bookings']);
+        }
+      });
+    } else {
+      this.router.navigate(['/bookings']);
+    }
+  }
+
+  getPaymentMethodLabel(value: string): string {
+    return this.paymentMethods.find(paymentMethod => paymentMethod.value = value)?.label ?? '';
+  }
+
+  private formatDate(date: Date): string {
+    if (!date) return '';
+    return date.toISOString().split('T')[0];
   }
 
   private buildForm(): FormGroup {
@@ -256,11 +452,27 @@ export class BookingFormComponent implements OnInit {
       packageType: [{value: null, disabled: true}, Validators.required],
       customPackageOptions: [{value: null, disabled: true}],
       totalAmount: [{value: 0, disabled: true}, [Validators.required, Validators.min(0)]],
-      paidAmount: [0, [Validators.required, Validators.min(0)]],
+      paidAmount: [{value: 0, disabled: true}, [Validators.required, Validators.min(0)]],
       remainingAmount: [{value: 0, disabled: true}, [Validators.required, Validators.min(0)]],
       status: [{ value: BookingStatus.PENDING_PAYMENT, disabled: true}, Validators.required],
-      statementOfAccountUrl: [''],
       remarks: ['']
+    });
+  }
+
+  private buildPaymentForm(): FormGroup {
+    return this.fb.group({
+      date: [new Date(), Validators.required],
+      amount: [0, [Validators.required, Validators.min(1)]],
+      paymentMethod: ['CASH', Validators.required],
+      remarks: ['']
+    });
+  }
+
+  private buildPriceBreakdownForm(): FormGroup {
+    return this.fb.group({
+      description: ['', Validators.required],
+      amount: [0, [Validators.required, Validators.min(1)]],
+      pax: [1, [Validators.required, Validators.min(1)]]
     });
   }
 

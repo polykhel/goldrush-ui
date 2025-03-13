@@ -84,17 +84,147 @@
       </div>
     </section>
 
+    <!-- Price Breakdown Section -->
+    <section class="mb-8" *ngIf="bookingId">
+      <div class="flex justify-between items-center mb-4">
+        <h3 class="font-bold border-b pb-2">Price Breakdown</h3>
+        <p-button icon="pi pi-plus" label="Add Item" (onClick)="openPriceBreakdownDialog()" [outlined]="true" severity="secondary"></p-button>
+      </div>
+
+      <p-table [value]="localPriceBreakdown" styleClass="p-datatable-sm" [tableStyle]="{ 'min-width': '50rem' }">
+        <ng-template pTemplate="header">
+          <tr>
+            <th id="priceDescription">Description</th>
+            <th id="priceAmount" class="text-right">Amount</th>
+            <th id="pricePax" class="text-right">Pax</th>
+            <th id="priceTotal" class="text-right">Total</th>
+            <th id="priceActions" style="width: 5rem"></th>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-item let-i="rowIndex">
+          <tr>
+            <td>{{ item.label }}</td>
+            <td class="text-right">₱ {{ item.amount | number:'1.2-2' }}</td>
+            <td class="text-right">{{ item.amount }}</td>
+            <td class="text-right">₱ {{ item.total | number:'1.2-2' }}</td>
+            <td>
+              <p-button icon="pi pi-trash" (onClick)="deletePriceBreakdown(i)" [rounded]="true" [text]="true" severity="danger"></p-button>
+            </td>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="footer">
+          <tr>
+            <td colspan="3" class="text-right font-bold">Total:</td>
+            <td class="text-right font-bold">₱ {{ calculateTotalAmount() | number:'1.2-2' }}</td>
+            <td></td>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="emptymessage">
+          <tr>
+            <td colspan="5" class="text-center p-4">
+              No price breakdown items found. Click "Add Item" to add a new item.
+            </td>
+          </tr>
+        </ng-template>
+      </p-table>
+    </section>
+
+    <!-- Payment History Section -->
+    <section class="mb-8" *ngIf="bookingId">
+      <div class="flex justify-between items-center mb-4">
+        <h3 class="font-bold border-b pb-2">Payment History</h3>
+      </div>
+
+      <p-table [value]="localPaymentHistory" styleClass="p-datatable-sm" [tableStyle]="{ 'min-width': '50rem' }">
+        <ng-template pTemplate="header">
+          <tr>
+            <th id="paymentDate">Date</th>
+            <th id="paymentMethod">Payment Method</th>
+            <th id="paymentAmount" class="text-right">Amount</th>
+            <th id="paymentRemarks">Remarks</th>
+            <th id="paymentActions" style="width: 8rem">Actions</th>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-payment let-i="rowIndex">
+          <tr>
+            <td>{{ payment.date }}</td>
+            <td>{{ getPaymentMethodLabel(payment.paymentMethod) }}</td>
+            <td class="text-right">₱ {{ payment.amount | number:'1.2-2' }}</td>
+            <td>{{ payment.remarks }}</td>
+            <td>
+              @if (payment.id === null) {
+                <div class="flex gap-2 justify-center">
+                  <p-button icon="pi pi-pencil" (onClick)="openEditPaymentDialog(payment, i)" [rounded]="true" [text]="true" severity="primary"></p-button>
+                  <p-button icon="pi pi-trash" (onClick)="deletePayment(i)" [rounded]="true" [text]="true" severity="danger"></p-button>
+                </div>
+              }
+            </td>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="footer">
+          <tr>
+            <td colspan="2" class="text-right font-bold">Total Paid:</td>
+            <td class="text-right font-bold">₱ {{ calculatePaidAmount() | number:'1.2-2' }}</td>
+            <td colspan="2"></td>
+          </tr>
+          <tr>
+            <td colspan="2" class="text-right font-bold">Remaining Amount:</td>
+            <td class="text-right font-bold">₱ {{ calculateRemainingAmount() | number:'1.2-2' }}</td>
+            <td colspan="2"></td>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="emptymessage">
+          <tr>
+            <td colspan="5" class="text-center p-4">
+              No payment history found. Click "Add Payment" to record a payment.
+            </td>
+          </tr>
+        </ng-template>
+      </p-table>
+
+      <!-- Inline Payment Form -->
+      <form [formGroup]="paymentForm" class="mt-4 p-4 border rounded-lg bg-gray-50">
+        <h4 class="font-bold mb-3">{{ isEditingPayment ? 'Edit Payment' : 'Add New Payment' }}</h4>
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
+          <p-float-label variant="on">
+            <p-date-picker id="paymentDate" formControlName="date" [showIcon]="true" dateFormat="mm-dd-yy" class="w-full"></p-date-picker>
+            <label for="paymentDate">Payment Date</label>
+          </p-float-label>
+
+          <p-float-label variant="on">
+            <p-select id="paymentMethod" formControlName="paymentMethod" [options]="paymentMethods" optionLabel="label" optionValue="value" class="w-full"></p-select>
+            <label for="paymentMethod">Payment Method</label>
+          </p-float-label>
+
+          <p-float-label variant="on">
+            <p-inputNumber id="paymentAmount" formControlName="amount" mode="currency" currency="PHP" locale="en-US" class="w-full"></p-inputNumber>
+            <label for="paymentAmount">Amount</label>
+          </p-float-label>
+
+          <p-float-label variant="on">
+            <input id="paymentRemarks" formControlName="remarks" pInputText class="w-full" />
+            <label for="paymentRemarks">Remarks</label>
+          </p-float-label>
+        </div>
+
+        <div class="flex justify-end gap-2">
+          <p-button *ngIf="isEditingPayment" label="Cancel" icon="pi pi-times" (onClick)="resetPaymentForm()" [outlined]="true"></p-button>
+          <p-button [label]="isEditingPayment ? 'Update Payment' : 'Add Payment'" [icon]="isEditingPayment ? 'pi pi-check' : 'pi pi-plus'" (onClick)="addPayment()" [disabled]="paymentForm.invalid || loading"></p-button>
+        </div>
+      </form>
+    </section>
+
     <!-- Payment Details Section -->
     <section class="mb-8">
-      <h3 class="font-bold mb-4 border-b pb-2">Payment Details</h3>
+      <h3 class="font-bold mb-4 border-b pb-2">Payment Summary</h3>
       <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
         <p-float-label variant="on">
-          <p-inputNumber id="totalAmount" formControlName="totalAmount" mode="currency" currency="PHP" locale="en-US" (onBlur)="calculateRemainingAmount()"></p-inputNumber>
+          <p-inputNumber id="totalAmount" formControlName="totalAmount" mode="currency" currency="PHP" locale="en-US" [readonly]="true"></p-inputNumber>
           <label for="totalAmount">Total Amount</label>
         </p-float-label>
 
         <p-float-label variant="on">
-          <p-inputNumber id="paidAmount" formControlName="paidAmount" mode="currency" currency="PHP" locale="en-US" (onBlur)="calculateRemainingAmount()"></p-inputNumber>
+          <p-inputNumber id="paidAmount" formControlName="paidAmount" mode="currency" currency="PHP" locale="en-US" [readonly]="true"></p-inputNumber>
           <label for="paidAmount">Paid Amount</label>
         </p-float-label>
 
@@ -119,7 +249,7 @@
     <!-- Actions Section -->
     <section class="mb-4">
       <div class="flex justify-end gap-2">
-        <p-button label="Save" icon="pi pi-save" (onClick)="updateRemarks()" [disabled]="bookingForm.invalid || loading"></p-button>
+        <p-button label="Save" icon="pi pi-save" (onClick)="saveBooking()" [disabled]="bookingForm.invalid || loading"></p-button>
       </div>
     </section>
   </form>
@@ -127,26 +257,37 @@
   <!-- Side Actions Panel -->
   <div class="mt-8 p-4 border rounded-lg bg-gray-50" *ngIf="bookingId">
     <h3 class="font-bold mb-4 border-b pb-2">Actions</h3>
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div class="grid grid-cols-1 gap-4">
       <div>
         <h4 class="font-semibold mb-2">Documents</h4>
         <p-button label="Generate Statement of Account" icon="pi pi-file-pdf" styleClass="p-button-info w-full mb-2"
           (onClick)="generateStatementOfAccount()" [disabled]="loading"></p-button>
       </div>
-
-      <div>
-        <h4 class="font-semibold mb-2">Payment Status</h4>
-        <div class="flex flex-column gap-2">
-          <p-button label="Mark as Partially Paid" icon="pi pi-wallet" styleClass="p-button-warning w-full mb-2"
-            (onClick)="updateStatus(statusOptions[1].value)" [disabled]="loading || bookingForm.get('status')?.value === statusOptions[1].value"></p-button>
-
-          <p-button label="Mark as Fully Paid" icon="pi pi-check-circle" styleClass="p-button-success w-full mb-2"
-            (onClick)="updateStatus(statusOptions[2].value)" [disabled]="loading || bookingForm.get('status')?.value === statusOptions[2].value"></p-button>
-
-          <p-button label="Update Payment" icon="pi pi-money-bill" styleClass="p-button-primary w-full"
-            (onClick)="updatePayment()" [disabled]="loading"></p-button>
-        </div>
-      </div>
     </div>
   </div>
 </section>
+
+<!-- Price Breakdown Dialog -->
+<p-dialog [(visible)]="priceBreakdownDialogVisible" [style]="{ width: '450px' }" header="Add Price Breakdown Item" [modal]="true">
+  <form [formGroup]="priceBreakdownForm" class="flex flex-col gap-4 mt-3">
+    <p-float-label variant="on">
+      <input class="w-full" formControlName="description" id="itemDescription" pInputText type="text">
+      <label for="itemDescription">Description</label>
+    </p-float-label>
+
+    <p-float-label variant="on">
+      <p-inputNumber id="itemAmount" formControlName="amount" mode="currency" currency="PHP" locale="en-US"></p-inputNumber>
+      <label for="itemAmount">Amount</label>
+    </p-float-label>
+
+    <p-float-label variant="on">
+      <p-inputNumber id="itemPax" formControlName="pax" [showButtons]="true" [min]="1"></p-inputNumber>
+      <label for="itemPax">Number of Pax</label>
+    </p-float-label>
+  </form>
+
+  <ng-template pTemplate="footer">
+    <p-button label="Cancel" icon="pi pi-times" (onClick)="priceBreakdownDialogVisible = false" [text]="true"></p-button>
+    <p-button label="Add" icon="pi pi-check" (onClick)="addPriceBreakdown()" [disabled]="priceBreakdownForm.invalid || loading"></p-button>
+  </ng-template>
+</p-dialog>
