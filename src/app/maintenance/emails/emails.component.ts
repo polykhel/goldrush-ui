@@ -1,18 +1,18 @@
+import { NgIf } from '@angular/common';
 import { Component } from '@angular/core';
 import { FormControl, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
-import { ConfirmationService, PrimeTemplate } from 'primeng/api';
-import { Textarea } from 'primeng/textarea';
-import { AbstractCrudComponent } from '../abstract-crud.component';
 import { Email } from '@models/email.model';
-import { ToastService } from '@services/toast.service';
 import { EmailService } from '@services/email.service';
+import { ToastService } from '@services/toast.service';
 import { Crud } from '@shared/components/crud/crud.component';
-import { Dialog } from 'primeng/dialog';
+import { ConfirmationService, PrimeTemplate } from 'primeng/api';
 import { Button } from 'primeng/button';
-import { NgIf } from '@angular/common';
-import { InputText } from 'primeng/inputtext';
+import { Dialog } from 'primeng/dialog';
 import { FloatLabel } from 'primeng/floatlabel';
+import { InputText } from 'primeng/inputtext';
+import { Textarea } from 'primeng/textarea';
 import { Toast } from 'primeng/toast';
+import { AbstractCrudComponent } from '../abstract-crud.component';
 
 @Component({
   selector: 'app-emails',
@@ -36,9 +36,9 @@ import { Toast } from 'primeng/toast';
 export class EmailsComponent extends AbstractCrudComponent<Email> {
   override form = this.fb.group({
     id: new FormControl<string | null>(null),
-    to: ['', [Validators.required]],
-    subject: ['', [Validators.required]],
-    body: ['', [Validators.required]]
+    to: [{value: '', disabled: true}, [Validators.required]],
+    subject: [{value: '', disabled: true}, [Validators.required]],
+    body: [{value: '', disabled: true}, [Validators.required]]
   });
 
   override columns = [

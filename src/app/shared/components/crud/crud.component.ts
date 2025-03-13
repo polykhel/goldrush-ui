@@ -1,14 +1,14 @@
 import { Component, EventEmitter, Input, Output, ViewChild } from '@angular/core';
-import { Table, TableLazyLoadEvent, TableModule } from 'primeng/table';
-import { Toolbar } from 'primeng/toolbar';
+import { FormsModule } from '@angular/forms';
 import { PrimeTemplate } from 'primeng/api';
 import { Button } from 'primeng/button';
-import { InputText } from 'primeng/inputtext';
-import { FormsModule } from '@angular/forms';
 import { ConfirmDialog } from 'primeng/confirmdialog';
-import { InputGroupModule } from 'primeng/inputgroup';
 import { IconField } from 'primeng/iconfield';
+import { InputGroupModule } from 'primeng/inputgroup';
 import { InputIcon } from 'primeng/inputicon';
+import { InputText } from 'primeng/inputtext';
+import { Table, TableLazyLoadEvent, TableModule } from 'primeng/table';
+import { Toolbar } from 'primeng/toolbar';
 
 export interface ColumnConfig {
   field: string;
@@ -48,6 +48,7 @@ export class Crud<T> {
   @Input() showDelete = false;
   @Input() showExport = false;
   @Input() showEdit = false;
+  @Input() viewOnly = false;
 
   @Output() create = new EventEmitter<T>();
   @Output() update = new EventEmitter<T>();

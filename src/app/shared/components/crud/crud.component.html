@@ -73,9 +73,9 @@
         <td>{{ entity[col.field] }}</td>
       }
       <td>
-        @if (showEdit) {
+        @if (viewOnly || showEdit) {
           <p-button (click)="onEdit(entity)" [outlined]="true" [rounded]="true" class="mr-2"
-                    icon="pi pi-pencil"/>
+                    [icon]="(viewOnly ? 'pi pi-eye' : 'pi pi-pencil')"/>
         }
         @if (showDelete) {
           <p-button (click)="onDelete(entity)" [outlined]="true" [rounded]="true" icon="pi pi-trash"
