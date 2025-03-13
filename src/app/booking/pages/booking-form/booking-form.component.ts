@@ -1,38 +1,33 @@
+import { DecimalPipe, NgIf } from '@angular/common';
 import { Component, HostListener, inject, OnInit } from '@angular/core';
-import {
-  FormGroup,
-  NonNullableFormBuilder,
-  ReactiveFormsModule,
-  Validators
-} from '@angular/forms';
+import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
+import { CanComponentDeactivate } from '@core/guards/can-deactivate.guard';
 import { Booking, BOOKING_STATUS_OPTIONS, BookingStatus, PaymentHistory, PriceBreakdown } from '@models/booking.model';
 import { Option } from '@models/option';
 import { BookingService } from '@services/booking.service';
 import { OptionsService } from '@services/options.service';
 import { ToastService } from '@services/toast.service';
+import { PACKAGE_OPTIONS } from '@utils/package.util';
 import { ConfirmationService } from 'primeng/api';
 import { ButtonModule } from 'primeng/button';
 import { CalendarModule } from 'primeng/calendar';
 import { CardModule } from 'primeng/card';
+import { Checkbox } from 'primeng/checkbox';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
+import { DatePicker } from 'primeng/datepicker';
+import { DialogModule } from 'primeng/dialog';
 import { DropdownModule } from 'primeng/dropdown';
+import { FloatLabel } from 'primeng/floatlabel';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { InputTextModule } from 'primeng/inputtext';
+import { RadioButton } from 'primeng/radiobutton';
+import { Select } from 'primeng/select';
+import { TableModule } from 'primeng/table';
+import { Textarea } from 'primeng/textarea';
 import { ToastModule } from 'primeng/toast';
 import { ToolbarModule } from 'primeng/toolbar';
-import { DecimalPipe, NgIf } from '@angular/common';
 import { finalize, Observable } from 'rxjs';
-import { FloatLabel } from 'primeng/floatlabel';
-import { Textarea } from 'primeng/textarea';
-import { DatePicker } from 'primeng/datepicker';
-import { Select } from 'primeng/select';
-import { Checkbox } from 'primeng/checkbox';
-import { RadioButton } from 'primeng/radiobutton';
-import { PACKAGE_OPTIONS } from '@utils/package.util';
-import { TableModule } from 'primeng/table';
-import { DialogModule } from 'primeng/dialog';
-import { CanComponentDeactivate } from '@core/guards/can-deactivate.guard';
 
 @Component({
   standalone: true,
@@ -94,7 +89,6 @@ export class BookingFormComponent implements OnInit, CanComponentDeactivate {
     private confirmationService: ConfirmationService,
     private optionsService: OptionsService,
   ) {
-    this.bookingForm = this.buildForm();
   }
 
   // Handle browser navigation/refresh/close
@@ -203,7 +197,8 @@ export class BookingFormComponent implements OnInit, CanComponentDeactivate {
           totalAmount: booking.totalAmount,
           paidAmount: booking.paidAmount,
           remainingAmount: booking.remainingAmount,
-          status: booking.status
+          status: booking.status,
+          customPackageOptions: booking.customPackageOptions?.split(';') ?? []
         });
 
         this.hasUnsavedChanges = false;
@@ -284,7 +279,7 @@ export class BookingFormComponent implements OnInit, CanComponentDeactivate {
       id: null,
       date: this.formatDate(this.paymentForm.get('date')?.value),
       amount: this.paymentForm.get('amount')?.value || 0,
-      paymentMethod: this.paymentForm.get('paymentMethod')?.value,
+      paymentMethod: this.paymentForm.get('paymentMethod')?.value || '',
       remarks: this.paymentForm.get('remarks')?.value
     };
 
@@ -311,11 +306,13 @@ export class BookingFormComponent implements OnInit, CanComponentDeactivate {
     }
 
     const priceBreakdown: PriceBreakdown = {
-      label: this.priceBreakdownForm.get('label')?.value,
+      label: this.priceBreakdownForm.get('label')?.value || '',
       amount: this.priceBreakdownForm.get('amount')?.value || 0,
       quantity: this.priceBreakdownForm.get('quantity')?.value || 1,
-      total: this.priceBreakdownForm.get('total')?.value || 0
+      total: 0
     };
+
+    priceBreakdown.total = priceBreakdown.amount * priceBreakdown.quantity;
 
     this.localPriceBreakdown.push(priceBreakdown);
     this.calculateTotals();
@@ -435,44 +432,48 @@ export class BookingFormComponent implements OnInit, CanComponentDeactivate {
     return this.paymentMethods.find(paymentMethod => paymentMethod.value = value)?.label ?? '';
   }
 
-  private formatDate(date: Date): string {
+  private formatDate(date?: Date): string {
     if (!date) return '';
     return date.toISOString().split('T')[0];
   }
 
-  private buildForm(): FormGroup {
+  private buildForm() {
     return this.fb.group({
-      id: [null],
-      inquiryId: [{value: null, disabled: true}, Validators.required],
-      clientName: [{value: null, disabled: true}, Validators.required],
-      bookingDate: [new Date(), Validators.required],
-      travelStartDate: [{value: null, disabled: true}, Validators.required],
-      travelEndDate: [{value: null, disabled: true}, Validators.required],
-      destination: [{value: null, disabled: true}, Validators.required],
-      packageType: [{value: null, disabled: true}, Validators.required],
-      customPackageOptions: [{value: null, disabled: true}],
-      totalAmount: [{value: 0, disabled: true}, [Validators.required, Validators.min(0)]],
-      paidAmount: [{value: 0, disabled: true}, [Validators.required, Validators.min(0)]],
-      remainingAmount: [{value: 0, disabled: true}, [Validators.required, Validators.min(0)]],
-      status: [{ value: BookingStatus.PENDING_PAYMENT, disabled: true}, Validators.required],
-      remarks: ['']
+      id: this.fb.control<string | null>(null),
+      inquiryId: this.fb.control<string>({value: '', disabled: true}, Validators.required),
+      clientName: this.fb.control<string>({value: '', disabled: true}, Validators.required),
+      bookingDate: this.fb.control<Date>(new Date(), Validators.required),
+      travelStartDate: this.fb.control<Date>({value: new Date(), disabled: true}, Validators.required),
+      travelEndDate: this.fb.control<Date>({value: new Date(), disabled: true}, Validators.required),
+      destination: this.fb.control<string>({value: '', disabled: true}, Validators.required),
+      packageType: this.fb.control<string>({value: '', disabled: true}, Validators.required),
+      customPackageOptions: this.fb.control<string[]>({value: [], disabled: true}),
+      totalAmount: this.fb.control<number>({value: 0, disabled: true}, [Validators.required, Validators.min(0)]),
+      paidAmount: this.fb.control<number>({value: 0, disabled: true}, [Validators.required, Validators.min(0)]),
+      remainingAmount: this.fb.control<number>({value: 0, disabled: true}, [Validators.required, Validators.min(0)]),
+      status: this.fb.control<BookingStatus>({
+        value: BookingStatus.PENDING_PAYMENT,
+        disabled: true
+      }, Validators.required),
+      remarks: this.fb.control<string>('')
     });
   }
 
-  private buildPaymentForm(): FormGroup {
+  private buildPaymentForm() {
     return this.fb.group({
-      date: [new Date(), Validators.required],
-      amount: [0, [Validators.required, Validators.min(1)]],
-      paymentMethod: ['CASH', Validators.required],
-      remarks: ['']
+      date: this.fb.control<Date>(new Date(), Validators.required),
+      amount: this.fb.control<number>(0, [Validators.required, Validators.min(1)]),
+      paymentMethod: this.fb.control<string>('CASH', Validators.required),
+      remarks: this.fb.control<string>('')
     });
   }
 
-  private buildPriceBreakdownForm(): FormGroup {
+  private buildPriceBreakdownForm() {
     return this.fb.group({
-      description: ['', Validators.required],
-      amount: [0, [Validators.required, Validators.min(1)]],
-      pax: [1, [Validators.required, Validators.min(1)]]
+      label: this.fb.control<string>('', Validators.required),
+      amount: this.fb.control<number>(0, [Validators.required, Validators.min(1)]),
+      quantity: this.fb.control<number>(1, [Validators.required, Validators.min(1)]),
+      total: this.fb.control<number>(0)
     });
   }
 

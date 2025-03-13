@@ -1,7 +1,7 @@
+import { CurrencyPipe, DatePipe, NgClass, NgForOf } from '@angular/common';
 import { Component } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { Router } from '@angular/router';
-import { AbstractCrudComponent } from '../../../maintenance/abstract-crud.component';
 import { Booking, BOOKING_STATUS_OPTIONS } from '@models/booking.model';
 import { BookingService } from '@services/booking.service';
 import { ToastService } from '@services/toast.service';
@@ -10,13 +10,13 @@ import { ButtonModule } from 'primeng/button';
 import { CardModule } from 'primeng/card';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { DropdownModule } from 'primeng/dropdown';
+import { InputGroup } from 'primeng/inputgroup';
+import { InputGroupAddon } from 'primeng/inputgroupaddon';
 import { InputTextModule } from 'primeng/inputtext';
 import { TableModule } from 'primeng/table';
 import { ToastModule } from 'primeng/toast';
 import { ToolbarModule } from 'primeng/toolbar';
-import { CurrencyPipe, DatePipe, NgClass, NgForOf } from '@angular/common';
-import { InputGroup } from 'primeng/inputgroup';
-import { InputGroupAddon } from 'primeng/inputgroupaddon';
+import { AbstractCrudComponent } from '../../../maintenance/abstract-crud.component';
 
 @Component({
   standalone: true,
@@ -64,7 +64,7 @@ export class BookingListComponent extends AbstractCrudComponent<Booking> {
     {field: 'destination', header: 'Destination'},
     {field: 'totalAmount', header: 'Total Amount'},
     {field: 'paidAmount', header: 'Paid Amount'},
-    {field: 'status', header: 'OptionsModel'}
+    {field: 'status', header: 'Status'}
   ];
 
   statusOptions = BOOKING_STATUS_OPTIONS;
