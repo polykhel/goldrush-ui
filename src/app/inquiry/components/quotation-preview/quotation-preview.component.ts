@@ -1,15 +1,16 @@
+import { CurrencyPipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output } from '@angular/core';
-import { formatDateRange } from '@utils/date.util';
-import dayjs from 'dayjs';
 
 import { DateRange } from '@models/date-range.model';
 import { ClientQuotation, Flight } from '@models/quotation.model';
+import { ToastService } from '@services/toast.service';
+import { formatDateRange } from '@utils/date.util';
 import { formatPairedValues, formatValue } from '@utils/string.util';
-import { Dialog } from 'primeng/dialog';
-import { Button } from 'primeng/button';
+import dayjs from 'dayjs';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
-import { CurrencyPipe } from '@angular/common';
+import { Button } from 'primeng/button';
+import { Dialog } from 'primeng/dialog';
 
 @Component({
   selector: 'app-quotation-preview',
@@ -26,6 +27,9 @@ export class QuotationPreviewComponent {
   @Output() cancel = new EventEmitter<void>();
 
   today = dayjs().format('MMM DD, YYYY');
+
+  constructor(private toastService: ToastService) {
+  }
 
   formatTravelDates(travelDates?: DateRange | null): string {
     return formatDateRange(travelDates);
@@ -83,11 +87,13 @@ export class QuotationPreviewComponent {
        this.generateImage(element, canvasOptions);
       } else if (type === 'pdf') {
         this.generatePDF(element, canvasOptions);
+      } else if (type === 'clipboard') {
+        this.copyToClipboard(element, canvasOptions);
       }
     }
   }
 
-  generateImage(element: HTMLElement, canvasOptions: any) {
+  private generateImage(element: HTMLElement, canvasOptions: any) {
     html2canvas(element, canvasOptions).then((canvas) => {
       const imgData = canvas.toDataURL('image/jpeg', 1.0);
       const link = document.createElement('a');
@@ -97,7 +103,7 @@ export class QuotationPreviewComponent {
     });
   }
 
-  generatePDF(element: HTMLElement, canvasOptions: any) {
+  private generatePDF(element: HTMLElement, canvasOptions: any) {
     html2canvas(element, canvasOptions).then(canvas => {
       const imgData = canvas.toDataURL('image/jpeg', 1.0);
 
@@ -123,6 +129,26 @@ export class QuotationPreviewComponent {
 
       const fileName = `${this.quotation.clientName}_${this.quotation?.title}.pdf`;
       pdf.save(fileName);
+    });
+  }
+
+  private copyToClipboard(element: HTMLElement, canvasOptions: any) {
+    html2canvas(element, canvasOptions).then(canvas => {
+      canvas.toBlob(async (blob) => {
+        if (blob) {
+          try {
+            await navigator.clipboard.write([
+              new ClipboardItem({
+                'image/png': blob
+              })
+            ]);
+            this.toastService.defaultSuccess('Successfully copied to clipboard');
+          } catch (err) {
+            console.error('Failed to copy image to clipboard: ', err);
+            this.toastService.defaultError('Failed to copy image to clipboard');
+          }
+        }
+      }, 'image/png');
     });
   }
 }

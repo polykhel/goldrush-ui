@@ -177,6 +177,8 @@
 
   </section>
   <div class="flex gap-2 justify-center items-center mt-4">
+    <p-button (onClick)="generateDoc('clipboard')" icon="pi pi-copy" label="Copy to Clipboard"
+              severity="help"></p-button>
     <p-button (onClick)="generateDoc('img')" icon="pi pi-image" label="Download as Image"
               severity="info"/>
     <p-button (onClick)="generateDoc('pdf')" icon="pi pi-file-pdf" label="Download as PDF"
