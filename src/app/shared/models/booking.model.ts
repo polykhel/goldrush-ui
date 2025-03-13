@@ -6,17 +6,6 @@ export enum BookingStatus {
   FULLY_PAID = 'FULLY_PAID'
 }
 
-export interface BookingStatusOption {
-  label: string;
-  value: BookingStatus;
-}
-
-export const BOOKING_STATUS_OPTIONS: BookingStatusOption[] = [
-  { label: 'Pending Payment', value: BookingStatus.PENDING_PAYMENT },
-  { label: 'Partially Paid', value: BookingStatus.PARTIALLY_PAID },
-  { label: 'Fully Paid', value: BookingStatus.FULLY_PAID }
-];
-
 export interface Booking extends AuditedBaseModel {
   inquiryId: string;
   providerQuotationId: string;
@@ -25,6 +14,7 @@ export interface Booking extends AuditedBaseModel {
   travelStartDate: Date;
   travelEndDate: Date;
   destination: string;
+  modeOfPayment: string;
   packageType: string;
   customPackageOptions: string | null;
   totalAmount: number;
@@ -41,6 +31,11 @@ export interface PriceBreakdown {
   amount: number;
   quantity: number;
   total: number;
+  serviceFee?: number;
+  serviceFeePct?: number;
+  serviceFeePerPax?: number;
+  netAmount?: number;
+  vendorName?: string;
 }
 
 export interface PaymentHistory {

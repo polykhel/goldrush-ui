@@ -94,40 +94,132 @@
     <section class="mb-8" *ngIf="bookingId">
       <div class="flex justify-between items-center mb-4">
         <h3 class="font-bold border-b pb-2">Price Breakdown</h3>
-        <p-button icon="pi pi-plus" label="Add Item" (onClick)="openPriceBreakdownDialog()" [outlined]="true" severity="secondary"></p-button>
+        <p-button (onClick)="addNewPriceBreakdownRow()" [outlined]="true" icon="pi pi-plus" label="Add Item"
+                  severity="secondary"></p-button>
       </div>
 
       <p-table [value]="localPriceBreakdown" styleClass="p-datatable-sm" [tableStyle]="{ 'min-width': '50rem' }">
         <ng-template pTemplate="header">
           <tr>
             <th id="priceDescription">Description</th>
-            <th id="priceAmount" class="text-right">Amount</th>
+            <th id="priceVendor">Vendor</th>
+            <th class="text-right" id="priceAmount">Rate per Pax</th>
             <th id="pricePax" class="text-right">Pax</th>
-            <th id="priceTotal" class="text-right">Total</th>
-            <th id="priceActions" style="width: 5rem"></th>
+            <th class="text-right" id="priceTotal">Total Rate</th>
+            <th class="text-right" id="priceServiceFee">Service Fee</th>
+            <th class="text-right" id="priceNetAmount">Vendor Fee</th>
+            <th id="priceActions" style="width: 8rem">Actions</th>
           </tr>
         </ng-template>
         <ng-template pTemplate="body" let-item let-i="rowIndex">
-          <tr>
+          <tr *ngIf="editingPriceBreakdownIndex !== i">
             <td>{{ item.label }}</td>
+            <td>{{ item.vendorName }}</td>
             <td class="text-right">₱ {{ item.amount | number:'1.2-2' }}</td>
             <td class="text-right">{{ item.quantity }}</td>
             <td class="text-right">₱ {{ item.total | number:'1.2-2' }}</td>
+            <td class="text-right">₱ {{ item.serviceFee | number:'1.2-2' }}</td>
+            <td class="text-right">₱ {{ item.netAmount | number:'1.2-2' }}</td>
             <td>
-              <p-button icon="pi pi-trash" (onClick)="deletePriceBreakdown(i)" [rounded]="true" [text]="true" severity="danger"></p-button>
+              <div class="flex gap-2 justify-center">
+                <p-button (onClick)="startEditingPriceBreakdown(i)" [rounded]="true" [text]="true" icon="pi pi-pencil"
+                          severity="primary"></p-button>
+                <p-button (onClick)="deletePriceBreakdown(i)" [rounded]="true" [text]="true" icon="pi pi-trash"
+                          severity="danger"></p-button>
+              </div>
+            </td>
+          </tr>
+          <tr *ngIf="editingPriceBreakdownIndex === i">
+            <td class="p-0" colspan="8">
+              <form [formGroup]="priceBreakdownForm" class="p-3 bg-gray-50 border rounded">
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
+                  <div>
+                    <label class="block text-sm font-medium mb-1" for="label">Description</label>
+                    <input class="w-full" formControlName="label" id="label" pInputText/>
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium mb-1" for="vendorName">Vendor</label>
+                    <input class="w-full" formControlName="vendorName" id="vendorName" pInputText/>
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium mb-1" for="amount">Rate per Pax</label>
+                    <p-inputNumber [maxFractionDigits]="2" [minFractionDigits]="2" class="w-full" formControlName="amount"
+                                   id="amount" mode="decimal"/>
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium mb-1" for="quantity">Quantity</label>
+                    <p-inputNumber [min]="1" class="w-full" formControlName="quantity" id="quantity"/>
+                  </div>
+
+                  <div class="md:col-span-2">
+                    <label class="block text-sm font-medium mb-1">Service Fee Calculation</label>
+                    <div class="flex items-center gap-4">
+                      <div class="flex items-center gap-2">
+                        <p-radioButton [value]="true" formControlName="usePercentage" inputId="usePercentage"/>
+                        <label for="usePercentage">Use Percentage</label>
+                      </div>
+                      <div class="flex items-center gap-2">
+                        <p-radioButton [value]="false" formControlName="usePercentage" inputId="useManual"/>
+                        <label for="useManual">Manual Entry</label>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="md:col-span-2">
+                    <div *ngIf="priceBreakdownForm.get('usePercentage')?.value">
+                      <label class="block text-sm font-medium mb-1" for="serviceFeePct">Service Fee %</label>
+                      <p-inputNumber [max]="100" [min]="0" class="w-full" formControlName="serviceFeePct" id="serviceFeePct"
+                                     suffix="%"/>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label class="block text-sm font-medium mb-1" for="serviceFee">Service Fee per Pax</label>
+                    <p-inputNumber [maxFractionDigits]="2" [minFractionDigits]="2" class="w-full"
+                                   formControlName="serviceFeePerPax" id="serviceFee" mode="decimal"/>
+                  </div>
+
+                  <div>
+                    <label class="block text-sm font-medium mb-1" for="serviceFee">Total Service Fee</label>
+                    <p-inputNumber [maxFractionDigits]="2" [minFractionDigits]="2" [readonly]="true" class="w-full"
+                                   formControlName="serviceFee" id="serviceFee" mode="decimal"/>
+                  </div>
+
+                  <div>
+                    <label class="block text-sm font-medium mb-1" for="total">Total Amount</label>
+                    <p-inputNumber [maxFractionDigits]="2" [minFractionDigits]="2" [readonly]="true" class="w-full"
+                                   formControlName="total" id="total" mode="decimal"/>
+                  </div>
+
+                  <div>
+                    <label class="block text-sm font-medium mb-1" for="netAmount">Net Amount</label>
+                    <p-inputNumber [maxFractionDigits]="2" [minFractionDigits]="2" [readonly]="true" class="w-full"
+                                   formControlName="netAmount" id="netAmount" mode="decimal"/>
+                  </div>
+                </div>
+
+                <div class="flex justify-end gap-2 mt-3">
+                  <p-button (onClick)="cancelEditingPriceBreakdown()" [outlined]="true" icon="pi pi-times"
+                            label="Cancel"></p-button>
+                  <p-button (onClick)="savePriceBreakdown()" [disabled]="priceBreakdownForm.invalid || loading" icon="pi pi-check"
+                            label="Save"></p-button>
+                </div>
+              </form>
             </td>
           </tr>
         </ng-template>
         <ng-template pTemplate="footer">
           <tr>
-            <td colspan="3" class="text-right font-bold">Total:</td>
+            <td class="text-right font-bold" colspan="4">Totals:</td>
             <td class="text-right font-bold">₱ {{ calculateTotalAmount() | number:'1.2-2' }}</td>
+            <td class="text-right font-bold">₱ {{ calculateTotalServiceFees() | number:'1.2-2' }}</td>
+            <td class="text-right font-bold">₱ {{ calculateTotalNetAmount() | number:'1.2-2' }}</td>
             <td></td>
           </tr>
         </ng-template>
         <ng-template pTemplate="emptymessage">
           <tr>
-            <td colspan="5" class="text-center p-4">
+            <td class="text-center p-4" colspan="8">
               No price breakdown items found. Click "Add Item" to add a new item.
             </td>
           </tr>
@@ -272,28 +364,3 @@
     </div>
   </div>
 </section>
-
-<!-- Price Breakdown Dialog -->
-<p-dialog [(visible)]="priceBreakdownDialogVisible" [style]="{ width: '450px' }" header="Add Price Breakdown Item" [modal]="true">
-  <form [formGroup]="priceBreakdownForm" class="flex flex-col gap-4 mt-3">
-    <p-float-label variant="on">
-      <input class="w-full" formControlName="label" id="itemDescription" pInputText type="text">
-      <label for="itemDescription">Description</label>
-    </p-float-label>
-
-    <p-float-label variant="on">
-      <p-inputNumber id="itemAmount" formControlName="amount" mode="currency" currency="PHP" locale="en-US"></p-inputNumber>
-      <label for="itemAmount">Amount</label>
-    </p-float-label>
-
-    <p-float-label variant="on">
-      <p-inputNumber [min]="1" [showButtons]="true" formControlName="quantity" id="itemPax"></p-inputNumber>
-      <label for="itemPax">Number of Pax</label>
-    </p-float-label>
-  </form>
-
-  <ng-template pTemplate="footer">
-    <p-button label="Cancel" icon="pi pi-times" (onClick)="priceBreakdownDialogVisible = false" [text]="true"></p-button>
-    <p-button label="Add" icon="pi pi-check" (onClick)="addPriceBreakdown()" [disabled]="priceBreakdownForm.invalid || loading"></p-button>
-  </ng-template>
-</p-dialog>

@@ -1,9 +1,11 @@
 import { CurrencyPipe, DatePipe, NgClass, NgForOf } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { Router } from '@angular/router';
-import { Booking, BOOKING_STATUS_OPTIONS } from '@models/booking.model';
+import { Booking } from '@models/booking.model';
+import { Option } from '@models/option';
 import { BookingService } from '@services/booking.service';
+import { OptionsService } from '@services/options.service';
 import { ToastService } from '@services/toast.service';
 import { ConfirmationService } from 'primeng/api';
 import { ButtonModule } from 'primeng/button';
@@ -40,7 +42,7 @@ import { AbstractCrudComponent } from '../../../maintenance/abstract-crud.compon
   ],
   providers: [ConfirmationService]
 })
-export class BookingListComponent extends AbstractCrudComponent<Booking> {
+export class BookingListComponent extends AbstractCrudComponent<Booking> implements OnInit {
 
   form: FormGroup = this.fb.group({
     id: [null],
@@ -67,15 +69,23 @@ export class BookingListComponent extends AbstractCrudComponent<Booking> {
     {field: 'status', header: 'Status'}
   ];
 
-  statusOptions = BOOKING_STATUS_OPTIONS;
+  statusOptions: Option[] = [];
 
   constructor(
     private router: Router,
     confirmationService: ConfirmationService,
     toastService: ToastService,
-    service: BookingService
+    service: BookingService,
+    private optionsService: OptionsService
   ) {
     super(confirmationService, toastService, service);
+  }
+
+  override ngOnInit() {
+    super.ngOnInit();
+    this.optionsService.getBookingStatuses().subscribe(data => {
+      this.statusOptions = data;
+    });
   }
 
   override getEntityName(): string {
