@@ -14,7 +14,7 @@ import { ConfirmDialog } from 'primeng/confirmdialog';
 import { InputGroup } from 'primeng/inputgroup';
 import { InputGroupAddon } from 'primeng/inputgroupaddon';
 import { InputText } from 'primeng/inputtext';
-import { SelectButton } from 'primeng/selectbutton';
+import { Select } from 'primeng/select';
 import { TableModule } from 'primeng/table';
 import { Toast } from 'primeng/toast';
 import { Tooltip } from 'primeng/tooltip';
@@ -33,9 +33,9 @@ import { debounceTime, distinctUntilChanged, firstValueFrom, Subject, takeUntil 
     InputGroup,
     InputGroupAddon,
     InputText,
-    SelectButton,
     FormsModule,
-    Tooltip
+    Tooltip,
+    Select
   ],
   providers: [ConfirmationService],
   templateUrl: './inquiry-list.component.html',
@@ -68,7 +68,9 @@ export class InquiryListComponent implements OnInit, OnDestroy {
   ngOnInit() {
     this.optionsService
       .getInquiryStatuses()
-      .subscribe((data) => (this.statusOptions = data));
+      .subscribe((data) => {
+        this.statusOptions = [{label: 'All', value: ''}, ...data];
+      });
 
     this.loadInquiries();
   }

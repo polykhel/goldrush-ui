@@ -18,17 +18,17 @@
         [value]="searchTerm"
         placeholder="Search client or destination..."/>
     </p-inputgroup>
-    <p-selectButton
+    <p-select
       [options]="statusOptions"
       [(ngModel)]="selectedStatus"
       (onChange)="onStatusChange()"
-      [multiple]="false"
+      placeholder="Filter Status"
       optionLabel="label"
       optionValue="value">
       <ng-template pTemplate="item" let-status>
         <span [class]="status.color">{{status.label}}</span>
       </ng-template>
-    </p-selectButton>
+    </p-select>
   </div>
 
   <p-table
