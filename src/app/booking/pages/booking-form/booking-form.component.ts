@@ -80,6 +80,7 @@ export class BookingFormComponent implements OnInit, CanComponentDeactivate {
 
   isEditingPayment = false;
   editingPaymentIndex: number | null = null;
+  protected readonly packageOptions = PACKAGE_OPTIONS;
 
   constructor(
     private route: ActivatedRoute,
@@ -125,7 +126,9 @@ export class BookingFormComponent implements OnInit, CanComponentDeactivate {
   ngOnInit(): void {
     this.optionsService
       .getPaymentMethods()
-      .subscribe((data) => (this.paymentMethods = data));
+      .subscribe(data => {
+        this.paymentMethods = data;
+      });
 
     this.route.paramMap.subscribe(params => {
       this.bookingId = params.get('id');
@@ -138,30 +141,32 @@ export class BookingFormComponent implements OnInit, CanComponentDeactivate {
   loadBooking(id: string): void {
     this.loading = true;
     this.bookingService.getById(id)
-    .pipe(finalize(() => this.loading = false))
-    .subscribe({
-      next: (booking) => {
-        this.booking = booking;
-        this.localPaymentHistory = [...(booking.paymentHistory || [])];
-        this.localPriceBreakdown = [...(booking.priceBreakdown || [])];
+      .pipe(finalize(() => this.loading = false))
+      .subscribe({
+        next: (booking) => {
+          this.booking = booking;
+          this.localPaymentHistory = [...(booking.paymentHistory || [])];
+          this.localPriceBreakdown = [...(booking.priceBreakdown || [])];
 
-        this.bookingForm.patchValue({
-          ...booking,
-          bookingDate: new Date(booking.bookingDate),
-          travelStartDate: new Date(booking.travelStartDate),
-          travelEndDate: new Date(booking.travelEndDate),
-          customPackageOptions:
-            booking.customPackageOptions?.split(';') || []
-        });
+          this.bookingForm.patchValue({
+            ...booking,
+            bookingDate: new Date(booking.bookingDate),
+            travelStartDate: new Date(booking.travelStartDate),
+            travelEndDate: new Date(booking.travelEndDate),
+            customPackageOptions:
+              booking.customPackageOptions?.split(';') || []
+          });
 
-        this.calculateTotals();
-        this.hasUnsavedChanges = false;
-      },
-      error: (error) => {
-        this.toastService.error('Error', 'Failed to load booking details');
-        console.error('Error loading booking:', error);
-      }
-    });
+          this.resetPaymentForm();
+
+          this.calculateTotals();
+          this.hasUnsavedChanges = false;
+        },
+        error: (error) => {
+          this.toastService.error('Error', 'Failed to load booking details');
+          console.error('Error loading booking:', error);
+        }
+      });
   }
 
   saveBooking(): void {
@@ -175,6 +180,7 @@ export class BookingFormComponent implements OnInit, CanComponentDeactivate {
     this.loading = true;
 
     const updatedBooking = {
+      modeOfPayment: this.bookingForm.get('modeOfPayment')?.value,
       remarks: this.bookingForm.get('remarks')?.value,
       paymentHistory: this.localPaymentHistory,
       priceBreakdown: this.localPriceBreakdown,
@@ -185,30 +191,30 @@ export class BookingFormComponent implements OnInit, CanComponentDeactivate {
     };
 
     this.bookingService.update(this.bookingId, updatedBooking)
-    .pipe(finalize(() => this.loading = false))
-    .subscribe({
-      next: (booking: Booking) => {
-        this.booking = booking;
-        this.localPaymentHistory = [...(booking.paymentHistory || [])];
-        this.localPriceBreakdown = [...(booking.priceBreakdown || [])];
+      .pipe(finalize(() => this.loading = false))
+      .subscribe({
+        next: (booking: Booking) => {
+          this.booking = booking;
+          this.localPaymentHistory = [...(booking.paymentHistory || [])];
+          this.localPriceBreakdown = [...(booking.priceBreakdown || [])];
 
-        this.bookingForm.patchValue({
-          ...booking,
-          totalAmount: booking.totalAmount,
-          paidAmount: booking.paidAmount,
-          remainingAmount: booking.remainingAmount,
-          status: booking.status,
-          customPackageOptions: booking.customPackageOptions?.split(';') ?? []
-        });
+          this.bookingForm.patchValue({
+            ...booking,
+            totalAmount: booking.totalAmount,
+            paidAmount: booking.paidAmount,
+            remainingAmount: booking.remainingAmount,
+            status: booking.status,
+            customPackageOptions: booking.customPackageOptions?.split(';') ?? []
+          });
 
-        this.hasUnsavedChanges = false;
-        this.toastService.success('Success', 'Booking saved successfully');
-      },
-      error: (error: any) => {
-        this.toastService.error('Error', 'Failed to save booking');
-        console.error('Error saving booking:', error);
-      }
-    });
+          this.hasUnsavedChanges = false;
+          this.toastService.success('Success', 'Booking saved successfully');
+        },
+        error: (error: any) => {
+          this.toastService.error('Error', 'Failed to save booking');
+          console.error('Error saving booking:', error);
+        }
+      });
   }
 
   openPriceBreakdownDialog(): void {
@@ -222,7 +228,7 @@ export class BookingFormComponent implements OnInit, CanComponentDeactivate {
     this.paymentForm.reset();
     this.paymentForm.patchValue({
       date: new Date(),
-      paymentMethod: 'CASH',
+      paymentMethod: this.bookingForm.get('modeOfPayment')?.value ?? 'CASH',
       amount: 0,
       remarks: ''
     });
@@ -279,7 +285,7 @@ export class BookingFormComponent implements OnInit, CanComponentDeactivate {
       id: null,
       date: this.formatDate(this.paymentForm.get('date')?.value),
       amount: this.paymentForm.get('amount')?.value || 0,
-      paymentMethod: this.paymentForm.get('paymentMethod')?.value || '',
+      paymentMethod: this.paymentForm.get('paymentMethod')?.value || 'CASH',
       remarks: this.paymentForm.get('remarks')?.value
     };
 
@@ -338,34 +344,43 @@ export class BookingFormComponent implements OnInit, CanComponentDeactivate {
   generateStatementOfAccount(): void {
     if (!this.bookingId) return;
 
+    if (this.bookingForm.invalid) {
+      this.toastService.warn('Validation Error', 'Please fill in all required fields correctly');
+      return;
+    }
+
+    if (this.hasUnsavedChanges) {
+      this.toastService.warn('Unsaved Changes', 'You have unsaved changes. Please save first before generating the statement of account');
+    }
+
     this.loading = true;
     this.bookingService.generateStatementOfAccount(this.bookingId)
-    .pipe(finalize(() => this.loading = false))
-    .subscribe({
-      next: (response) => {
-        if (response?.status !== 200 || !response.body || response.body.size === 0) {
-          this.toastService.warn('Warning', 'No data found for Statement of Account');
-          return;
+      .pipe(finalize(() => this.loading = false))
+      .subscribe({
+        next: (response) => {
+          if (response?.status !== 200 || !response.body || response.body.size === 0) {
+            this.toastService.warn('Warning', 'No data found for Statement of Account');
+            return;
+          }
+
+          const fileName = response.headers.get('Content-Disposition')?.split(';')[1]?.split('=')[1];
+
+          this.toastService.success('Success', 'Statement of Account generated successfully');
+          const fileURL = URL.createObjectURL(response.body);
+          const a = document.createElement('a');
+          a.href = fileURL;
+          a.target = '_blank';
+          a.download = fileName ?? 'statement-of-account.pdf';
+          document.body.appendChild(a); // Required for Firefox
+          a.click();
+          document.body.removeChild(a); // Clean up
+          URL.revokeObjectURL(fileURL); // Release the object URL
+        },
+        error: (error) => {
+          this.toastService.error('Error', 'Failed to generate Statement of Account');
+          console.error('Error generating Statement of Account:', error);
         }
-
-        const fileName = response.headers.get('Content-Disposition')?.split(';')[1]?.split('=')[1];
-
-        this.toastService.success('Success', 'Statement of Account generated successfully');
-        const fileURL = URL.createObjectURL(response.body);
-        const a = document.createElement('a');
-        a.href = fileURL;
-        a.target = '_blank';
-        a.download = fileName ?? 'statement-of-account.pdf';
-        document.body.appendChild(a); // Required for Firefox
-        a.click();
-        document.body.removeChild(a); // Clean up
-        URL.revokeObjectURL(fileURL); // Release the object URL
-      },
-      error: (error) => {
-        this.toastService.error('Error', 'Failed to generate Statement of Account');
-        console.error('Error generating Statement of Account:', error);
-      }
-    });
+      });
   }
 
   calculateTotals(): void {
@@ -446,6 +461,7 @@ export class BookingFormComponent implements OnInit, CanComponentDeactivate {
       travelStartDate: this.fb.control<Date>({value: new Date(), disabled: true}, Validators.required),
       travelEndDate: this.fb.control<Date>({value: new Date(), disabled: true}, Validators.required),
       destination: this.fb.control<string>({value: '', disabled: true}, Validators.required),
+      modeOfPayment: this.fb.control<string>('CASH', Validators.required),
       packageType: this.fb.control<string>({value: '', disabled: true}, Validators.required),
       customPackageOptions: this.fb.control<string[]>({value: [], disabled: true}),
       totalAmount: this.fb.control<number>({value: 0, disabled: true}, [Validators.required, Validators.min(0)]),
@@ -463,7 +479,7 @@ export class BookingFormComponent implements OnInit, CanComponentDeactivate {
     return this.fb.group({
       date: this.fb.control<Date>(new Date(), Validators.required),
       amount: this.fb.control<number>(0, [Validators.required, Validators.min(1)]),
-      paymentMethod: this.fb.control<string>('CASH', Validators.required),
+      paymentMethod: this.fb.control<string>(this.bookingForm.get('modeOfPayment')?.value ?? 'CASH', Validators.required),
       remarks: this.fb.control<string>('')
     });
   }
@@ -476,6 +492,4 @@ export class BookingFormComponent implements OnInit, CanComponentDeactivate {
       total: this.fb.control<number>(0)
     });
   }
-
-  protected readonly packageOptions = PACKAGE_OPTIONS;
 }

@@ -81,6 +81,12 @@
               </div>
             }
         </div>
+
+        <p-float-label variant="on">
+          <p-select [options]="paymentMethods" class="w-full" formControlName="modeOfPayment" id="modeOfPayment"
+                    optionLabel="label" optionValue="value"></p-select>
+          <label for="modeOfPayment">Mode of Payment</label>
+        </p-float-label>
       </div>
     </section>
 
@@ -105,7 +111,7 @@
           <tr>
             <td>{{ item.label }}</td>
             <td class="text-right">₱ {{ item.amount | number:'1.2-2' }}</td>
-            <td class="text-right">{{ item.amount }}</td>
+            <td class="text-right">{{ item.quantity }}</td>
             <td class="text-right">₱ {{ item.total | number:'1.2-2' }}</td>
             <td>
               <p-button icon="pi pi-trash" (onClick)="deletePriceBreakdown(i)" [rounded]="true" [text]="true" severity="danger"></p-button>
@@ -281,7 +287,7 @@
     </p-float-label>
 
     <p-float-label variant="on">
-      <p-inputNumber id="itemPax" formControlName="pax" [showButtons]="true" [min]="1"></p-inputNumber>
+      <p-inputNumber [min]="1" [showButtons]="true" formControlName="quantity" id="itemPax"></p-inputNumber>
       <label for="itemPax">Number of Pax</label>
     </p-float-label>
   </form>
