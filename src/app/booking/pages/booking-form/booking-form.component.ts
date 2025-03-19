@@ -378,7 +378,6 @@ export class BookingFormComponent implements OnInit, CanComponentDeactivate {
       date: new Date(),
       paymentMethod: this.bookingForm.get('modeOfPayment')?.value ?? 'CASH',
       amount: 0,
-      paymentType: this.bookingForm.get('paymentType')?.value ?? 'PARTIAL_PAYMENT',
       remarks: ''
     });
   }
@@ -430,12 +429,18 @@ export class BookingFormComponent implements OnInit, CanComponentDeactivate {
       return;
     }
 
+    const amount = this.paymentForm.get('amount')?.value || 0;
+    const remainingAmount = this.calculateRemainingAmount();
+
+    // Automatically determine payment type based on amount
+    const paymentType = amount >= remainingAmount ? 'FULL_PAYMENT' : 'PARTIAL_PAYMENT';
+
     const payment: PaymentHistory = {
       id: null,
       date: this.formatDate(this.paymentForm.get('date')?.value),
-      amount: this.paymentForm.get('amount')?.value || 0,
+      amount: amount,
       paymentMethod: this.paymentForm.get('paymentMethod')?.value || 'CASH',
-      paymentType: this.paymentForm.get('paymentType')?.value || 'PARTIAL_PAYMENT',
+      paymentType: paymentType,
       remarks: this.paymentForm.get('remarks')?.value
     };
 
@@ -649,7 +654,6 @@ export class BookingFormComponent implements OnInit, CanComponentDeactivate {
       date: this.fb.control<Date>(new Date(), Validators.required),
       amount: this.fb.control<number>(0, [Validators.required, Validators.min(1)]),
       paymentMethod: this.fb.control<string>(this.bookingForm.get('modeOfPayment')?.value ?? 'CASH', Validators.required),
-      paymentType: this.fb.control<string>('PARTIAL_PAYMENT', Validators.required),
       remarks: this.fb.control<string>('')
     });
   }
