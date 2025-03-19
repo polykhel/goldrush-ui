@@ -26,4 +26,8 @@ export class OptionsService {
   getPaymentMethods() {
     return this.http.get<Option[]>(`${this.baseUrl}/payment-methods`);
   }
+
+  getPaymentTypes() {
+    return this.http.get<Option[]>(`${this.baseUrl}/payment-types`);
+  }
 }

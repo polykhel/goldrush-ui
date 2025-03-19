@@ -56,7 +56,7 @@ import { distinctUntilChanged, finalize, Observable, takeUntil } from 'rxjs';
     DialogModule,
     DecimalPipe
   ],
-  providers: [ConfirmationService, DestroyService]
+  providers: [ConfirmationService]
 })
 export class BookingFormComponent implements OnInit, CanComponentDeactivate {
   fb = inject(NonNullableFormBuilder);
@@ -77,10 +77,10 @@ export class BookingFormComponent implements OnInit, CanComponentDeactivate {
   hasUnsavedChanges = false;
 
   paymentMethods: Option[] = [];
+  paymentTypes: Option[] = [];
 
   isEditingPayment = false;
   editingPaymentIndex: number | null = null;
-  private readonly destroy$ = inject(DestroyService);
 
   protected readonly packageOptions = PACKAGE_OPTIONS;
 
@@ -91,6 +91,7 @@ export class BookingFormComponent implements OnInit, CanComponentDeactivate {
     private toastService: ToastService,
     private confirmationService: ConfirmationService,
     private optionsService: OptionsService,
+    private destroy$: DestroyService,
   ) {
   }
 
@@ -132,6 +133,10 @@ export class BookingFormComponent implements OnInit, CanComponentDeactivate {
 
     this.optionsService.getBookingStatuses().subscribe(data => {
       this.statusOptions = data;
+    });
+
+    this.optionsService.getPaymentTypes().subscribe(data => {
+      this.paymentTypes = data;
     });
 
     this.route.paramMap.subscribe(params => {
@@ -364,6 +369,7 @@ export class BookingFormComponent implements OnInit, CanComponentDeactivate {
       date: new Date(),
       paymentMethod: this.bookingForm.get('modeOfPayment')?.value ?? 'CASH',
       amount: 0,
+      paymentType: this.bookingForm.get('paymentType')?.value ?? 'PARTIAL_PAYMENT',
       remarks: ''
     });
   }
@@ -420,6 +426,7 @@ export class BookingFormComponent implements OnInit, CanComponentDeactivate {
       date: this.formatDate(this.paymentForm.get('date')?.value),
       amount: this.paymentForm.get('amount')?.value || 0,
       paymentMethod: this.paymentForm.get('paymentMethod')?.value || 'CASH',
+      paymentType: this.paymentForm.get('paymentType')?.value || 'PARTIAL_PAYMENT',
       remarks: this.paymentForm.get('remarks')?.value
     };
 
@@ -477,6 +484,44 @@ export class BookingFormComponent implements OnInit, CanComponentDeactivate {
         error: (error) => {
           this.toastService.error('Error', 'Failed to generate Statement of Account');
           console.error('Error generating Statement of Account:', error);
+        }
+      });
+  }
+
+  generatePaymentAcknowledgement(paymentHistoryId: string): void {
+    if (!this.bookingId) return;
+
+    if (this.bookingForm.invalid) {
+      this.toastService.warn('Validation Error', 'Please fill in all required fields correctly');
+      return;
+    }
+
+    this.loading = true;
+    this.bookingService.generatePaymentAcknowledgement(this.bookingId, paymentHistoryId)
+      .pipe(finalize(() => this.loading = false))
+      .subscribe({
+        next: (response) => {
+          if (response?.status !== 200 || !response.body || response.body.size === 0) {
+            this.toastService.warn('Warning', 'No data found for Statement of Account');
+            return;
+          }
+
+          const fileName = response.headers.get('Content-Disposition')?.split(';')[1]?.split('=')[1];
+
+          this.toastService.success('Success', 'Payment Acknowledgement generated successfully');
+          const fileURL = URL.createObjectURL(response.body);
+          const a = document.createElement('a');
+          a.href = fileURL;
+          a.target = '_blank';
+          a.download = fileName ?? 'payment-acknowledgement.pdf';
+          document.body.appendChild(a); // Required for Firefox
+          a.click();
+          document.body.removeChild(a); // Clean up
+          URL.revokeObjectURL(fileURL); // Release the object URL
+        },
+        error: (error) => {
+          this.toastService.error('Error', 'Failed to generate Payment Acknowledgement');
+          console.error('Error generating Payment Acknowledgement:', error);
         }
       });
   }
@@ -542,7 +587,11 @@ export class BookingFormComponent implements OnInit, CanComponentDeactivate {
   }
 
   getPaymentMethodLabel(value: string): string {
-    return this.paymentMethods.find(paymentMethod => paymentMethod.value = value)?.label ?? '';
+    return this.paymentMethods.find(paymentMethod => paymentMethod.value == value)?.label ?? '';
+  }
+
+  getPaymentTypeLabel(value: string): string {
+    return this.paymentTypes.find(paymentType => paymentType.value == value)?.label ?? '';
   }
 
   calculateTotalServiceFees(): number {
@@ -590,6 +639,7 @@ export class BookingFormComponent implements OnInit, CanComponentDeactivate {
       date: this.fb.control<Date>(new Date(), Validators.required),
       amount: this.fb.control<number>(0, [Validators.required, Validators.min(1)]),
       paymentMethod: this.fb.control<string>(this.bookingForm.get('modeOfPayment')?.value ?? 'CASH', Validators.required),
+      paymentType: this.fb.control<string>('PARTIAL_PAYMENT', Validators.required),
       remarks: this.fb.control<string>('')
     });
   }

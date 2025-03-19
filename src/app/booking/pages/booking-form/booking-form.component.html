@@ -240,6 +240,7 @@
             <th id="paymentMethod">Payment Method</th>
             <th id="paymentAmount" class="text-right">Amount</th>
             <th id="paymentRemarks">Remarks</th>
+            <th id="paymentType">Type</th>
             <th id="paymentActions" style="width: 8rem">Actions</th>
           </tr>
         </ng-template>
@@ -249,12 +250,17 @@
             <td>{{ getPaymentMethodLabel(payment.paymentMethod) }}</td>
             <td class="text-right">₱ {{ payment.amount | number:'1.2-2' }}</td>
             <td>{{ payment.remarks }}</td>
+            <td>{{ getPaymentTypeLabel(payment.paymentType) }}</td>
             <td>
               @if (payment.id === null) {
                 <div class="flex gap-2 justify-center">
                   <p-button icon="pi pi-pencil" (onClick)="openEditPaymentDialog(payment, i)" [rounded]="true" [text]="true" severity="primary"></p-button>
                   <p-button icon="pi pi-trash" (onClick)="deletePayment(i)" [rounded]="true" [text]="true" severity="danger"></p-button>
                 </div>
+              } @else {
+                <p-button icon="pi pi-file-pdf"
+                          (onClick)="generatePaymentAcknowledgement(payment.id)" [rounded]="true" [text]="true"
+                          [disabled]="loading"></p-button>
               }
             </td>
           </tr>
@@ -297,6 +303,12 @@
           <p-float-label variant="on">
             <p-inputNumber id="paymentAmount" formControlName="amount" mode="currency" currency="PHP" locale="en-US" class="w-full"></p-inputNumber>
             <label for="paymentAmount">Amount</label>
+          </p-float-label>
+
+          <p-float-label variant="on">
+            <p-select [options]="paymentTypes" class="w-full" formControlName="paymentType" id="paymentType"
+                      optionLabel="label" optionValue="value"></p-select>
+            <label for="paymentType">Type</label>
           </p-float-label>
 
           <p-float-label variant="on">

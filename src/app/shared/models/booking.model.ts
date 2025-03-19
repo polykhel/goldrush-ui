@@ -43,5 +43,6 @@ export interface PaymentHistory {
   date: string;
   amount: number;
   paymentMethod: string;
+  paymentType: string;
   remarks?: string;
 }
