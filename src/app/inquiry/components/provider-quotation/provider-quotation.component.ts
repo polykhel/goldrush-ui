@@ -1,11 +1,11 @@
 import { DatePipe } from '@angular/common';
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormArray, FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { Option } from '@models/option';
 import { ProviderQuotation } from '@models/provider-quotation.model';
 import { Provider } from '@models/provider.model';
+import { UntilDestroy, untilDestroyed } from '@ngneat/until-destroy';
 import { BookingService } from '@services/booking.service';
 import { ExchangeRateService } from '@services/exchange-rate.service';
 import { OptionsService } from '@services/options.service';
@@ -26,6 +26,7 @@ import { InputText } from 'primeng/inputtext';
 import { Select } from 'primeng/select';
 import { Textarea } from 'primeng/textarea';
 
+@UntilDestroy()
 @Component({
   selector: 'app-provider-quotation',
   templateUrl: './provider-quotation.component.html',
@@ -117,7 +118,6 @@ export class ProviderQuotationComponent implements OnInit {
     )?.value;
 
     this.optionsService.getQuotationStatuses()
-      .pipe(takeUntilDestroyed())
       .subscribe(statuses => {
         this.quotationStatuses = statuses;
       });
@@ -127,7 +127,7 @@ export class ProviderQuotationComponent implements OnInit {
       const control = this.formGroup.get(field);
       if (control) {
         control.valueChanges
-          .pipe(takeUntilDestroyed())
+          .pipe(untilDestroyed(this))
           .subscribe(value => {
             if (value) {
               const cleanedValue = this.cleanTextInput(value);

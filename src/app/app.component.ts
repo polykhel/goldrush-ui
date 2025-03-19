@@ -1,8 +1,8 @@
 import { CommonModule } from '@angular/common';
 import { Component, ElementRef, OnDestroy, OnInit, Renderer2, ViewChild } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router, RouterOutlet } from '@angular/router';
 import { AuthService } from '@auth0/auth0-angular';
+import { UntilDestroy, untilDestroyed } from '@ngneat/until-destroy';
 import { filter, Subscription } from 'rxjs';
 import { FooterComponent } from './layout/footer/footer.component';
 import { LayoutService } from './layout/layout.service';
@@ -10,6 +10,7 @@ import { NavbarComponent } from './layout/navbar/navbar.component';
 import { SidebarComponent } from './layout/sidebar/sidebar.component';
 import { PageLoaderComponent } from './pages/page-loader/page-loader.component';
 
+@UntilDestroy()
 @Component({
   selector: 'app-root',
   standalone: true,
@@ -33,20 +34,20 @@ export class AppComponent implements OnInit, OnDestroy {
     public router: Router,
   ) {
     this.overlayMenuOpenSubscription = this.layoutService.overlayOpen$
-      .pipe(takeUntilDestroyed())
-    .subscribe(() => {
-      if (!this.menuOutsideClickListener) {
-        this.menuOutsideClickListener = this.renderer.listen('document', 'click', (event) => {
-          if (this.isOutsideClicked(event)) {
-            this.hideMenu();
-          }
-        });
-      }
+      .pipe(untilDestroyed(this))
+      .subscribe(() => {
+        if (!this.menuOutsideClickListener) {
+          this.menuOutsideClickListener = this.renderer.listen('document', 'click', (event) => {
+            if (this.isOutsideClicked(event)) {
+              this.hideMenu();
+            }
+          });
+        }
 
-      if (this.layoutService.layoutState().staticMenuMobileActive) {
-        this.blockBodyScroll();
-      }
-    });
+        if (this.layoutService.layoutState().staticMenuMobileActive) {
+          this.blockBodyScroll();
+        }
+      });
 
     this.router.events.pipe(filter((event) => event instanceof NavigationEnd)).subscribe(() => {
       this.hideMenu();

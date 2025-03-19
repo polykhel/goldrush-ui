@@ -1,6 +1,5 @@
 import { DatePipe } from '@angular/common';
 import { Component, inject, OnInit } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import {
   FormArray,
   FormControl,
@@ -18,6 +17,7 @@ import { Option } from '@models/option';
 import { ProviderQuotation, ProviderQuotationEmailRequest } from '@models/provider-quotation.model';
 import { Provider } from '@models/provider.model';
 import { ClientQuotation, Flight } from '@models/quotation.model';
+import { UntilDestroy, untilDestroyed } from '@ngneat/until-destroy';
 import { CountryService } from '@services/country.service';
 import { EmailService } from '@services/email.service';
 import { InquiryService } from '@services/inquiry.service';
@@ -46,6 +46,7 @@ import { EmailPreviewModalComponent } from '../../components/email-preview-modal
 import { ProviderQuotationComponent } from '../../components/provider-quotation/provider-quotation.component';
 import { QuotationPreviewComponent } from '../../components/quotation-preview/quotation-preview.component';
 
+@UntilDestroy()
 @Component({
   standalone: true,
   selector: 'app-inquiry-form',
@@ -156,7 +157,7 @@ export class InquiryFormComponent implements OnInit {
   setupFormFromRoute() {
     this.route.params
       .pipe(
-        takeUntilDestroyed(),
+        untilDestroyed(this),
         switchMap(params => {
           const id = params['id'];
           if (id) {
@@ -205,7 +206,6 @@ export class InquiryFormComponent implements OnInit {
         .saveInquiry(toSave)
         .pipe(
           finalize(() => (this.saving = false)),
-          takeUntilDestroyed()
         )
         .subscribe({
           next: (response) => {

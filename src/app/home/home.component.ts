@@ -1,13 +1,14 @@
 import { AsyncPipe } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute } from '@angular/router';
 import { AuthService } from '@auth0/auth0-angular';
+import { UntilDestroy, untilDestroyed } from '@ngneat/until-destroy';
 import { ToastService } from '@services/toast.service';
 import { Toast } from 'primeng/toast';
 import { DashboardComponent } from '../dashboard/dashboard.component';
 import { LoginComponent } from '../pages/login/login.component';
 
+@UntilDestroy()
 @Component({
   selector: 'app-home',
   imports: [DashboardComponent, Toast, LoginComponent, AsyncPipe],
@@ -25,7 +26,7 @@ export class HomeComponent implements OnInit {
 
   ngOnInit(): void {
     this.route.queryParams
-      .pipe(takeUntilDestroyed())
+      .pipe(untilDestroyed(this))
       .subscribe((params) => {
         if (params['loginRequired']) {
           this.toastService.showDelayedMessage(

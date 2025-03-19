@@ -1,11 +1,11 @@
 import { DecimalPipe, NgIf } from '@angular/common';
 import { Component, HostListener, inject, OnInit } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CanComponentDeactivate } from '@core/guards/can-deactivate.guard';
 import { Booking, BookingStatus, PaymentHistory, PriceBreakdown } from '@models/booking.model';
 import { Option } from '@models/option';
+import { UntilDestroy, untilDestroyed } from '@ngneat/until-destroy';
 import { BookingService } from '@services/booking.service';
 import { OptionsService } from '@services/options.service';
 import { ToastService } from '@services/toast.service';
@@ -30,6 +30,7 @@ import { ToastModule } from 'primeng/toast';
 import { ToolbarModule } from 'primeng/toolbar';
 import { distinctUntilChanged, finalize, Observable } from 'rxjs';
 
+@UntilDestroy()
 @Component({
   standalone: true,
   selector: 'app-booking-form',
@@ -678,7 +679,7 @@ export class BookingFormComponent implements OnInit, CanComponentDeactivate {
 
     // Subscribe to usePercentage changes
     form.get('usePercentage')?.valueChanges
-      .pipe(takeUntilDestroyed())
+      .pipe(untilDestroyed(this))
       .subscribe(usePercentage => {
         const serviceFeePerPaxControl = form.get('serviceFeePerPax');
         if (usePercentage) {
@@ -694,7 +695,7 @@ export class BookingFormComponent implements OnInit, CanComponentDeactivate {
     relevantControls.forEach(controlName => {
       form.get(controlName)?.valueChanges
         .pipe(
-          takeUntilDestroyed(),
+          untilDestroyed(this),
           distinctUntilChanged()
         )
         .subscribe(() => this.updatePriceCalculations(form));
