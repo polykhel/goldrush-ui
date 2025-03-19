@@ -1,14 +1,14 @@
+import { CommonModule } from '@angular/common';
 import { Component, ElementRef, OnDestroy, OnInit, Renderer2, ViewChild } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router, RouterOutlet } from '@angular/router';
 import { AuthService } from '@auth0/auth0-angular';
-import { CommonModule } from '@angular/common';
-import { SidebarComponent } from './layout/sidebar/sidebar.component';
-import { NavbarComponent } from './layout/navbar/navbar.component';
-import { LayoutService } from './layout/layout.service';
-import { filter, Subscription, takeUntil } from 'rxjs';
-import { DestroyService } from '@services/destroy.service';
-import { PageLoaderComponent } from './pages/page-loader/page-loader.component';
+import { filter, Subscription } from 'rxjs';
 import { FooterComponent } from './layout/footer/footer.component';
+import { LayoutService } from './layout/layout.service';
+import { NavbarComponent } from './layout/navbar/navbar.component';
+import { SidebarComponent } from './layout/sidebar/sidebar.component';
+import { PageLoaderComponent } from './pages/page-loader/page-loader.component';
 
 @Component({
   selector: 'app-root',
@@ -31,10 +31,9 @@ export class AppComponent implements OnInit, OnDestroy {
     public layoutService: LayoutService,
     public renderer: Renderer2,
     public router: Router,
-    private destroy$: DestroyService
   ) {
     this.overlayMenuOpenSubscription = this.layoutService.overlayOpen$
-    .pipe(takeUntil(this.destroy$))
+      .pipe(takeUntilDestroyed())
     .subscribe(() => {
       if (!this.menuOutsideClickListener) {
         this.menuOutsideClickListener = this.renderer.listen('document', 'click', (event) => {

@@ -1,31 +1,30 @@
 import { DatePipe } from '@angular/common';
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormArray, FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
-import { Provider } from '@models/provider.model';
+import { Router } from '@angular/router';
 import { Option } from '@models/option';
+import { ProviderQuotation } from '@models/provider-quotation.model';
+import { Provider } from '@models/provider.model';
+import { BookingService } from '@services/booking.service';
 import { ExchangeRateService } from '@services/exchange-rate.service';
 import { OptionsService } from '@services/options.service';
+import { ProviderQuotationService } from '@services/provider-quotation.service';
 import { ToastService } from '@services/toast.service';
 import { CURRENCIES } from '@utils/constants.util';
+import { ConfirmationService } from 'primeng/api';
 import { Button } from 'primeng/button';
+import { Checkbox } from 'primeng/checkbox';
+import { ConfirmDialog } from 'primeng/confirmdialog';
+import { DatePicker } from 'primeng/datepicker';
 import { FloatLabel } from 'primeng/floatlabel';
+import { Fluid } from 'primeng/fluid';
 import { InputGroup } from 'primeng/inputgroup';
 import { InputGroupAddon } from 'primeng/inputgroupaddon';
 import { InputNumber, InputNumberInputEvent } from 'primeng/inputnumber';
 import { InputText } from 'primeng/inputtext';
 import { Select } from 'primeng/select';
 import { Textarea } from 'primeng/textarea';
-import { ProviderQuotation } from '@models/provider-quotation.model';
-import { ProviderQuotationService } from '@services/provider-quotation.service';
-import { DatePicker } from 'primeng/datepicker';
-import { Fluid } from 'primeng/fluid';
-import { Checkbox } from 'primeng/checkbox';
-import { takeUntil } from 'rxjs';
-import { DestroyService } from '@services/destroy.service';
-import { ConfirmDialog } from 'primeng/confirmdialog';
-import { ConfirmationService } from 'primeng/api';
-import { BookingService } from '@services/booking.service';
-import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-provider-quotation',
@@ -51,8 +50,8 @@ import { Router } from '@angular/router';
 export class ProviderQuotationComponent implements OnInit {
   currencies = CURRENCIES;
 
-  @Input({ required: true }) provider!: Provider;
-  @Input({ required: true }) formGroup!: FormGroup;
+  @Input({required: true}) provider!: Provider;
+  @Input({required: true}) formGroup!: FormGroup;
   @Input() isEditMode = false;
   @Input() showFlightDetails = false;
   @Input() showChildPrices = false;
@@ -74,15 +73,10 @@ export class ProviderQuotationComponent implements OnInit {
     private optionsService: OptionsService,
     private toastService: ToastService,
     private fb: FormBuilder,
-    private destroy$: DestroyService,
     private confirmationService: ConfirmationService,
     private bookingService: BookingService,
     private router: Router,
-  ) {}
-
-  private cleanTextInput(text: string): string {
-    return text
-    .replace(/[^\x20-\x7E\n]/g, ''); // Remove non-printable ASCII characters except newlines
+  ) {
   }
 
   get showEmailSection(): boolean {
@@ -123,7 +117,7 @@ export class ProviderQuotationComponent implements OnInit {
     )?.value;
 
     this.optionsService.getQuotationStatuses()
-      .pipe(takeUntil(this.destroy$))
+      .pipe(takeUntilDestroyed())
       .subscribe(statuses => {
         this.quotationStatuses = statuses;
       });
@@ -133,15 +127,15 @@ export class ProviderQuotationComponent implements OnInit {
       const control = this.formGroup.get(field);
       if (control) {
         control.valueChanges
-        .pipe(takeUntil(this.destroy$))
-        .subscribe(value => {
-          if (value) {
-            const cleanedValue = this.cleanTextInput(value);
-            if (cleanedValue !== value) {
-              control.setValue(cleanedValue, {emitEvent: false});
+          .pipe(takeUntilDestroyed())
+          .subscribe(value => {
+            if (value) {
+              const cleanedValue = this.cleanTextInput(value);
+              if (cleanedValue !== value) {
+                control.setValue(cleanedValue, {emitEvent: false});
+              }
             }
-          }
-        });
+          });
       }
     });
 
@@ -155,10 +149,10 @@ export class ProviderQuotationComponent implements OnInit {
     const exchangeRate = this.formGroup.get('exchangeRate');
 
     if (price && this.formGroup.get('currencyCode')?.value !== 'PHP') {
-      exchangeRate?.enable({ emitEvent: false });
+      exchangeRate?.enable({emitEvent: false});
       this.calculatePhpEquivalent();
     } else {
-      exchangeRate?.disable({ emitEvent: false });
+      exchangeRate?.disable({emitEvent: false});
       exchangeRate?.setValue(null);
       this.formGroup.get('phpEquivalentAmount')?.setValue(null);
     }
@@ -350,5 +344,10 @@ export class ProviderQuotationComponent implements OnInit {
         }
       }
     });
+  }
+
+  private cleanTextInput(text: string): string {
+    return text
+      .replace(/[^\x20-\x7E\n]/g, ''); // Remove non-printable ASCII characters except newlines
   }
 }

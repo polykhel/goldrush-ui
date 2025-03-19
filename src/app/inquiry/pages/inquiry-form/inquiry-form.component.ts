@@ -1,5 +1,6 @@
 import { DatePipe } from '@angular/common';
 import { Component, inject, OnInit } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import {
   FormArray,
   FormControl,
@@ -13,17 +14,21 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { AuditFields } from '@models/base.model';
 import { Country } from '@models/country.model';
 import { Inquiry } from '@models/inquiry.model';
-import { Provider } from '@models/provider.model';
 import { Option } from '@models/option';
+import { ProviderQuotation, ProviderQuotationEmailRequest } from '@models/provider-quotation.model';
+import { Provider } from '@models/provider.model';
+import { ClientQuotation, Flight } from '@models/quotation.model';
 import { CountryService } from '@services/country.service';
-import { DestroyService } from '@services/destroy.service';
 import { EmailService } from '@services/email.service';
 import { InquiryService } from '@services/inquiry.service';
 import { OptionsService } from '@services/options.service';
+import { ProviderQuotationService } from '@services/provider-quotation.service';
 import { ProviderService } from '@services/provider.service';
 import { ToastService } from '@services/toast.service';
 import { EmailData, prepareProviderEmail } from '@utils/email.util';
 import { PACKAGE_OPTIONS } from '@utils/package.util';
+import dayjs from 'dayjs';
+import { ConfirmationService } from 'primeng/api';
 import { Button } from 'primeng/button';
 import { Checkbox } from 'primeng/checkbox';
 import { DatePicker } from 'primeng/datepicker';
@@ -36,21 +41,10 @@ import { RadioButton } from 'primeng/radiobutton';
 import { Select, SelectChangeEvent } from 'primeng/select';
 import { Textarea } from 'primeng/textarea';
 import { Toast } from 'primeng/toast';
-import { finalize, of, switchMap, takeUntil } from 'rxjs';
-import { ProviderQuotation, ProviderQuotationEmailRequest } from '@models/provider-quotation.model';
-import { ProviderQuotationService } from '@services/provider-quotation.service';
-import {
-  EmailPreviewModalComponent
-} from '../../components/email-preview-modal/email-preview-modal.component';
-import {
-  ProviderQuotationComponent
-} from '../../components/provider-quotation/provider-quotation.component';
-import dayjs from 'dayjs';
-import { ClientQuotation, Flight } from '@models/quotation.model';
-import {
-  QuotationPreviewComponent
-} from '../../components/quotation-preview/quotation-preview.component';
-import { ConfirmationService } from 'primeng/api';
+import { finalize, of, switchMap } from 'rxjs';
+import { EmailPreviewModalComponent } from '../../components/email-preview-modal/email-preview-modal.component';
+import { ProviderQuotationComponent } from '../../components/provider-quotation/provider-quotation.component';
+import { QuotationPreviewComponent } from '../../components/quotation-preview/quotation-preview.component';
 
 @Component({
   standalone: true,
@@ -105,7 +99,6 @@ export class InquiryFormComponent implements OnInit {
   constructor(
     private providerService: ProviderService,
     private countryService: CountryService,
-    private destroy$: DestroyService,
     private inquiryService: InquiryService,
     private providerQuotationService: ProviderQuotationService,
     private emailService: EmailService,
@@ -157,29 +150,29 @@ export class InquiryFormComponent implements OnInit {
     }
 
     this.loadInitialData();
-    this.setupFormFromRoute()
+    this.setupFormFromRoute();
   }
 
   setupFormFromRoute() {
     this.route.params
-    .pipe(
-      takeUntil(this.destroy$),
-      switchMap(params => {
-        const id = params['id'];
-        if (id) {
-          this.editMode = true;
-          this.inquiryId = id;
-          return this.inquiryService.getInquiry(id);
+      .pipe(
+        takeUntilDestroyed(),
+        switchMap(params => {
+          const id = params['id'];
+          if (id) {
+            this.editMode = true;
+            this.inquiryId = id;
+            return this.inquiryService.getInquiry(id);
+          }
+          return of(null);
+        })
+      )
+      .subscribe(inquiry => {
+        if (inquiry) {
+          this.currentInquiry = inquiry;
+          this.populateFormWithInquiry(inquiry);
         }
-        return of(null);
-      })
-    )
-    .subscribe(inquiry => {
-      if (inquiry) {
-        this.currentInquiry = inquiry;
-        this.populateFormWithInquiry(inquiry);
-      }
-    });
+      });
   }
 
   saveInquiry() {
@@ -197,7 +190,7 @@ export class InquiryFormComponent implements OnInit {
 
       if (!this.editMode) {
         toSave.quotations = toSave.quotations.map(quotation => {
-          quotation.status = 'PENDING'
+          quotation.status = 'PENDING';
           return quotation;
         });
       }
@@ -209,32 +202,32 @@ export class InquiryFormComponent implements OnInit {
       );
 
       this.inquiryService
-      .saveInquiry(toSave)
-      .pipe(
-        finalize(() => (this.saving = false)),
-        takeUntil(this.destroy$)
-      )
-      .subscribe({
-        next: (response) => {
-          this.toastService.success('Success', 'Inquiry saved successfully');
+        .saveInquiry(toSave)
+        .pipe(
+          finalize(() => (this.saving = false)),
+          takeUntilDestroyed()
+        )
+        .subscribe({
+          next: (response) => {
+            this.toastService.success('Success', 'Inquiry saved successfully');
 
-          if (!this.editMode) {
-            this.editMode = true;
-            this.inquiryId = response.id!;
-            this.router.navigate(['/inquiries', this.inquiryId]);
-          } else {
-            this.auditFields = {
-              ...this.auditFields,
-              updatedBy: response.updatedBy,
-              updatedAt: response.updatedAt
-            };
+            if (!this.editMode) {
+              this.editMode = true;
+              this.inquiryId = response.id!;
+              this.router.navigate(['/inquiries', this.inquiryId]);
+            } else {
+              this.auditFields = {
+                ...this.auditFields,
+                updatedBy: response.updatedBy,
+                updatedAt: response.updatedAt
+              };
+            }
+          },
+          error: (error) => {
+            this.toastService.defaultError('Failed to save inquiry');
+            console.error('Error saving inquiry:', error);
           }
-        },
-        error: (error) => {
-          this.toastService.defaultError('Failed to save inquiry');
-          console.error('Error saving inquiry:', error);
-        }
-      });
+        });
     } else {
       this.toastService.warn(
         'Validation Error',
@@ -305,45 +298,45 @@ export class InquiryFormComponent implements OnInit {
 
     this.isSending = true;
     this.emailService
-    .sendEmail({
-      to: this.providerQuotationRequest.to,
-      subject: this.emailData?.subject,
-      content: this.emailData?.emailContent
-    })
-    .subscribe({
-      next: () => {
-        this.quotations.controls.forEach((control) => {
-          const providerId = control.get('providerId')?.value;
-          if (providerId === this.providerQuotationRequest?.providerId) {
-            control.patchValue({
-              sent: true
-            });
+      .sendEmail({
+        to: this.providerQuotationRequest.to,
+        subject: this.emailData?.subject,
+        content: this.emailData?.emailContent
+      })
+      .subscribe({
+        next: () => {
+          this.quotations.controls.forEach((control) => {
+            const providerId = control.get('providerId')?.value;
+            if (providerId === this.providerQuotationRequest?.providerId) {
+              control.patchValue({
+                sent: true
+              });
 
-            this.providerQuotationService
-            .updateProviderQuotation(control.get('id')?.value, {
-              emailQuotation: control.get('emailQuotation')?.value,
-              sent: true
-            })
+              this.providerQuotationService
+                .updateProviderQuotation(control.get('id')?.value, {
+                  emailQuotation: control.get('emailQuotation')?.value,
+                  sent: true
+                })
+                .subscribe();
+            }
+          });
+
+          this.inquiryForm.get('status')?.setValue('PENDING');
+          this.inquiryService
+            .updateInquiryStatus(this.inquiryId!, 'PENDING')
             .subscribe();
-          }
-        });
 
-        this.inquiryForm.get('status')?.setValue('PENDING');
-        this.inquiryService
-        .updateInquiryStatus(this.inquiryId!, 'PENDING')
-        .subscribe();
-
-        this.toastService.success('Emails sent successfully');
-        this.showEmailPreview = false;
-      },
-      error: (error) => {
-        this.toastService.defaultError('Failed to send emails');
-        console.error('Error sending emails:', error);
-      },
-      complete: () => {
-        this.isSending = false;
-      }
-    });
+          this.toastService.success('Emails sent successfully');
+          this.showEmailPreview = false;
+        },
+        error: (error) => {
+          this.toastService.defaultError('Failed to send emails');
+          console.error('Error sending emails:', error);
+        },
+        complete: () => {
+          this.isSending = false;
+        }
+      });
   }
 
   generateQuotation(providerQuotationId: string) {
@@ -407,8 +400,8 @@ export class InquiryFormComponent implements OnInit {
     if (status?.value === 'NEW' || status?.value === 'PENDING') {
       status?.setValue('QUOTED');
       this.inquiryService
-      .updateInquiryStatus(this.inquiryId, 'QUOTED')
-      .subscribe();
+        .updateInquiryStatus(this.inquiryId, 'QUOTED')
+        .subscribe();
     }
     this.showQuotationPreview = true;
   }
@@ -464,10 +457,10 @@ export class InquiryFormComponent implements OnInit {
 
   updateProviders(event: SelectChangeEvent) {
     this.providerService.getProviderByCountryId(event.value)
-    .subscribe(providers => {
-      this.providers = providers;
-      this.updateAvailableProviders();
-    });
+      .subscribe(providers => {
+        this.providers = providers;
+        this.updateAvailableProviders();
+      });
   }
 
   private updateAvailableProviders() {
@@ -483,29 +476,26 @@ export class InquiryFormComponent implements OnInit {
 
   private loadInitialData() {
     this.countryService.getCountries()
-    .pipe(takeUntil(this.destroy$))
-    .subscribe(countries => {
-      this.countries = countries;
-    });
+      .subscribe(countries => {
+        this.countries = countries;
+      });
 
     this.optionsService.getInquiryStatuses()
-    .pipe(takeUntil(this.destroy$))
-    .subscribe(statuses => {
-      this.statusOptions = statuses;
-    });
+      .subscribe(statuses => {
+        this.statusOptions = statuses;
+      });
 
     this.providerService.getProviders()
-    .pipe(takeUntil(this.destroy$))
-    .subscribe(providers => {
-      if (providers) {
-        this.providers = providers;
-        this.availableProviders = [...providers];
-        this.providerMap = providers.reduce((acc, provider) => {
-          acc.set(provider.id!, provider);
-          return acc;
-        }, new Map<string, Provider>());
-      }
-    });
+      .subscribe(providers => {
+        if (providers) {
+          this.providers = providers;
+          this.availableProviders = [...providers];
+          this.providerMap = providers.reduce((acc, provider) => {
+            acc.set(provider.id!, provider);
+            return acc;
+          }, new Map<string, Provider>());
+        }
+      });
   }
 
   private buildForm() {

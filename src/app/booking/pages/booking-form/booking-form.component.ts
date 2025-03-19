@@ -1,9 +1,9 @@
 import { DecimalPipe, NgIf } from '@angular/common';
 import { Component, HostListener, inject, OnInit } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CanComponentDeactivate } from '@core/guards/can-deactivate.guard';
-import { DestroyService } from '@core/services/destroy.service';
 import { Booking, BookingStatus, PaymentHistory, PriceBreakdown } from '@models/booking.model';
 import { Option } from '@models/option';
 import { BookingService } from '@services/booking.service';
@@ -28,7 +28,7 @@ import { TableModule } from 'primeng/table';
 import { Textarea } from 'primeng/textarea';
 import { ToastModule } from 'primeng/toast';
 import { ToolbarModule } from 'primeng/toolbar';
-import { distinctUntilChanged, finalize, Observable, takeUntil } from 'rxjs';
+import { distinctUntilChanged, finalize, Observable } from 'rxjs';
 
 @Component({
   standalone: true,
@@ -92,7 +92,6 @@ export class BookingFormComponent implements OnInit, CanComponentDeactivate {
     private toastService: ToastService,
     private confirmationService: ConfirmationService,
     private optionsService: OptionsService,
-    private destroy$: DestroyService,
   ) {
   }
 
@@ -679,7 +678,7 @@ export class BookingFormComponent implements OnInit, CanComponentDeactivate {
 
     // Subscribe to usePercentage changes
     form.get('usePercentage')?.valueChanges
-      .pipe(takeUntil(this.destroy$))
+      .pipe(takeUntilDestroyed())
       .subscribe(usePercentage => {
         const serviceFeePerPaxControl = form.get('serviceFeePerPax');
         if (usePercentage) {
@@ -695,7 +694,7 @@ export class BookingFormComponent implements OnInit, CanComponentDeactivate {
     relevantControls.forEach(controlName => {
       form.get(controlName)?.valueChanges
         .pipe(
-          takeUntil(this.destroy$),
+          takeUntilDestroyed(),
           distinctUntilChanged()
         )
         .subscribe(() => this.updatePriceCalculations(form));
