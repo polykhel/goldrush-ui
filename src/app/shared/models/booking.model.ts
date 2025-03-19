@@ -9,6 +9,7 @@ export enum BookingStatus {
 export interface Booking extends AuditedBaseModel {
   inquiryId: string;
   providerQuotationId: string;
+  salutation: string;
   clientName: string;
   bookingDate: Date;
   travelStartDate: Date;

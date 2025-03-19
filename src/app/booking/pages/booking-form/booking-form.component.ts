@@ -78,6 +78,7 @@ export class BookingFormComponent implements OnInit, CanComponentDeactivate {
 
   paymentMethods: Option[] = [];
   paymentTypes: Option[] = [];
+  salutations: Option[] = [];
 
   isEditingPayment = false;
   editingPaymentIndex: number | null = null;
@@ -139,6 +140,10 @@ export class BookingFormComponent implements OnInit, CanComponentDeactivate {
       this.paymentTypes = data;
     });
 
+    this.optionsService.getSalutations().subscribe(data => {
+      this.salutations = data;
+    });
+
     this.route.paramMap.subscribe(params => {
       this.bookingId = params.get('id');
       if (this.bookingId) {
@@ -189,6 +194,7 @@ export class BookingFormComponent implements OnInit, CanComponentDeactivate {
     this.loading = true;
 
     const updatedBooking = {
+      salutation: this.bookingForm.get('salutation')?.value,
       modeOfPayment: this.bookingForm.get('modeOfPayment')?.value,
       remarks: this.bookingForm.get('remarks')?.value,
       paymentHistory: this.localPaymentHistory,
@@ -209,6 +215,9 @@ export class BookingFormComponent implements OnInit, CanComponentDeactivate {
 
           this.bookingForm.patchValue({
             ...booking,
+            bookingDate: new Date(booking.bookingDate),
+            travelStartDate: new Date(booking.travelStartDate),
+            travelEndDate: new Date(booking.travelEndDate),
             totalAmount: booking.totalAmount,
             paidAmount: booking.paidAmount,
             remainingAmount: booking.remainingAmount,
@@ -616,6 +625,7 @@ export class BookingFormComponent implements OnInit, CanComponentDeactivate {
       id: this.fb.control<string | null>(null),
       inquiryId: this.fb.control<string>({value: '', disabled: true}, Validators.required),
       clientName: this.fb.control<string>({value: '', disabled: true}, Validators.required),
+      salutation: this.fb.control<string>('', Validators.required),
       bookingDate: this.fb.control<Date>(new Date(), Validators.required),
       travelStartDate: this.fb.control<Date>({value: new Date(), disabled: true}, Validators.required),
       travelEndDate: this.fb.control<Date>({value: new Date(), disabled: true}, Validators.required),

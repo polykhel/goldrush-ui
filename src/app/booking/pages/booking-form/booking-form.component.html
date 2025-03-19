@@ -24,8 +24,13 @@
         </p-float-label>
       </div>
 
-      <div class="mt-4">
-        <p-float-label variant="on">
+      <div class="grid grid-cols-12 gap-1 mt-4">
+        <p-float-label class="col-span-2" variant="on">
+          <p-select [options]="salutations" class="w-full" formControlName="salutation" id="salutation"
+                    optionLabel="label" optionValue="value"></p-select>
+          <label for="salutation">Salutation</label>
+        </p-float-label>
+        <p-float-label class="col-span-10" variant="on">
           <input class="w-full" formControlName="clientName" id="clientName" pInputText type="text">
           <label for="clientName">Client Name</label>
         </p-float-label>

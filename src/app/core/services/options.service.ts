@@ -30,4 +30,8 @@ export class OptionsService {
   getPaymentTypes() {
     return this.http.get<Option[]>(`${this.baseUrl}/payment-types`);
   }
+
+  getSalutations() {
+    return this.http.get<Option[]>(`${this.baseUrl}/salutations`);
+  }
 }
