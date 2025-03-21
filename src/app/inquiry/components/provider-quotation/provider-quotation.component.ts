@@ -1,6 +1,11 @@
 import { DatePipe } from '@angular/common';
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
-import { FormArray, FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
+import {
+  FormArray,
+  FormBuilder,
+  FormGroup,
+  ReactiveFormsModule,
+} from '@angular/forms';
 import { Router } from '@angular/router';
 import { Option } from '@models/option';
 import { ProviderQuotation } from '@models/provider-quotation.model';
@@ -44,15 +49,15 @@ import { Textarea } from 'primeng/textarea';
     DatePicker,
     Fluid,
     Checkbox,
-    ConfirmDialog
+    ConfirmDialog,
   ],
-  providers: [ConfirmationService]
+  providers: [ConfirmationService],
 })
 export class ProviderQuotationComponent implements OnInit {
   currencies = CURRENCIES;
 
-  @Input({required: true}) provider!: Provider;
-  @Input({required: true}) formGroup!: FormGroup;
+  @Input({ required: true }) provider!: Provider;
+  @Input({ required: true }) formGroup!: FormGroup;
   @Input() isEditMode = false;
   @Input() showFlightDetails = false;
   @Input() showChildPrices = false;
@@ -66,7 +71,13 @@ export class ProviderQuotationComponent implements OnInit {
   isLoadingRate = false;
   exchangeRateLastUpdated: Date | null = null;
   quotationStatuses: Option[] = [];
-  breakdownItems = ['Flight', 'Land Arrangement', 'Hotel', 'Airport Transfer', 'Other'];
+  breakdownItems = [
+    'Flight',
+    'Land Arrangement',
+    'Hotel',
+    'Airport Transfer',
+    'Other',
+  ];
 
   constructor(
     private exchangeRateService: ExchangeRateService,
@@ -77,8 +88,7 @@ export class ProviderQuotationComponent implements OnInit {
     private confirmationService: ConfirmationService,
     private bookingService: BookingService,
     private router: Router,
-  ) {
-  }
+  ) {}
 
   get showEmailSection(): boolean {
     const status = this.formGroup.get('status')?.value;
@@ -92,7 +102,7 @@ export class ProviderQuotationComponent implements OnInit {
 
   get showFlightSection(): boolean {
     const status = this.formGroup.get('status')?.value;
-    return this.showFlightDetails && (status === 'RECEIVED');
+    return this.showFlightDetails && status === 'RECEIVED';
   }
 
   get showAdditionalSection(): boolean {
@@ -117,27 +127,26 @@ export class ProviderQuotationComponent implements OnInit {
       'exchangeRateLastUpdated',
     )?.value;
 
-    this.optionsService.getQuotationStatuses()
-      .subscribe(statuses => {
-        this.quotationStatuses = statuses;
-      });
+    this.optionsService.getQuotationStatuses().subscribe((statuses) => {
+      this.quotationStatuses = statuses;
+    });
 
     // Add paste event listeners to textareas
-    ['inclusions', 'exclusions', 'optionalTours'].forEach(field => {
-      const control = this.formGroup.get(field);
-      if (control) {
-        control.valueChanges
-          .pipe(untilDestroyed(this))
-          .subscribe(value => {
+    ['inclusions', 'exclusions', 'optionalTours', 'itinerary'].forEach(
+      (field) => {
+        const control = this.formGroup.get(field);
+        if (control) {
+          control.valueChanges.pipe(untilDestroyed(this)).subscribe((value) => {
             if (value) {
               const cleanedValue = this.cleanTextInput(value);
               if (cleanedValue !== value) {
-                control.setValue(cleanedValue, {emitEvent: false});
+                control.setValue(cleanedValue, { emitEvent: false });
               }
             }
           });
-      }
-    });
+        }
+      },
+    );
 
     // Calculate initial breakdown total
     this.updatePriceBreakdown();
@@ -149,10 +158,10 @@ export class ProviderQuotationComponent implements OnInit {
     const exchangeRate = this.formGroup.get('exchangeRate');
 
     if (price && this.formGroup.get('currencyCode')?.value !== 'PHP') {
-      exchangeRate?.enable({emitEvent: false});
+      exchangeRate?.enable({ emitEvent: false });
       this.calculatePhpEquivalent();
     } else {
-      exchangeRate?.disable({emitEvent: false});
+      exchangeRate?.disable({ emitEvent: false });
       exchangeRate?.setValue(null);
       this.formGroup.get('phpEquivalentAmount')?.setValue(null);
     }
@@ -271,8 +280,8 @@ export class ProviderQuotationComponent implements OnInit {
     this.priceBreakdownArray.push(
       this.fb.group({
         label: [this.breakdownItems[this.priceBreakdownArray.length]],
-        amount: [0]
-      })
+        amount: [0],
+      }),
     );
   }
 
@@ -285,7 +294,7 @@ export class ProviderQuotationComponent implements OnInit {
     if (this.priceBreakdownArray.length > 0) {
       const breakdownTotal = this.priceBreakdownArray.controls.reduce(
         (sum, control) => sum + (control.get('amount')?.value || 0),
-        0
+        0,
       );
       this.formGroup.get('priceAmount')?.setValue(breakdownTotal);
     }
@@ -296,8 +305,8 @@ export class ProviderQuotationComponent implements OnInit {
     this.childPriceBreakdownArray.push(
       this.fb.group({
         label: [this.breakdownItems[this.childPriceBreakdownArray.length]],
-        amount: [0]
-      })
+        amount: [0],
+      }),
     );
   }
 
@@ -310,7 +319,7 @@ export class ProviderQuotationComponent implements OnInit {
     if (this.childPriceBreakdownArray.length > 0) {
       const breakdownTotal = this.childPriceBreakdownArray.controls.reduce(
         (sum, control) => sum + (control.get('amount')?.value || 0),
-        0
+        0,
       );
       this.formGroup.get('childPriceAmount')?.setValue(breakdownTotal);
     }
@@ -318,36 +327,42 @@ export class ProviderQuotationComponent implements OnInit {
 
   createBooking() {
     this.confirmationService.confirm({
-      message: 'This will create a booking for this inquiry. Are you sure you want to proceed?',
+      message:
+        'This will create a booking for this inquiry. Are you sure you want to proceed?',
       header: 'Create Booking',
       icon: 'pi pi-exclamation-triangle',
       accept: () => {
         if (this.formGroup.valid && this.formGroup.get('priceAmount')?.value) {
-          this.toastService.info(
-            'Creating Booking',
-            'Creating booking...'
-          );
+          this.toastService.info('Creating Booking', 'Creating booking...');
 
-          this.bookingService.createBookingFromInquiry(this.inquiryId!, this.formGroup.get('id')?.value).subscribe({
-            next: (booking) => {
-              this.router.navigate(['/bookings', booking.id]);
-            },
-            error: (error) => {
-              this.toastService.error(
-                'Error Creating Booking',
-                error.message || 'An error occurred while creating the booking'
-              );
-            }
-          });
+          this.bookingService
+            .createBookingFromInquiry(
+              this.inquiryId!,
+              this.formGroup.get('id')?.value,
+            )
+            .subscribe({
+              next: (booking) => {
+                this.router.navigate(['/bookings', booking.id]);
+              },
+              error: (error) => {
+                this.toastService.error(
+                  'Error Creating Booking',
+                  error.message ||
+                    'An error occurred while creating the booking',
+                );
+              },
+            });
         } else {
-          this.toastService.warn('Validation Error', 'Please fill in all required fields');
+          this.toastService.warn(
+            'Validation Error',
+            'Please fill in all required fields',
+          );
         }
-      }
+      },
     });
   }
 
   private cleanTextInput(text: string): string {
-    return text
-      .replace(/[^\x20-\x7E\n]/g, ''); // Remove non-printable ASCII characters except newlines
+    return text.replace(/[^\x20-\x7E\n]/g, ''); // Remove non-printable ASCII characters except newlines
   }
 }

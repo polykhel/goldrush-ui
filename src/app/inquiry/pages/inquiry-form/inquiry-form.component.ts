@@ -7,14 +7,17 @@ import {
   FormsModule,
   NonNullableFormBuilder,
   ReactiveFormsModule,
-  Validators
+  Validators,
 } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AuditFields } from '@models/base.model';
 import { Country } from '@models/country.model';
 import { Inquiry } from '@models/inquiry.model';
 import { Option } from '@models/option';
-import { ProviderQuotation, ProviderQuotationEmailRequest } from '@models/provider-quotation.model';
+import {
+  ProviderQuotation,
+  ProviderQuotationEmailRequest,
+} from '@models/provider-quotation.model';
 import { Provider } from '@models/provider.model';
 import { ClientQuotation, Flight } from '@models/quotation.model';
 import { UntilDestroy, untilDestroyed } from '@ngneat/until-destroy';
@@ -68,10 +71,10 @@ import { QuotationPreviewComponent } from '../../components/quotation-preview/qu
     ProviderQuotationComponent,
     Checkbox,
     FormsModule,
-    QuotationPreviewComponent
+    QuotationPreviewComponent,
   ],
   templateUrl: './inquiry-form.component.html',
-  providers: [ConfirmationService]
+  providers: [ConfirmationService],
 })
 export class InquiryFormComponent implements OnInit {
   fb = inject(NonNullableFormBuilder);
@@ -106,16 +109,17 @@ export class InquiryFormComponent implements OnInit {
     private optionsService: OptionsService,
     private toastService: ToastService,
     private route: ActivatedRoute,
-    private router: Router
-  ) {
-  }
+    private router: Router,
+  ) {}
 
   get status() {
     return this.inquiryForm.get('status')?.value;
   }
 
   get startDate(): Date {
-    return this.inquiryForm.get('travelDetails.startDate')?.value ?? this.defaultDate;
+    return (
+      this.inquiryForm.get('travelDetails.startDate')?.value ?? this.defaultDate
+    );
   }
 
   get quotations(): FormArray {
@@ -147,7 +151,11 @@ export class InquiryFormComponent implements OnInit {
   ngOnInit() {
     const state = this.router.lastSuccessfulNavigation?.extras?.state;
     if (state?.['duplicate']) {
-      this.toastService.showDelayedMessage('success', 'Success', 'Inquiry duplicated successfully');
+      this.toastService.showDelayedMessage(
+        'success',
+        'Success',
+        'Inquiry duplicated successfully',
+      );
     }
 
     this.loadInitialData();
@@ -158,7 +166,7 @@ export class InquiryFormComponent implements OnInit {
     this.route.params
       .pipe(
         untilDestroyed(this),
-        switchMap(params => {
+        switchMap((params) => {
           const id = params['id'];
           if (id) {
             this.editMode = true;
@@ -166,9 +174,9 @@ export class InquiryFormComponent implements OnInit {
             return this.inquiryService.getInquiry(id);
           }
           return of(null);
-        })
+        }),
       )
-      .subscribe(inquiry => {
+      .subscribe((inquiry) => {
         if (inquiry) {
           this.currentInquiry = inquiry;
           this.populateFormWithInquiry(inquiry);
@@ -183,14 +191,18 @@ export class InquiryFormComponent implements OnInit {
         ...formValue,
         travelDetails: {
           ...formValue.travelDetails,
-          startDate: formValue.travelDetails.startDate ? dayjs(formValue.travelDetails.startDate).format('YYYY-MM-DD') : '',
-          endDate: formValue.travelDetails.endDate ? dayjs(formValue.travelDetails.endDate).format('YYYY-MM-DD') : ''
+          startDate: formValue.travelDetails.startDate
+            ? dayjs(formValue.travelDetails.startDate).format('YYYY-MM-DD')
+            : '',
+          endDate: formValue.travelDetails.endDate
+            ? dayjs(formValue.travelDetails.endDate).format('YYYY-MM-DD')
+            : '',
         },
-        customPackageOptions: formValue.customPackageOptions?.join(';') ?? null
+        customPackageOptions: formValue.customPackageOptions?.join(';') ?? null,
       };
 
       if (!this.editMode) {
-        toSave.quotations = toSave.quotations.map(quotation => {
+        toSave.quotations = toSave.quotations.map((quotation) => {
           quotation.status = 'PENDING';
           return quotation;
         });
@@ -199,14 +211,12 @@ export class InquiryFormComponent implements OnInit {
       this.saving = true;
       this.toastService.info(
         'Saving',
-        `${this.editMode ? 'Updating' : 'Creating'} inquiry...`
+        `${this.editMode ? 'Updating' : 'Creating'} inquiry...`,
       );
 
       this.inquiryService
         .saveInquiry(toSave)
-        .pipe(
-          finalize(() => (this.saving = false)),
-        )
+        .pipe(finalize(() => (this.saving = false)))
         .subscribe({
           next: (response) => {
             this.toastService.success('Success', 'Inquiry saved successfully');
@@ -219,19 +229,19 @@ export class InquiryFormComponent implements OnInit {
               this.auditFields = {
                 ...this.auditFields,
                 updatedBy: response.updatedBy,
-                updatedAt: response.updatedAt
+                updatedAt: response.updatedAt,
               };
             }
           },
           error: (error) => {
             this.toastService.defaultError('Failed to save inquiry');
             console.error('Error saving inquiry:', error);
-          }
+          },
         });
     } else {
       this.toastService.warn(
         'Validation Error',
-        'Please fill in all required fields'
+        'Please fill in all required fields',
       );
     }
   }
@@ -246,8 +256,14 @@ export class InquiryFormComponent implements OnInit {
         return;
       }
 
-      if (inquiry.travelDetails.startDate === null || inquiry.travelDetails.endDate === null) {
-        this.toastService.warn('Validation Error', 'Please select start and end date.');
+      if (
+        inquiry.travelDetails.startDate === null ||
+        inquiry.travelDetails.endDate === null
+      ) {
+        this.toastService.warn(
+          'Validation Error',
+          'Please select start and end date.',
+        );
         return;
       }
 
@@ -255,7 +271,7 @@ export class InquiryFormComponent implements OnInit {
         providerId: providerQuotation.providerId,
         dateRange: {
           start: inquiry.travelDetails.startDate,
-          end: inquiry.travelDetails.endDate
+          end: inquiry.travelDetails.endDate,
         },
         travelDays: inquiry.travelDetails.days,
         travelNights: inquiry.travelDetails.nights,
@@ -269,7 +285,7 @@ export class InquiryFormComponent implements OnInit {
         emailRemarks: providerQuotation.emailQuotation,
         sender: this.auditFields.createdBy ?? 'Goldrush',
         sent: providerQuotation.sent,
-        to: provider?.email
+        to: provider?.email,
       };
 
       this.emailData = prepareProviderEmail(this.providerQuotationRequest);
@@ -277,7 +293,7 @@ export class InquiryFormComponent implements OnInit {
     } else {
       this.toastService.warn(
         'Validation Error',
-        'Please fill in all required field'
+        'Please fill in all required field',
       );
     }
   }
@@ -286,7 +302,7 @@ export class InquiryFormComponent implements OnInit {
     if (!this.inquiryId) {
       this.toastService.warn(
         'Inquiry not saved yet',
-        'Please save inquiry first before sending'
+        'Please save inquiry first before sending',
       );
       return;
     }
@@ -301,7 +317,7 @@ export class InquiryFormComponent implements OnInit {
       .sendEmail({
         to: this.providerQuotationRequest.to,
         subject: this.emailData?.subject,
-        content: this.emailData?.emailContent
+        content: this.emailData?.emailContent,
       })
       .subscribe({
         next: () => {
@@ -309,13 +325,13 @@ export class InquiryFormComponent implements OnInit {
             const providerId = control.get('providerId')?.value;
             if (providerId === this.providerQuotationRequest?.providerId) {
               control.patchValue({
-                sent: true
+                sent: true,
               });
 
               this.providerQuotationService
                 .updateProviderQuotation(control.get('id')?.value, {
                   emailQuotation: control.get('emailQuotation')?.value,
-                  sent: true
+                  sent: true,
                 })
                 .subscribe();
             }
@@ -335,7 +351,7 @@ export class InquiryFormComponent implements OnInit {
         },
         complete: () => {
           this.isSending = false;
-        }
+        },
       });
   }
 
@@ -343,42 +359,50 @@ export class InquiryFormComponent implements OnInit {
     if (!this.inquiryId) {
       this.toastService.warn(
         'Inquiry not saved yet',
-        'Please save inquiry first before generating'
+        'Please save inquiry first before generating',
       );
       return;
     }
 
     const inquiry = this.inquiryForm.getRawValue();
     const providerQuotation = inquiry.quotations.find(
-      (quotation) => quotation.id === providerQuotationId
+      (quotation) => quotation.id === providerQuotationId,
     );
 
     if (!providerQuotation) {
       this.toastService.warn(
         'Provider quotation not found',
-        'Please save inquiry first before generating'
+        'Please save inquiry first before generating',
       );
       return;
     }
 
-    if (inquiry.travelDetails.startDate === null || inquiry.travelDetails.endDate === null) {
-      this.toastService.warn('Validation Error', 'Please select start and end date.');
+    if (
+      inquiry.travelDetails.startDate === null ||
+      inquiry.travelDetails.endDate === null
+    ) {
+      this.toastService.warn(
+        'Validation Error',
+        'Please select start and end date.',
+      );
       return;
     }
 
-    const totalRatePerPax = providerQuotation.currencyCode === 'PHP'
-      ? (providerQuotation.priceAmount ?? 0)
-      : (providerQuotation.phpEquivalentAmount ?? 0);
-    const totalRatePerChild = providerQuotation.currencyCode === 'PHP'
-      ? (providerQuotation.childPriceAmount ?? 0)
-      : (providerQuotation.childPhpEquivalentAmount ?? 0);
+    const totalRatePerPax =
+      providerQuotation.currencyCode === 'PHP'
+        ? (providerQuotation.priceAmount ?? 0)
+        : (providerQuotation.phpEquivalentAmount ?? 0);
+    const totalRatePerChild =
+      providerQuotation.currencyCode === 'PHP'
+        ? (providerQuotation.childPriceAmount ?? 0)
+        : (providerQuotation.childPhpEquivalentAmount ?? 0);
 
     this.quotationData = {
       clientName: inquiry.clientName,
       title: `${inquiry.travelDetails.days}D${inquiry.travelDetails.nights}N ${inquiry.travelDetails.destination} Package`,
       travelDates: {
         start: inquiry.travelDetails.startDate,
-        end: inquiry.travelDetails.endDate
+        end: inquiry.travelDetails.endDate,
       },
       noOfPax: inquiry.travelDetails.adults + inquiry.travelDetails.children,
       ratePerPax: totalRatePerPax,
@@ -387,13 +411,17 @@ export class InquiryFormComponent implements OnInit {
       showPriceBreakdown: providerQuotation.showPriceBreakdown,
       priceBreakdown: providerQuotation.priceBreakdown,
       childPriceBreakdown: providerQuotation.childPriceBreakdown,
-      flightDetails: providerQuotation.status === 'INFORMATION_REQUESTED' ? {
-        departure: providerQuotation.flightDetails?.departure ?? null,
-        arrival: providerQuotation.flightDetails?.arrival ?? null
-      } : null,
+      flightDetails:
+        providerQuotation.status === 'INFORMATION_REQUESTED'
+          ? {
+              departure: providerQuotation.flightDetails?.departure ?? null,
+              arrival: providerQuotation.flightDetails?.arrival ?? null,
+            }
+          : null,
       inclusions: providerQuotation.inclusions?.split('\n') ?? [],
       exclusions: providerQuotation.exclusions?.split('\n') ?? [],
-      optionalTours: providerQuotation.optionalTours?.split('\n') ?? []
+      optionalTours: providerQuotation.optionalTours?.split('\n') ?? [],
+      itinerary: providerQuotation.itinerary,
     };
 
     const status = this.inquiryForm.get('status');
@@ -414,7 +442,7 @@ export class InquiryFormComponent implements OnInit {
     if (
       this.selectedProvider &&
       !this.quotations.controls.some(
-        (control) => control.get('providerId')?.value === this.selectedProvider
+        (control) => control.get('providerId')?.value === this.selectedProvider,
       )
     ) {
       const provider = this.providerMap.get(this.selectedProvider);
@@ -456,8 +484,9 @@ export class InquiryFormComponent implements OnInit {
   }
 
   updateProviders(event: SelectChangeEvent) {
-    this.providerService.getProviderByCountryId(event.value)
-      .subscribe(providers => {
+    this.providerService
+      .getProviderByCountryId(event.value)
+      .subscribe((providers) => {
         this.providers = providers;
         this.updateAvailableProviders();
       });
@@ -466,36 +495,33 @@ export class InquiryFormComponent implements OnInit {
   private updateAvailableProviders() {
     const usedProviders = new Set(
       this.quotations.controls.map(
-        (control) => control.get('providerId')?.value
-      )
+        (control) => control.get('providerId')?.value,
+      ),
     );
     this.availableProviders = this.providers.filter(
-      (provider) => !usedProviders.has(provider.id)
+      (provider) => !usedProviders.has(provider.id),
     );
   }
 
   private loadInitialData() {
-    this.countryService.getCountries()
-      .subscribe(countries => {
-        this.countries = countries;
-      });
+    this.countryService.getCountries().subscribe((countries) => {
+      this.countries = countries;
+    });
 
-    this.optionsService.getInquiryStatuses()
-      .subscribe(statuses => {
-        this.statusOptions = statuses;
-      });
+    this.optionsService.getInquiryStatuses().subscribe((statuses) => {
+      this.statusOptions = statuses;
+    });
 
-    this.providerService.getProviders()
-      .subscribe(providers => {
-        if (providers) {
-          this.providers = providers;
-          this.availableProviders = [...providers];
-          this.providerMap = providers.reduce((acc, provider) => {
-            acc.set(provider.id!, provider);
-            return acc;
-          }, new Map<string, Provider>());
-        }
-      });
+    this.providerService.getProviders().subscribe((providers) => {
+      if (providers) {
+        this.providers = providers;
+        this.availableProviders = [...providers];
+        this.providerMap = providers.reduce((acc, provider) => {
+          acc.set(provider.id!, provider);
+          return acc;
+        }, new Map<string, Provider>());
+      }
+    });
   }
 
   private buildForm() {
@@ -515,14 +541,14 @@ export class InquiryFormComponent implements OnInit {
         preferredHotel: this.fb.control<string | null>(null),
         adults: this.fb.control<number>(0),
         children: this.fb.control<number>(0),
-        childAges: this.fb.control<string | null>(null)
+        childAges: this.fb.control<string | null>(null),
       }),
       packageType: this.fb.control<string>('ALL_INCLUSIVE', [
-        Validators.required
+        Validators.required,
       ]),
       customPackageOptions: this.fb.control<string[]>([]),
       quotations: this.fb.array<ProviderQuotation>([]),
-      remarks: this.fb.control<string | null>(null)
+      remarks: this.fb.control<string | null>(null),
     });
   }
 
@@ -534,19 +560,19 @@ export class InquiryFormComponent implements OnInit {
       childPriceAmount: [quotation?.childPriceAmount ?? null],
       currencyCode: [quotation?.currencyCode ?? 'PHP'],
       exchangeRate: [
-        {value: quotation?.exchangeRate ?? null, disabled: true}
+        { value: quotation?.exchangeRate ?? null, disabled: true },
       ],
       exchangeRateLastUpdated: [
         {
           value: quotation?.exchangeRateLastUpdated ?? null,
-          disabled: true
-        }
+          disabled: true,
+        },
       ],
       phpEquivalentAmount: [
-        {value: quotation?.phpEquivalentAmount ?? null, disabled: true}
+        { value: quotation?.phpEquivalentAmount ?? null, disabled: true },
       ],
       childPhpEquivalentAmount: [
-        {value: quotation?.childPhpEquivalentAmount ?? null, disabled: true}
+        { value: quotation?.childPhpEquivalentAmount ?? null, disabled: true },
       ],
       internalRemarks: [quotation?.internalRemarks ?? null],
       emailQuotation: [quotation?.emailQuotation ?? null],
@@ -554,26 +580,31 @@ export class InquiryFormComponent implements OnInit {
       status: [quotation?.status ?? 'NEW'],
       showPriceBreakdown: [quotation?.showPriceBreakdown ?? false],
       priceBreakdown: this.fb.array(
-        quotation?.priceBreakdown?.map(item => this.fb.group({
-          label: [item.label],
-          amount: [item.amount]
-        })) || []
+        quotation?.priceBreakdown?.map((item) =>
+          this.fb.group({
+            label: [item.label],
+            amount: [item.amount],
+          }),
+        ) || [],
       ),
       childPriceBreakdown: this.fb.array(
-        quotation?.childPriceBreakdown?.map(item => this.fb.group({
-          label: [item.label],
-          amount: [item.amount]
-        })) || []
+        quotation?.childPriceBreakdown?.map((item) =>
+          this.fb.group({
+            label: [item.label],
+            amount: [item.amount],
+          }),
+        ) || [],
       ),
       flightDetails: this.fb.group({
         departure: this.buildFlightDetailsForm(
-          quotation?.flightDetails?.departure
+          quotation?.flightDetails?.departure,
         ),
-        arrival: this.buildFlightDetailsForm(quotation?.flightDetails?.arrival)
+        arrival: this.buildFlightDetailsForm(quotation?.flightDetails?.arrival),
       }),
       inclusions: [quotation?.inclusions ?? null],
       exclusions: [quotation?.exclusions ?? null],
-      optionalTours: [quotation?.optionalTours ?? null]
+      optionalTours: [quotation?.optionalTours ?? null],
+      itinerary: [quotation?.itinerary ?? null],
     });
   }
 
@@ -590,7 +621,7 @@ export class InquiryFormComponent implements OnInit {
       airportCode: [flightDetails?.airportCode ?? 'MNL'],
       startDate: [startDate],
       endDate: [endDate],
-      airline: [flightDetails?.airline ?? null]
+      airline: [flightDetails?.airline ?? null],
     });
   }
 
@@ -599,7 +630,7 @@ export class InquiryFormComponent implements OnInit {
       createdBy: inquiry.createdBy,
       createdAt: inquiry.createdAt,
       updatedBy: inquiry.updatedBy,
-      updatedAt: inquiry.updatedAt
+      updatedAt: inquiry.updatedAt,
     };
 
     this.inquiryForm.patchValue({
@@ -608,10 +639,9 @@ export class InquiryFormComponent implements OnInit {
       travelDetails: {
         ...inquiry.travelDetails,
         startDate: new Date(inquiry.travelDetails.startDate),
-        endDate: new Date(inquiry.travelDetails.endDate)
+        endDate: new Date(inquiry.travelDetails.endDate),
       },
-      customPackageOptions:
-        inquiry.customPackageOptions?.split(';') || []
+      customPackageOptions: inquiry.customPackageOptions?.split(';') || [],
     });
 
     if (inquiry?.quotations) {

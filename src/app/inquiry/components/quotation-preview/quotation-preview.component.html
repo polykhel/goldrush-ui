@@ -3,11 +3,14 @@
   [(visible)]="visible"
   [modal]="true"
   [style]="{ maxWidth: '600px' }"
-  class="p-4 font-roboto w-full">
+  class="p-4 font-roboto w-full"
+>
   <section class="relative" id="preview">
     <!-- Header -->
     <div class="mb-6">
-      <h2 class="text-2xl font-bold text-center text-blue-700 mb-2">{{ quotation.title }}</h2>
+      <h2 class="text-2xl font-bold text-center text-blue-700 mb-2">
+        {{ quotation.title }}
+      </h2>
       <p class="text-center text-gray-600">QUOTED AS OF: {{ today }}</p>
     </div>
 
@@ -27,7 +30,7 @@
           RATE PER PAX
           @if (quotation.showPriceBreakdown && quotation.priceBreakdown) {
             <span class="text-xl font-bold text-red-600">
-            {{ quotation.ratePerPax | currency: 'PHP' }}
+              {{ quotation.ratePerPax | currency: "PHP" }}
             </span>
           }
         </div>
@@ -37,13 +40,13 @@
             <div>
               <span class="font-semibold">{{ breakdown.label }}</span>
               <span class="font-bold text-red-600">
-                {{ breakdown.amount | currency: 'PHP' }}
+                {{ breakdown.amount | currency: "PHP" }}
               </span>
             </div>
           }
         } @else {
           <span class="text-xl font-bold text-red-600">
-            {{ quotation.ratePerPax | currency: 'PHP' }}
+            {{ quotation.ratePerPax | currency: "PHP" }}
           </span>
         }
         @if (quotation.ratePerPax !== quotation.ratePerChild) {
@@ -51,7 +54,7 @@
             RATE PER CHILD
             @if (quotation.showPriceBreakdown && quotation.childPriceBreakdown) {
               <span class="text-xl font-bold text-red-600">
-                  {{ quotation.ratePerChild | currency: 'PHP' }}
+                {{ quotation.ratePerChild | currency: "PHP" }}
               </span>
             }
           </div>
@@ -60,14 +63,14 @@
               <div>
                 <span class="font-semibold">{{ breakdown.label }}</span>
                 <span class="font-bold text-red-600">
-                  {{ breakdown.amount | currency: 'PHP' }}
+                  {{ breakdown.amount | currency: "PHP" }}
                 </span>
               </div>
             }
           } @else {
             @if (quotation.ratePerChild) {
               <span class="text-xl font-bold text-red-600">
-                {{ quotation.ratePerChild | currency: 'PHP' }}
+                {{ quotation.ratePerChild | currency: "PHP" }}
               </span>
             }
           }
@@ -86,14 +89,22 @@
             }
           </div>
           <ul class="pl-4 space-y-1">
-            <li><span class="mr-2">•</span> {{
-                getFlightDetails(quotation.flightDetails.departure,
-                  quotation.flightDetails.arrival?.airportCode)
+            <li>
+              <span class="mr-2">•</span>
+              {{
+                getFlightDetails(
+                  quotation.flightDetails.departure,
+                  quotation.flightDetails.arrival?.airportCode
+                )
               }}
             </li>
-            <li><span class="mr-2">•</span> {{
-                getFlightDetails(quotation.flightDetails.arrival,
-                  quotation.flightDetails.departure?.airportCode)
+            <li>
+              <span class="mr-2">•</span>
+              {{
+                getFlightDetails(
+                  quotation.flightDetails.arrival,
+                  quotation.flightDetails.departure?.airportCode
+                )
               }}
             </li>
             <span></span>
@@ -115,8 +126,7 @@
         </ul>
       </div>
       @if (quotation.exclusions ? quotation.exclusions.length > 0 : false) {
-        <div
-          class="p-2 rounded-lg">
+        <div class="p-2 rounded-lg">
           <div class="font-semibold">EXCLUSIONS</div>
           <ul class="space-y-1">
             @for (exclusion of quotation.exclusions; track exclusion) {
@@ -130,8 +140,7 @@
         </div>
       }
       @if (quotation.optionalTours ? quotation.optionalTours.length > 0 : false) {
-        <div
-          class="bg-gray-50 p-2 rounded-lg">
+        <div class="bg-gray-50 p-2 rounded-lg">
           <div class="font-semibold">OPTIONAL ACTIVITIES</div>
           <ul class="space-y-1">
             @for (activity of quotation.optionalTours; track activity) {
@@ -144,6 +153,12 @@
           </ul>
         </div>
       }
+      @if (quotation.itinerary) {
+        <div class="bg-gray-50 p-2 rounded-lg">
+          <div class="font-semibold">Itinerary</div>
+          <div class="text-sm" [innerText]="quotation.itinerary"></div>
+        </div>
+      }
     </div>
 
     <!-- Terms and Conditions -->
@@ -154,34 +169,53 @@
           <span class="mr-2">•</span> Book and Buy Basis
         </li>
         <li class="flex items-start">
-          <span class="mr-2">•</span> Rates and availability subject to change until finalization
+          <span class="mr-2">•</span> Rates and availability subject to change
+          until finalization
         </li>
         <li class="flex items-start">
-          <span class="mr-2">•</span> Bookings not guaranteed until full payment and voucher
-          issuance
+          <span class="mr-2">•</span> Bookings not guaranteed until full payment
+          and voucher issuance
         </li>
         <li class="flex items-start">
-          <span class="mr-2">•</span> Cancellation Policy follows airline, hotel, and local operator
-          terms
+          <span class="mr-2">•</span> Cancellation Policy follows airline,
+          hotel, and local operator terms
         </li>
         <li class="flex items-start">
-          <span class="mr-2">•</span> Payment methods are cash or bank transfer only
+          <span class="mr-2">•</span> Payment methods are cash or bank transfer
+          only
         </li>
       </ul>
     </div>
 
     <!-- Watermark -->
-    <div class="absolute inset-0 flex items-center justify-center pointer-events-none opacity-10">
-      <img alt="Watermark" class="max-w-[50%] max-h-[50%]" src="/images/logo.png"/>
+    <div
+      class="absolute inset-0 flex items-center justify-center pointer-events-none opacity-10"
+    >
+      <img
+        alt="Watermark"
+        class="max-w-[50%] max-h-[50%]"
+        src="/images/logo.png"
+      />
     </div>
-
   </section>
   <div class="flex gap-2 justify-center items-center mt-4">
-    <p-button (onClick)="generateDoc('clipboard')" icon="pi pi-copy" label="Copy to Clipboard"
-              severity="help"></p-button>
-    <p-button (onClick)="generateDoc('img')" icon="pi pi-image" label="Download as Image"
-              severity="info"/>
-    <p-button (onClick)="generateDoc('pdf')" icon="pi pi-file-pdf" label="Download as PDF"
-              severity="secondary"></p-button>
+    <p-button
+      (onClick)="generateDoc('clipboard')"
+      icon="pi pi-copy"
+      label="Copy to Clipboard"
+      severity="help"
+    ></p-button>
+    <p-button
+      (onClick)="generateDoc('img')"
+      icon="pi pi-image"
+      label="Download as Image"
+      severity="info"
+    />
+    <p-button
+      (onClick)="generateDoc('pdf')"
+      icon="pi pi-file-pdf"
+      label="Download as PDF"
+      severity="secondary"
+    ></p-button>
   </div>
 </p-dialog>

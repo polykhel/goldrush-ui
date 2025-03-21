@@ -15,6 +15,7 @@ export interface ClientQuotation {
   inclusions: string[] | null;
   exclusions: string[] | null;
   optionalTours: string[] | null;
+  itinerary: string | null;
   showPriceBreakdown: boolean;
   priceBreakdown: Breakdown[] | null;
   childPriceBreakdown: Breakdown[] | null;
