@@ -412,7 +412,7 @@ export class InquiryFormComponent implements OnInit {
       priceBreakdown: providerQuotation.priceBreakdown,
       childPriceBreakdown: providerQuotation.childPriceBreakdown,
       flightDetails:
-        providerQuotation.status === 'INFORMATION_REQUESTED'
+        providerQuotation.status === 'RECEIVED'
           ? {
               departure: providerQuotation.flightDetails?.departure ?? null,
               arrival: providerQuotation.flightDetails?.arrival ?? null,
