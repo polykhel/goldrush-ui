@@ -1,37 +1,67 @@
 <section
-  class="card container mx-auto max-w-5xl p-8 rounded-lg shadow-lg hover:shadow-xl border border-gray-100">
+  class="card container mx-auto max-w-7xl p-8 rounded-lg shadow-lg hover:shadow-xl border border-gray-100"
+>
   <p-toast></p-toast>
   <p-confirmDialog></p-confirmDialog>
 
-  <form [formGroup]="bookingForm" class="max-w-5xl mx-auto">
+  <form [formGroup]="bookingForm" class="max-w-7xl mx-auto">
     <div class="flex justify-between align-items-center mb-3">
-      <p-button (click)="goBack()" [text]="true" icon="pi pi-arrow-left" label="Back"></p-button>
-      <h2 class="font-bold">{{ bookingId ? 'Edit' : 'New' }} Booking</h2>
+      <p-button
+        (click)="goBack()"
+        [text]="true"
+        icon="pi pi-arrow-left"
+        label="Back"
+      ></p-button>
+      <h2 class="font-bold">{{ bookingId ? "Edit" : "New" }} Booking</h2>
     </div>
 
     <!-- Basic Information Section -->
     <section class="mb-8">
       <h3 class="font-bold mb-4 border-b pb-2">Basic Information</h3>
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
         <p-float-label variant="on">
-          <p-date-picker id="bookingDate" formControlName="bookingDate" [showIcon]="true" dateFormat="mm-dd-yy"></p-date-picker>
+          <p-date-picker
+            [showIcon]="true"
+            dateFormat="mm-dd-yy"
+            formControlName="bookingDate"
+            id="bookingDate"
+          ></p-date-picker>
           <label for="bookingDate">Booking Date</label>
         </p-float-label>
 
         <p-float-label variant="on">
-          <p-select id="status" formControlName="status" [options]="statusOptions" optionLabel="label" optionValue="value"></p-select>
+          <p-select
+            [options]="statusOptions"
+            formControlName="status"
+            id="status"
+            optionLabel="label"
+            optionValue="value"
+          ></p-select>
           <label for="status">Status</label>
+        </p-float-label>
+
+        <p-float-label variant="on">
+          <p-select
+            [options]="salutations"
+            class="w-full"
+            formControlName="salutation"
+            id="salutation"
+            optionLabel="label"
+            optionValue="value"
+          ></p-select>
+          <label for="salutation">Salutation</label>
         </p-float-label>
       </div>
 
-      <div class="grid grid-cols-12 gap-1 mt-4">
-        <p-float-label class="col-span-2" variant="on">
-          <p-select [options]="salutations" class="w-full" formControlName="salutation" id="salutation"
-                    optionLabel="label" optionValue="value"></p-select>
-          <label for="salutation">Salutation</label>
-        </p-float-label>
-        <p-float-label class="col-span-10" variant="on">
-          <input class="w-full" formControlName="clientName" id="clientName" pInputText type="text">
+      <div class="mt-4">
+        <p-float-label variant="on">
+          <input
+            class="w-full"
+            formControlName="clientName"
+            id="clientName"
+            pInputText
+            type="text"
+          />
           <label for="clientName">Client Name</label>
         </p-float-label>
       </div>
@@ -40,131 +70,249 @@
     <!-- Travel Details Section -->
     <section class="mb-8">
       <h3 class="font-bold mb-4 border-b pb-2">Travel Details</h3>
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
         <p-float-label variant="on">
-          <p-date-picker id="travelStartDate" formControlName="travelStartDate" [showIcon]="true" dateFormat="mm-dd-yy"></p-date-picker>
+          <p-date-picker
+            [showIcon]="true"
+            dateFormat="mm-dd-yy"
+            formControlName="travelStartDate"
+            id="travelStartDate"
+          ></p-date-picker>
           <label for="travelStartDate">Travel Start Date</label>
         </p-float-label>
 
         <p-float-label variant="on">
-          <p-date-picker id="travelEndDate" formControlName="travelEndDate" [showIcon]="true" dateFormat="mm-dd-yy"></p-date-picker>
+          <p-date-picker
+            [showIcon]="true"
+            dateFormat="mm-dd-yy"
+            formControlName="travelEndDate"
+            id="travelEndDate"
+          ></p-date-picker>
           <label for="travelEndDate">Travel End Date</label>
         </p-float-label>
 
         <p-float-label variant="on">
-          <input class="w-full" formControlName="destination" id="destination" pInputText type="text">
+          <input
+            class="w-full"
+            formControlName="destination"
+            id="destination"
+            pInputText
+            type="text"
+          />
           <label for="destination">Destination</label>
         </p-float-label>
 
-        <div class="grid grid-cols-2 gap-2">
-          <div class="flex flex-col gap-2">
-            <div class="flex items-center gap-2">
-              <p-radio-button formControlName="packageType" inputId="allInclusive"
-                              value="ALL_INCLUSIVE"/>
-              <label for="allInclusive">All-Inclusive Package</label>
-            </div>
-            <div class="flex items-center gap-2">
-              <p-radio-button formControlName="packageType" inputId="custom" value="CUSTOM"/>
-              <label for="custom">Custom Package</label>
-            </div>
-          </div>
-            @if (bookingForm.controls['packageType'].value === 'CUSTOM') {
-              <div class="flex flex-col gap-2">
-              <div
-                class="ml-6 flex flex-col gap-2">
-                @for (option of packageOptions; track option) {
-                  <div class="flex items-center gap-2">
-                    <p-checkbox
-                      [formControlName]="'customPackageOptions'"
-                      [inputId]="option.id"
-                      [value]="option.id">
-                    </p-checkbox>
-                    <label [for]="option.id" class="ml-2"> {{ option.label }} </label>
-                  </div>
-                }
+        <div class="md:col-span-3">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="flex flex-col gap-2">
+              <div class="flex items-center gap-2">
+                <p-radio-button
+                  formControlName="packageType"
+                  inputId="allInclusive"
+                  value="ALL_INCLUSIVE"
+                />
+                <label for="allInclusive">All-Inclusive Package</label>
               </div>
+              <div class="flex items-center gap-2">
+                <p-radio-button
+                  formControlName="packageType"
+                  inputId="custom"
+                  value="CUSTOM"
+                />
+                <label for="custom">Custom Package</label>
+              </div>
+            </div>
+            @if (bookingForm.controls["packageType"].value === "CUSTOM") {
+              <div class="flex flex-col gap-2">
+                <div class="ml-6 flex flex-col gap-2">
+                  @for (option of packageOptions; track option) {
+                    <div class="flex items-center gap-2">
+                      <p-checkbox
+                        [formControlName]="'customPackageOptions'"
+                        [inputId]="option.id"
+                        [value]="option.id"
+                      >
+                      </p-checkbox>
+                      <label [for]="option.id" class="ml-2">
+                        {{ option.label }}
+                      </label>
+                    </div>
+                  }
+                </div>
               </div>
             }
+          </div>
         </div>
 
         <p-float-label variant="on">
-          <p-select [options]="paymentMethods" class="w-full" formControlName="modeOfPayment" id="modeOfPayment"
-                    optionLabel="label" optionValue="value"></p-select>
+          <p-select
+            [options]="paymentMethods"
+            class="w-full"
+            formControlName="modeOfPayment"
+            id="modeOfPayment"
+            optionLabel="label"
+            optionValue="value"
+          ></p-select>
           <label for="modeOfPayment">Mode of Payment</label>
         </p-float-label>
       </div>
     </section>
 
     <!-- Price Breakdown Section -->
-    <section class="mb-8" *ngIf="bookingId">
+    <section *ngIf="bookingId" class="mb-8">
       <div class="flex justify-between items-center mb-4">
         <h3 class="font-bold border-b pb-2">Price Breakdown</h3>
-        <p-button (onClick)="addNewPriceBreakdownRow()" [outlined]="true" icon="pi pi-plus" label="Add Item"
-                  severity="secondary"></p-button>
+        <p-button
+          (onClick)="addNewPriceBreakdownRow()"
+          [outlined]="true"
+          icon="pi pi-plus"
+          label="Add Item"
+          severity="secondary"
+        ></p-button>
       </div>
 
-      <p-table [value]="localPriceBreakdown" styleClass="p-datatable-sm" [tableStyle]="{ 'min-width': '50rem' }">
+      <p-table
+        [tableStyle]="{ 'min-width': '50rem' }"
+        [value]="localPriceBreakdown"
+        styleClass="p-datatable-sm"
+      >
         <ng-template pTemplate="header">
           <tr>
-            <th id="priceDescription">Description</th>
-            <th id="priceVendor">Vendor</th>
-            <th class="text-right" id="priceAmount">Rate per Pax</th>
-            <th id="pricePax" class="text-right">Pax</th>
-            <th class="text-right" id="priceTotal">Total Rate</th>
-            <th class="text-right" id="priceServiceFee">Service Fee</th>
-            <th class="text-right" id="priceNetAmount">Vendor Fee</th>
+            <th id="priceDescription" style="min-width: 200px">Description</th>
+            <th id="priceVendor" style="min-width: 150px">Vendor</th>
+            <th class="text-right" id="priceAmount" style="min-width: 120px">
+              Rate per Pax
+            </th>
+            <th class="text-right" id="pricePax" style="min-width: 80px">
+              Pax
+            </th>
+            <th class="text-right" id="priceTotal" style="min-width: 120px">
+              Total Rate
+            </th>
+            <th
+              class="text-right"
+              id="priceServiceFee"
+              style="min-width: 120px"
+            >
+              Service Fee
+            </th>
+            <th class="text-right" id="priceNetAmount" style="min-width: 120px">
+              Vendor Fee
+            </th>
             <th id="priceActions" style="width: 8rem">Actions</th>
           </tr>
         </ng-template>
-        <ng-template pTemplate="body" let-item let-i="rowIndex">
+        <ng-template let-i="rowIndex" let-item pTemplate="body">
           <tr *ngIf="editingPriceBreakdownIndex !== i">
             <td>{{ item.label }}</td>
             <td>{{ item.vendorName }}</td>
-            <td class="text-right">₱ {{ item.amount | number:'1.2-2' }}</td>
+            <td class="text-right whitespace-nowrap">
+              ₱{{ item.amount | number: "1.2-2" }}
+            </td>
             <td class="text-right">{{ item.quantity }}</td>
-            <td class="text-right">₱ {{ item.total | number:'1.2-2' }}</td>
-            <td class="text-right">₱ {{ item.serviceFee | number:'1.2-2' }}</td>
-            <td class="text-right">₱ {{ item.netAmount | number:'1.2-2' }}</td>
+            <td class="text-right whitespace-nowrap">
+              ₱{{ item.total | number: "1.2-2" }}
+            </td>
+            <td class="text-right whitespace-nowrap">
+              ₱{{ item.serviceFee | number: "1.2-2" }}
+            </td>
+            <td class="text-right whitespace-nowrap">
+              ₱{{ item.netAmount | number: "1.2-2" }}
+            </td>
             <td>
               <div class="flex gap-2 justify-center">
-                <p-button (onClick)="startEditingPriceBreakdown(i)" [rounded]="true" [text]="true" icon="pi pi-pencil"
-                          severity="primary"></p-button>
-                <p-button (onClick)="deletePriceBreakdown(i)" [rounded]="true" [text]="true" icon="pi pi-trash"
-                          severity="danger"></p-button>
+                <p-button
+                  (onClick)="startEditingPriceBreakdown(i)"
+                  [rounded]="true"
+                  [text]="true"
+                  icon="pi pi-pencil"
+                  severity="primary"
+                ></p-button>
+                <p-button
+                  (onClick)="deletePriceBreakdown(i)"
+                  [rounded]="true"
+                  [text]="true"
+                  icon="pi pi-trash"
+                  severity="danger"
+                ></p-button>
               </div>
             </td>
           </tr>
           <tr *ngIf="editingPriceBreakdownIndex === i">
             <td class="p-0" colspan="8">
-              <form [formGroup]="priceBreakdownForm" class="p-3 bg-gray-50 border rounded">
+              <form
+                [formGroup]="priceBreakdownForm"
+                class="p-3 bg-gray-50 border rounded"
+              >
                 <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
                   <div>
-                    <label class="block text-sm font-medium mb-1" for="label">Description</label>
-                    <input class="w-full" formControlName="label" id="label" pInputText/>
+                    <label class="block text-sm font-medium mb-1" for="label"
+                    >Description</label
+                    >
+                    <input
+                      class="w-full"
+                      formControlName="label"
+                      id="label"
+                      pInputText
+                    />
                   </div>
                   <div>
-                    <label class="block text-sm font-medium mb-1" for="vendorName">Vendor</label>
-                    <input class="w-full" formControlName="vendorName" id="vendorName" pInputText/>
+                    <label
+                      class="block text-sm font-medium mb-1"
+                      for="vendorName"
+                    >Vendor</label
+                    >
+                    <input
+                      class="w-full"
+                      formControlName="vendorName"
+                      id="vendorName"
+                      pInputText
+                    />
                   </div>
                   <div>
-                    <label class="block text-sm font-medium mb-1" for="amount">Rate per Pax</label>
-                    <p-inputNumber [maxFractionDigits]="2" [minFractionDigits]="2" class="w-full" formControlName="amount"
-                                   id="amount" mode="decimal"/>
+                    <label class="block text-sm font-medium mb-1" for="amount"
+                    >Rate per Pax</label
+                    >
+                    <p-inputNumber
+                      [maxFractionDigits]="2"
+                      [minFractionDigits]="2"
+                      class="w-full"
+                      formControlName="amount"
+                      id="amount"
+                      mode="decimal"
+                    />
                   </div>
                   <div>
-                    <label class="block text-sm font-medium mb-1" for="quantity">Quantity</label>
-                    <p-inputNumber [min]="1" class="w-full" formControlName="quantity" id="quantity"/>
+                    <label class="block text-sm font-medium mb-1" for="quantity"
+                    >Quantity</label
+                    >
+                    <p-inputNumber
+                      [min]="1"
+                      class="w-full"
+                      formControlName="quantity"
+                      id="quantity"
+                    />
                   </div>
 
                   <div class="md:col-span-2">
-                    <label class="block text-sm font-medium mb-1">Service Fee Calculation</label>
+                    <label class="block text-sm font-medium mb-1"
+                    >Service Fee Calculation</label
+                    >
                     <div class="flex items-center gap-4">
                       <div class="flex items-center gap-2">
-                        <p-radioButton [value]="true" formControlName="usePercentage" inputId="usePercentage"/>
+                        <p-radioButton
+                          [value]="true"
+                          formControlName="usePercentage"
+                          inputId="usePercentage"
+                        />
                         <label for="usePercentage">Use Percentage</label>
                       </div>
                       <div class="flex items-center gap-2">
-                        <p-radioButton [value]="false" formControlName="usePercentage" inputId="useManual"/>
+                        <p-radioButton
+                          [value]="false"
+                          formControlName="usePercentage"
+                          inputId="useManual"
+                        />
                         <label for="useManual">Manual Entry</label>
                       </div>
                     </div>
@@ -172,42 +320,101 @@
 
                   <div class="md:col-span-2">
                     <div *ngIf="priceBreakdownForm.get('usePercentage')?.value">
-                      <label class="block text-sm font-medium mb-1" for="serviceFeePct">Service Fee %</label>
-                      <p-inputNumber [max]="100" [min]="0" class="w-full" formControlName="serviceFeePct" id="serviceFeePct"
-                                     suffix="%"/>
+                      <label
+                        class="block text-sm font-medium mb-1"
+                        for="serviceFeePct"
+                      >Service Fee %</label
+                      >
+                      <p-inputNumber
+                        [max]="100"
+                        [min]="0"
+                        class="w-full"
+                        formControlName="serviceFeePct"
+                        id="serviceFeePct"
+                        suffix="%"
+                      />
                     </div>
                   </div>
 
                   <div>
-                    <label class="block text-sm font-medium mb-1" for="serviceFee">Service Fee per Pax</label>
-                    <p-inputNumber [maxFractionDigits]="2" [minFractionDigits]="2" class="w-full"
-                                   formControlName="serviceFeePerPax" id="serviceFee" mode="decimal"/>
+                    <label
+                      class="block text-sm font-medium mb-1"
+                      for="serviceFee"
+                    >Service Fee per Pax</label
+                    >
+                    <p-inputNumber
+                      [maxFractionDigits]="2"
+                      [minFractionDigits]="2"
+                      class="w-full"
+                      formControlName="serviceFeePerPax"
+                      id="serviceFee"
+                      mode="decimal"
+                    />
                   </div>
 
                   <div>
-                    <label class="block text-sm font-medium mb-1" for="serviceFee">Total Service Fee</label>
-                    <p-inputNumber [maxFractionDigits]="2" [minFractionDigits]="2" [readonly]="true" class="w-full"
-                                   formControlName="serviceFee" id="serviceFee" mode="decimal"/>
+                    <label
+                      class="block text-sm font-medium mb-1"
+                      for="serviceFee"
+                    >Total Service Fee</label
+                    >
+                    <p-inputNumber
+                      [maxFractionDigits]="2"
+                      [minFractionDigits]="2"
+                      [readonly]="true"
+                      class="w-full"
+                      formControlName="serviceFee"
+                      id="serviceFee"
+                      mode="decimal"
+                    />
                   </div>
 
                   <div>
-                    <label class="block text-sm font-medium mb-1" for="total">Total Amount</label>
-                    <p-inputNumber [maxFractionDigits]="2" [minFractionDigits]="2" [readonly]="true" class="w-full"
-                                   formControlName="total" id="total" mode="decimal"/>
+                    <label class="block text-sm font-medium mb-1" for="total"
+                    >Total Amount</label
+                    >
+                    <p-inputNumber
+                      [maxFractionDigits]="2"
+                      [minFractionDigits]="2"
+                      [readonly]="true"
+                      class="w-full"
+                      formControlName="total"
+                      id="total"
+                      mode="decimal"
+                    />
                   </div>
 
                   <div>
-                    <label class="block text-sm font-medium mb-1" for="netAmount">Net Amount</label>
-                    <p-inputNumber [maxFractionDigits]="2" [minFractionDigits]="2" [readonly]="true" class="w-full"
-                                   formControlName="netAmount" id="netAmount" mode="decimal"/>
+                    <label
+                      class="block text-sm font-medium mb-1"
+                      for="netAmount"
+                    >Net Amount</label
+                    >
+                    <p-inputNumber
+                      [maxFractionDigits]="2"
+                      [minFractionDigits]="2"
+                      [readonly]="true"
+                      class="w-full"
+                      formControlName="netAmount"
+                      id="netAmount"
+                      mode="decimal"
+                    />
                   </div>
                 </div>
 
                 <div class="flex justify-end gap-2 mt-3">
-                  <p-button (onClick)="cancelEditingPriceBreakdown()" [outlined]="true" icon="pi pi-times"
-                            label="Cancel"></p-button>
-                  <p-button (onClick)="savePriceBreakdown()" [disabled]="priceBreakdownForm.invalid || loading" icon="pi pi-check"
-                            label="Save"></p-button>
+                  <p-button
+                    (onClick)="cancelEditingPriceBreakdown()"
+                    [outlined]="true"
+                    icon="pi pi-times"
+                    label="Cancel"
+                  ></p-button>
+                  <p-button
+                    (onClick)="savePriceBreakdown()"
+                    [disabled]="priceBreakdownForm.invalid || loading"
+                    icon="pi pi-check"
+                    label="Save"
+                  ></p-button>
                 </div>
               </form>
             </td>
@@ -216,16 +423,23 @@
         <ng-template pTemplate="footer">
           <tr>
             <td class="text-right font-bold" colspan="4">Totals:</td>
-            <td class="text-right font-bold">₱ {{ calculateTotalAmount() | number:'1.2-2' }}</td>
-            <td class="text-right font-bold">₱ {{ calculateTotalServiceFees() | number:'1.2-2' }}</td>
-            <td class="text-right font-bold">₱ {{ calculateTotalNetAmount() | number:'1.2-2' }}</td>
+            <td class="text-right font-bold">
+              ₱ {{ calculateTotalAmount() | number: "1.2-2" }}
+            </td>
+            <td class="text-right font-bold">
+              ₱ {{ calculateTotalServiceFees() | number: "1.2-2" }}
+            </td>
+            <td class="text-right font-bold">
+              ₱ {{ calculateTotalNetAmount() | number: "1.2-2" }}
+            </td>
             <td></td>
           </tr>
         </ng-template>
         <ng-template pTemplate="emptymessage">
           <tr>
             <td class="text-center p-4" colspan="8">
-              No price breakdown items found. Click "Add Item" to add a new item.
+              No price breakdown items found. Click "Add Item" to add a new
+              item.
             </td>
           </tr>
         </ng-template>
@@ -233,58 +447,99 @@
     </section>
 
     <!-- Payment History Section -->
-    <section class="mb-8" *ngIf="bookingId">
+    <section *ngIf="bookingId" class="mb-8">
       <div class="flex justify-between items-center mb-4">
         <h3 class="font-bold border-b pb-2">Payment History</h3>
       </div>
 
-      <p-table [value]="localPaymentHistory" styleClass="p-datatable-sm" [tableStyle]="{ 'min-width': '50rem' }">
+      <p-table
+        [tableStyle]="{ 'min-width': '80rem' }"
+        [value]="localPaymentHistory"
+        styleClass="p-datatable-sm"
+      >
         <ng-template pTemplate="header">
           <tr>
             <th id="paymentDate">Date</th>
             <th id="paymentMethod">Payment Method</th>
-            <th id="paymentAmount" class="text-right">Amount</th>
+            <th class="text-right" id="paymentBaseAmount">Base Amount</th>
+            <th class="text-right" id="paymentFee">Fee</th>
+            <th class="text-right" id="paymentAmount">Total Amount</th>
             <th id="paymentRemarks">Description</th>
             <th id="paymentType">Type</th>
             <th id="paymentActions" style="width: 8rem">Actions</th>
           </tr>
         </ng-template>
-        <ng-template pTemplate="body" let-payment let-i="rowIndex">
+        <ng-template let-i="rowIndex" let-payment pTemplate="body">
           <tr>
             <td>{{ payment.date }}</td>
             <td>{{ getPaymentMethodLabel(payment.paymentMethod) }}</td>
-            <td class="text-right">₱ {{ payment.amount | number:'1.2-2' }}</td>
+            <td class="text-right">
+              {{
+                payment.baseAmount
+                  ? "₱" + (payment.baseAmount | number: "1.2-2")
+                  : "-"
+              }}
+            </td>
+            <td class="text-right">
+              {{
+                payment.feeAmount ? '₱' + (payment.feeAmount | number: "1.2-2") : "-"
+              }}
+              {{
+                payment.feePercentage ? "(" + payment.feePercentage + "%)" : ""
+              }}
+            </td>
+            <td class="text-right">₱{{ payment.amount | number: "1.2-2" }}</td>
             <td>{{ payment.remarks }}</td>
             <td>{{ getPaymentTypeLabel(payment.paymentType) }}</td>
             <td>
               @if (payment.id === null) {
                 <div class="flex gap-2 justify-center">
-                  <p-button icon="pi pi-pencil" (onClick)="openEditPaymentDialog(payment, i)" [rounded]="true" [text]="true" severity="primary"></p-button>
-                  <p-button icon="pi pi-trash" (onClick)="deletePayment(i)" [rounded]="true" [text]="true" severity="danger"></p-button>
+                  <p-button
+                    icon="pi pi-pencil"
+                    (onClick)="openEditPaymentDialog(payment, i)"
+                    [rounded]="true"
+                    [text]="true"
+                    severity="primary"
+                  ></p-button>
+                  <p-button
+                    icon="pi pi-trash"
+                    (onClick)="deletePayment(i)"
+                    [rounded]="true"
+                    [text]="true"
+                    severity="danger"
+                  ></p-button>
                 </div>
               } @else {
-                <p-button icon="pi pi-file-pdf"
-                          (onClick)="generatePaymentAcknowledgement(payment.id)" [rounded]="true" [text]="true"
-                          [disabled]="loading"></p-button>
+                <p-button
+                  icon="pi pi-file-pdf"
+                  (onClick)="generatePaymentAcknowledgement(payment.id)"
+                  [rounded]="true"
+                  [text]="true"
+                  [disabled]="loading"
+                ></p-button>
               }
             </td>
           </tr>
         </ng-template>
         <ng-template pTemplate="footer">
           <tr>
-            <td colspan="2" class="text-right font-bold">Total Paid:</td>
-            <td class="text-right font-bold">₱ {{ calculatePaidAmount() | number:'1.2-2' }}</td>
+            <td class="text-right font-bold" colspan="2">Total Paid:</td>
+            <td class="text-right font-bold">
+              ₱ {{ calculatePaidAmount() | number: "1.2-2" }}
+            </td>
             <td colspan="2"></td>
           </tr>
           <tr>
-            <td colspan="2" class="text-right font-bold">Remaining Amount:</td>
-            <td class="text-right font-bold">₱ {{ calculateRemainingAmount() | number:'1.2-2' }}</td>
+            <td class="text-right font-bold" colspan="2">Remaining Amount:</td>
+            <td class="text-right font-bold">
+              ₱ {{ calculateRemainingAmount() | number: "1.2-2" }}
+            </td>
             <td colspan="2"></td>
           </tr>
         </ng-template>
         <ng-template pTemplate="emptymessage">
           <tr>
-            <td colspan="5" class="text-center p-4">
+            <td class="text-center p-4" colspan="5">
               No payment history found. Click "Add Payment" to record a payment.
             </td>
           </tr>
@@ -292,33 +547,111 @@
       </p-table>
 
       <!-- Inline Payment Form -->
-      <form [formGroup]="paymentForm" class="mt-4 p-4 border rounded-lg bg-gray-50">
-        <h4 class="font-bold mb-3">{{ isEditingPayment ? 'Edit Payment' : 'Add New Payment' }}</h4>
+      <form
+        [formGroup]="paymentForm"
+        class="mt-4 p-4 border rounded-lg bg-gray-50"
+      >
+        <h4 class="font-bold mb-3">
+          {{ isEditingPayment ? "Edit Payment" : "Add New Payment" }}
+        </h4>
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
           <p-float-label variant="on">
-            <p-date-picker id="paymentDate" formControlName="date" [showIcon]="true" dateFormat="mm-dd-yy" class="w-full"></p-date-picker>
+            <p-date-picker
+              [showIcon]="true"
+              class="w-full"
+              dateFormat="mm-dd-yy"
+              formControlName="date"
+              id="paymentDate"
+            ></p-date-picker>
             <label for="paymentDate">Payment Date</label>
           </p-float-label>
 
           <p-float-label variant="on">
-            <p-select id="paymentMethod" formControlName="paymentMethod" [options]="paymentMethods" optionLabel="label" optionValue="value" class="w-full"></p-select>
+            <p-select
+              [options]="paymentMethods"
+              class="w-full"
+              formControlName="paymentMethod"
+              id="paymentMethod"
+              optionLabel="label"
+              optionValue="value"
+            ></p-select>
             <label for="paymentMethod">Payment Method</label>
           </p-float-label>
 
           <p-float-label variant="on">
-            <p-inputNumber id="paymentAmount" formControlName="amount" mode="currency" currency="PHP" locale="en-US" class="w-full"></p-inputNumber>
+            <p-inputNumber
+              class="w-full"
+              currency="PHP"
+              formControlName="amount"
+              id="paymentAmount"
+              locale="en-US"
+              mode="currency"
+            ></p-inputNumber>
             <label for="paymentAmount">Amount</label>
           </p-float-label>
 
+          <div
+            *ngIf="paymentForm.get('paymentMethod')?.value === 'CREDIT_CARD'"
+            class="md:col-span-3"
+          >
+            <div class="flex items-center gap-2 mb-2">
+              <p-float-label variant="on">
+                <p-inputNumber
+                  [max]="100"
+                  [min]="0"
+                  formControlName="feePercentage"
+                  id="feePercentage"
+                  suffix="%"
+                ></p-inputNumber>
+                <label for="feePercentage">Credit Card Fee</label>
+              </p-float-label>
+              <small class="text-gray-600"
+              >(Terminal operator fee, not included in our service fee)</small
+              >
+            </div>
+            <div class="text-sm text-gray-600 bg-gray-100 p-2 rounded">
+              <p class="mb-1">
+                Note: The credit card fee is charged by the terminal operator
+                and will be added to the payment amount.
+              </p>
+              <p class="font-medium">
+                Final amount will be: ₱{{
+                  paymentForm.get("amount")?.value || 0 | number: "1.2-2"
+                }}
+                + {{ paymentForm.get("feePercentage")?.value || 3.5 }}% = ₱{{
+                  (paymentForm.get("amount")?.value || 0) *
+                  (1 + (paymentForm.get("feePercentage")?.value || 3.5) / 100)
+                    | number: "1.2-2"
+                }}
+              </p>
+            </div>
+          </div>
+
           <p-float-label class="md:col-span-3" variant="on">
-            <input id="paymentRemarks" formControlName="remarks" pInputText class="w-full" />
+            <input
+              class="w-full"
+              formControlName="remarks"
+              id="paymentRemarks"
+              pInputText
+            />
             <label for="paymentRemarks">Description</label>
           </p-float-label>
         </div>
 
         <div class="flex justify-end gap-2">
-          <p-button *ngIf="isEditingPayment" label="Cancel" icon="pi pi-times" (onClick)="resetPaymentForm()" [outlined]="true"></p-button>
-          <p-button [label]="isEditingPayment ? 'Update Payment' : 'Add Payment'" [icon]="isEditingPayment ? 'pi pi-check' : 'pi pi-plus'" (onClick)="addPayment()" [disabled]="paymentForm.invalid || loading"></p-button>
+          <p-button
+            (onClick)="resetPaymentForm()"
+            *ngIf="isEditingPayment"
+            [outlined]="true"
+            icon="pi pi-times"
+            label="Cancel"
+          ></p-button>
+          <p-button
+            (onClick)="addPayment()"
+            [disabled]="paymentForm.invalid || loading"
+            [icon]="isEditingPayment ? 'pi pi-check' : 'pi pi-plus'"
+            [label]="isEditingPayment ? 'Update Payment' : 'Add Payment'"
+          ></p-button>
         </div>
       </form>
     </section>
@@ -326,20 +659,52 @@
     <!-- Payment Details Section -->
     <section class="mb-8">
       <h3 class="font-bold mb-4 border-b pb-2">Payment Summary</h3>
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
         <p-float-label variant="on">
-          <p-inputNumber id="totalAmount" formControlName="totalAmount" mode="currency" currency="PHP" locale="en-US" [readonly]="true"></p-inputNumber>
+          <p-inputNumber
+            [readonly]="true"
+            currency="PHP"
+            formControlName="totalAmount"
+            id="totalAmount"
+            locale="en-US"
+            mode="currency"
+          ></p-inputNumber>
           <label for="totalAmount">Total Amount</label>
         </p-float-label>
 
         <p-float-label variant="on">
-          <p-inputNumber id="paidAmount" formControlName="paidAmount" mode="currency" currency="PHP" locale="en-US" [readonly]="true"></p-inputNumber>
+          <p-inputNumber
+            [readonly]="true"
+            currency="PHP"
+            formControlName="paidAmount"
+            id="paidAmount"
+            locale="en-US"
+            mode="currency"
+          ></p-inputNumber>
           <label for="paidAmount">Paid Amount</label>
         </p-float-label>
 
         <p-float-label variant="on">
-          <p-inputNumber id="remainingAmount" formControlName="remainingAmount" mode="currency" currency="PHP" locale="en-US" [readonly]="true"></p-inputNumber>
+          <p-inputNumber
+            [readonly]="true"
+            currency="PHP"
+            formControlName="remainingAmount"
+            id="remainingAmount"
+            locale="en-US"
+            mode="currency"
+          ></p-inputNumber>
           <label for="remainingAmount">Remaining Amount</label>
+        </p-float-label>
+
+        <p-float-label variant="on">
+          <p-inputNumber
+            [readonly]="true"
+            currency="PHP"
+            formControlName="totalServiceFees"
+            locale="en-US"
+            mode="currency"
+          ></p-inputNumber>
+          <label>Total Service Fees</label>
         </p-float-label>
       </div>
     </section>
@@ -349,7 +714,13 @@
       <h3 class="font-bold mb-4 border-b pb-2">Additional Information</h3>
       <div class="grid grid-cols-1 gap-4">
         <p-float-label variant="on">
-          <textarea pTextarea id="remarks" formControlName="remarks" rows="3" class="w-full"></textarea>
+          <textarea
+            class="w-full"
+            formControlName="remarks"
+            id="remarks"
+            pTextarea
+            rows="3"
+          ></textarea>
           <label for="remarks">Remarks</label>
         </p-float-label>
       </div>
@@ -358,7 +729,12 @@
     <!-- Actions Section -->
     <section class="mb-4">
       <div class="flex justify-end gap-2">
-        <p-button label="Save" icon="pi pi-save" (onClick)="saveBooking()" [disabled]="bookingForm.invalid || loading"></p-button>
+        <p-button
+          (onClick)="saveBooking()"
+          [disabled]="bookingForm.invalid || loading"
+          icon="pi pi-save"
+          label="Save"
+        ></p-button>
       </div>
     </section>
   </form>
@@ -369,8 +745,13 @@
     <div class="grid grid-cols-1 gap-4">
       <div>
         <h4 class="font-semibold mb-2">Documents</h4>
-        <p-button label="Generate Statement of Account" icon="pi pi-file-pdf" styleClass="p-button-info w-full mb-2"
-          (onClick)="generateStatementOfAccount()" [disabled]="loading"></p-button>
+        <p-button
+          (onClick)="generateStatementOfAccount()"
+          [disabled]="loading"
+          icon="pi pi-file-pdf"
+          label="Generate Statement of Account"
+          styleClass="p-button-info w-full mb-2"
+        ></p-button>
       </div>
     </div>
   </div>

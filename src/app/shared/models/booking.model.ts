@@ -3,7 +3,7 @@ import { AuditedBaseModel } from './base.model';
 export enum BookingStatus {
   PENDING_PAYMENT = 'PENDING_PAYMENT',
   PARTIALLY_PAID = 'PARTIALLY_PAID',
-  FULLY_PAID = 'FULLY_PAID'
+  FULLY_PAID = 'FULLY_PAID',
 }
 
 export interface Booking extends AuditedBaseModel {
@@ -43,7 +43,10 @@ export interface PaymentHistory {
   id: string | null;
   date: string;
   amount: number;
+  baseAmount: number | null;
   paymentMethod: string;
   paymentType: string;
+  feeAmount: number | null;
+  feePercentage: number | null;
   remarks?: string;
 }
