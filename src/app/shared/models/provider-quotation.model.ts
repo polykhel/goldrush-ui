@@ -11,11 +11,13 @@ export interface ProviderQuotation {
   status: string;
   priceAmount: number | null;
   childPriceAmount: number | null;
+  seniorPriceAmount: number | null;
   currencyCode: string | null;
   exchangeRate: number | null;
   exchangeRateLastUpdated: Date | null;
   phpEquivalentAmount: number | null;
   childPhpEquivalentAmount: number | null;
+  seniorPhpEquivalentAmount: number | null;
   emailQuotation: string | null;
   internalRemarks: string | null;
   providerId: string;
@@ -31,6 +33,7 @@ export interface ProviderQuotation {
   showPriceBreakdown: boolean;
   priceBreakdown: Breakdown[] | null;
   childPriceBreakdown: Breakdown[] | null;
+  seniorPriceBreakdown: Breakdown[] | null;
 }
 
 export interface ProviderQuotationEmailRequest {

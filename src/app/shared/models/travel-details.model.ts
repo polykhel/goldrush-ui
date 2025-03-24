@@ -8,5 +8,6 @@ export interface TravelDetails {
   preferredHotel: string | null;
   adults: number;
   children: number;
+  seniors: number;
   childAges: string | null;
 }

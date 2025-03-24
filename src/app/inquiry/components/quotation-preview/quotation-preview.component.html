@@ -75,6 +75,32 @@
             }
           }
         }
+        @if (quotation.ratePerSenior !== quotation.ratePerPax) {
+          <div class="font-semibold">
+            RATE PER SENIOR
+            @if (quotation.showPriceBreakdown && quotation.seniorPriceBreakdown) {
+              <span class="text-xl font-bold text-red-600">
+                {{ quotation.ratePerSenior | currency: "PHP" }}
+              </span>
+            }
+          </div>
+          @if (quotation.showPriceBreakdown && quotation.seniorPriceBreakdown) {
+            @for (breakdown of quotation.seniorPriceBreakdown; track breakdown) {
+              <div>
+                <span class="font-semibold">{{ breakdown.label }}</span>
+                <span class="font-bold text-red-600">
+                  {{ breakdown.amount | currency: "PHP" }}
+                </span>
+              </div>
+            }
+          } @else {
+            @if (quotation.ratePerSenior) {
+              <span class="text-xl font-bold text-red-600">
+                {{ quotation.ratePerSenior | currency: "PHP" }}
+              </span>
+            }
+          }
+        }
       </div>
 
       <!-- Flight Information -->

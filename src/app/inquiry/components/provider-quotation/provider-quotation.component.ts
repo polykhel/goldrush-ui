@@ -61,6 +61,7 @@ export class ProviderQuotationComponent implements OnInit {
   @Input() isEditMode = false;
   @Input() showFlightDetails = false;
   @Input() showChildPrices = false;
+  @Input() showSeniorPrices = false;
   @Input() inquiryStatus = '';
   @Input() inquiryId: string | null = null;
 
@@ -122,6 +123,10 @@ export class ProviderQuotationComponent implements OnInit {
     return this.formGroup.get('childPriceBreakdown') as FormArray;
   }
 
+  get seniorPriceBreakdownArray(): FormArray {
+    return this.formGroup.get('seniorPriceBreakdown') as FormArray;
+  }
+
   ngOnInit() {
     this.exchangeRateLastUpdated = this.formGroup.get(
       'exchangeRateLastUpdated',
@@ -149,8 +154,9 @@ export class ProviderQuotationComponent implements OnInit {
     );
 
     // Calculate initial breakdown total
-    this.updatePriceBreakdown();
-    this.updateChildPriceBreakdown();
+    this.handleBreakdown('regular', 'update');
+    this.handleBreakdown('child', 'update');
+    this.handleBreakdown('senior', 'update');
   }
 
   onPriceInput(event: InputNumberInputEvent) {
@@ -167,6 +173,7 @@ export class ProviderQuotationComponent implements OnInit {
     }
 
     this.formGroup.get('childPriceAmount')?.setValue(price);
+    this.formGroup.get('seniorPriceAmount')?.setValue(price);
 
     // Update breakdown items if price changes
     if (this.priceBreakdownArray.length === 1) {
@@ -174,7 +181,7 @@ export class ProviderQuotationComponent implements OnInit {
     }
   }
 
-  onChildPriceInput(event: InputNumberInputEvent) {
+  onChildSeniorPriceInput(event: InputNumberInputEvent) {
     const price = event.value;
 
     if (price && this.formGroup.get('currencyCode')?.value !== 'PHP') {
@@ -234,6 +241,7 @@ export class ProviderQuotationComponent implements OnInit {
   calculatePhpEquivalent() {
     const price = this.formGroup.get('priceAmount')?.value;
     const childPrice = this.formGroup.get('childPriceAmount')?.value;
+    const seniorPrice = this.formGroup.get('seniorPriceAmount')?.value;
     const rate = this.formGroup.get('exchangeRate')?.value;
 
     if (price && rate) {
@@ -250,6 +258,15 @@ export class ProviderQuotationComponent implements OnInit {
         ?.setValue(phpEquivalentAmount);
     } else {
       this.formGroup.get('childPhpEquivalentAmount')?.setValue(null);
+    }
+
+    if (seniorPrice && rate) {
+      const phpEquivalentAmount = seniorPrice * rate;
+      this.formGroup
+        .get('seniorPhpEquivalentAmount')
+        ?.setValue(phpEquivalentAmount);
+    } else {
+      this.formGroup.get('seniorPhpEquivalentAmount')?.setValue(null);
     }
   }
 
@@ -275,54 +292,66 @@ export class ProviderQuotationComponent implements OnInit {
     this.onRemove.emit();
   }
 
-  // Price breakdown methods
-  addPriceBreakdownItem() {
-    this.priceBreakdownArray.push(
-      this.fb.group({
-        label: [this.breakdownItems[this.priceBreakdownArray.length]],
-        amount: [0],
-      }),
-    );
-  }
+  handleBreakdown(
+    breakdownType: 'regular' | 'child' | 'senior',
+    action: 'add' | 'remove' | 'update',
+    index?: number,
+  ) {
+    const breakdownMap = {
+      regular: {
+        array: this.priceBreakdownArray,
+        amount: 'priceAmount',
+        phpAmount: 'phpEquivalentAmount',
+      },
+      child: {
+        array: this.childPriceBreakdownArray,
+        amount: 'childPriceAmount',
+        phpAmount: 'childPhpEquivalentAmount',
+      },
+      senior: {
+        array: this.seniorPriceBreakdownArray,
+        amount: 'seniorPriceAmount',
+        phpAmount: 'seniorPhpEquivalentAmount',
+      },
+    };
 
-  removePriceBreakdownItem(index: number) {
-    this.priceBreakdownArray.removeAt(index);
-    this.updatePriceBreakdown();
-  }
+    const breakdown = breakdownMap[breakdownType];
 
-  updatePriceBreakdown() {
-    if (this.priceBreakdownArray.length > 0) {
-      const breakdownTotal = this.priceBreakdownArray.controls.reduce(
-        (sum, control) => sum + (control.get('amount')?.value || 0),
-        0,
-      );
-      this.formGroup.get('priceAmount')?.setValue(breakdownTotal);
+    switch (action) {
+      case 'add':
+        breakdown.array.push(
+          this.fb.group({
+            label: [this.breakdownItems[breakdown.array.length]],
+            amount: [0],
+          }),
+        );
+        break;
+
+      case 'remove':
+        if (typeof index === 'number') {
+          breakdown.array.removeAt(index);
+        }
+        break;
+
+      case 'update':
+        const total = breakdown.array.controls.reduce(
+          (sum, control) => sum + (control.get('amount')?.value || 0),
+          0,
+        );
+        this.formGroup.patchValue({ [breakdown.amount]: total });
+        if (this.formGroup.get('currencyCode')?.value !== 'PHP') {
+          this.calculatePhpEquivalent();
+        }
+        break;
     }
   }
 
-  // Child price breakdown methods
-  addChildPriceBreakdownItem() {
-    this.childPriceBreakdownArray.push(
-      this.fb.group({
-        label: [this.breakdownItems[this.childPriceBreakdownArray.length]],
-        amount: [0],
-      }),
-    );
-  }
-
-  removeChildPriceBreakdownItem(index: number) {
-    this.childPriceBreakdownArray.removeAt(index);
-    this.updateChildPriceBreakdown();
-  }
-
-  updateChildPriceBreakdown() {
-    if (this.childPriceBreakdownArray.length > 0) {
-      const breakdownTotal = this.childPriceBreakdownArray.controls.reduce(
-        (sum, control) => sum + (control.get('amount')?.value || 0),
-        0,
-      );
-      this.formGroup.get('childPriceAmount')?.setValue(breakdownTotal);
-    }
+  removePriceBreakdownItem(
+    index: number,
+    breakdownType: 'regular' | 'child' | 'senior',
+  ) {
+    this.handleBreakdown(breakdownType, 'remove', index);
+    this.handleBreakdown(breakdownType, 'update');
   }
 
   createBooking() {

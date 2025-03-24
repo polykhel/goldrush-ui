@@ -75,7 +75,7 @@
                   <div class="flex justify-between items-center mb-2">
                     <h4 class="text-sm font-medium">Price Breakdown</h4>
                     <p-button
-                      (onClick)="addPriceBreakdownItem()"
+                      (onClick)="handleBreakdown('regular', 'add')"
                       [text]="true"
                       icon="pi pi-plus"
                       size="small"
@@ -100,7 +100,7 @@
                         </p-float-label>
                         <p-float-label class="w-[200px]" variant="on">
                           <p-input-number
-                            (onInput)="updatePriceBreakdown()"
+                            (onInput)="handleBreakdown('regular', 'update')"
                             [currency]="
                               formGroup.get('currencyCode')?.value || 'PHP'
                             "
@@ -112,7 +112,7 @@
                           <label [for]="'amount-' + i">Amount</label>
                         </p-float-label>
                         <p-button
-                          (onClick)="removePriceBreakdownItem(i)"
+                          (onClick)="removePriceBreakdownItem(i, 'regular')"
                           [text]="true"
                           icon="pi pi-trash"
                           severity="danger"
@@ -128,7 +128,7 @@
               @if (showChildPrices) {
                 <p-float-label variant="on">
                   <p-input-number
-                    (onInput)="onChildPriceInput($event)"
+                    (onInput)="onChildSeniorPriceInput($event)"
                     [id]="'childPriceAmount-' + provider.name"
                     class="w-full"
                     formControlName="childPriceAmount"
@@ -145,7 +145,7 @@
                     <div class="flex justify-between items-center mb-2">
                       <h4 class="text-sm font-medium">Child Price Breakdown</h4>
                       <p-button
-                        (onClick)="addChildPriceBreakdownItem()"
+                        (onClick)="handleBreakdown('child', 'add')"
                         [text]="true"
                         icon="pi pi-plus"
                         size="small"
@@ -173,7 +173,7 @@
                           </p-float-label>
                           <p-float-label class="w-[200px]" variant="on">
                             <p-input-number
-                              (onInput)="updateChildPriceBreakdown()"
+                              (onInput)="handleBreakdown('child', 'update')"
                               [currency]="
                                 formGroup.get('currencyCode')?.value || 'PHP'
                               "
@@ -185,7 +185,7 @@
                             <label [for]="'childAmount-' + i">Amount</label>
                           </p-float-label>
                           <p-button
-                            (onClick)="removeChildPriceBreakdownItem(i)"
+                            (onClick)="removePriceBreakdownItem(i, 'child')"
                             [text]="true"
                             icon="pi pi-trash"
                             severity="danger"
@@ -198,6 +198,81 @@
                   </div>
                 }
                 <!-- End of Child Price Breakdown Section -->
+              }
+              <!-- Senior Price Section -->
+              @if (showSeniorPrices) {
+                <p-float-label variant="on">
+                  <p-input-number
+                    (onInput)="onChildSeniorPriceInput($event)"
+                    [id]="'seniorPriceAmount-' + provider.name"
+                    class="w-full"
+                    formControlName="seniorPriceAmount"
+                    [currency]="formGroup.get('currencyCode')?.value || 'PHP'"
+                    mode="currency"
+                  />
+                  <label [for]="'seniorPriceAmount-' + provider.name"
+                  >Senior Price</label
+                  >
+                </p-float-label>
+                <!-- Senior Price Breakdown Section -->
+                @if (formGroup.get("showPriceBreakdown")?.value) {
+                  <div class="col-span-2 mt-2">
+                    <div class="flex justify-between items-center mb-2">
+                      <h4 class="text-sm font-medium">Senior Price Breakdown</h4>
+                      <p-button
+                        (onClick)="handleBreakdown('senior', 'add')"
+                        [text]="true"
+                        icon="pi pi-plus"
+                        size="small"
+                        label="Add Item"
+                      >
+                      </p-button>
+                    </div>
+                    <div formArrayName="seniorPriceBreakdown" class="space-y-2">
+                      @for (item of seniorPriceBreakdownArray.controls;
+                        track item;
+                        let i = $index) {
+                        <div
+                          [formGroupName]="i"
+                          class="flex gap-2 items-center"
+                        >
+                          <p-float-label class="flex-1" variant="on">
+                            <input
+                              type="text"
+                              pInputText
+                              id="seniorLabel-{{ i }}"
+                              formControlName="label"
+                              class="w-full"
+                            />
+                            <label for="seniorLabel-{{ i }}">Label</label>
+                          </p-float-label>
+                          <p-float-label class="w-[200px]" variant="on">
+                            <p-input-number
+                              (onInput)="handleBreakdown('senior', 'update')"
+                              [currency]="
+                                formGroup.get('currencyCode')?.value || 'PHP'
+                              "
+                              [id]="'seniorAmount-' + i"
+                              class="w-full"
+                              formControlName="amount"
+                              mode="currency"
+                            />
+                            <label [for]="'seniorAmount-' + i">Amount</label>
+                          </p-float-label>
+                          <p-button
+                            (onClick)="removePriceBreakdownItem(i, 'senior')"
+                            [text]="true"
+                            icon="pi pi-trash"
+                            severity="danger"
+                            size="small"
+                          >
+                          </p-button>
+                        </div>
+                      }
+                    </div>
+                  </div>
+                }
+                <!-- End of Senior Price Breakdown Section -->
               }
               @if (formGroup.get("currencyCode")?.value !== "PHP") {
                 <div class="col-span-2">

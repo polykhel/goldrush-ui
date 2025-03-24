@@ -118,6 +118,10 @@
             <p-input-number [showButtons]="true" formControlName="children" inputId="children"/>
             <label for="children">Children</label>
           </p-float-label>
+          <p-float-label variant="on">
+            <p-input-number [showButtons]="true" formControlName="seniors" inputId="seniors" />
+            <label for="seniors">Seniors</label>
+          </p-float-label>
           @if (childrenControl.value) {
             <p-float-label variant="on">
               <input pInputText formControlName="childAges" id="childAges"/>
@@ -193,6 +197,7 @@
                                       [inquiryStatus]="status ?? 'NEW'"
                                       [showFlightDetails]="showFlightDetails"
                                       [showChildPrices]="!!inquiryForm.get('travelDetails.children')?.value"
+                                      [showSeniorPrices]="!!inquiryForm.get('travelDetails.seniors')?.value"
                                       [provider]="providerMap.get(quotationControl.get('providerId')?.value)!"
                                       (onSendEmail)="openEmailModal($event)"
                                       (onRemove)="removeQuotation(i)">

@@ -396,6 +396,10 @@ export class InquiryFormComponent implements OnInit {
       providerQuotation.currencyCode === 'PHP'
         ? (providerQuotation.childPriceAmount ?? 0)
         : (providerQuotation.childPhpEquivalentAmount ?? 0);
+    const totalRatePerSenior =
+      providerQuotation.currencyCode === 'PHP'
+        ? (providerQuotation.seniorPriceAmount ?? 0)
+        : (providerQuotation.seniorPhpEquivalentAmount ?? 0);
 
     this.quotationData = {
       clientName: inquiry.clientName,
@@ -408,9 +412,12 @@ export class InquiryFormComponent implements OnInit {
       ratePerPax: totalRatePerPax,
       ratePerChild:
         totalRatePerChild === 0 ? totalRatePerPax : totalRatePerChild,
+      ratePerSenior:
+        totalRatePerSenior === 0 ? totalRatePerPax : totalRatePerSenior,
       showPriceBreakdown: providerQuotation.showPriceBreakdown,
       priceBreakdown: providerQuotation.priceBreakdown,
       childPriceBreakdown: providerQuotation.childPriceBreakdown,
+      seniorPriceBreakdown: providerQuotation.seniorPriceBreakdown,
       flightDetails:
         providerQuotation.status === 'RECEIVED'
           ? {
@@ -541,6 +548,7 @@ export class InquiryFormComponent implements OnInit {
         preferredHotel: this.fb.control<string | null>(null),
         adults: this.fb.control<number>(0),
         children: this.fb.control<number>(0),
+        seniors: this.fb.control<number>(0),
         childAges: this.fb.control<string | null>(null),
       }),
       packageType: this.fb.control<string>('ALL_INCLUSIVE', [
@@ -558,6 +566,7 @@ export class InquiryFormComponent implements OnInit {
       providerId: [quotation?.providerId ?? null],
       priceAmount: [quotation?.priceAmount ?? null],
       childPriceAmount: [quotation?.childPriceAmount ?? null],
+      seniorPriceAmount: [quotation?.seniorPriceAmount ?? null],
       currencyCode: [quotation?.currencyCode ?? 'PHP'],
       exchangeRate: [
         { value: quotation?.exchangeRate ?? null, disabled: true },
@@ -574,6 +583,9 @@ export class InquiryFormComponent implements OnInit {
       childPhpEquivalentAmount: [
         { value: quotation?.childPhpEquivalentAmount ?? null, disabled: true },
       ],
+      seniorPhpEquivalentAmount: [
+        { value: quotation?.seniorPhpEquivalentAmount ?? null, disabled: true },
+      ],
       internalRemarks: [quotation?.internalRemarks ?? null],
       emailQuotation: [quotation?.emailQuotation ?? null],
       sent: [quotation?.sent ?? false],
@@ -589,6 +601,14 @@ export class InquiryFormComponent implements OnInit {
       ),
       childPriceBreakdown: this.fb.array(
         quotation?.childPriceBreakdown?.map((item) =>
+          this.fb.group({
+            label: [item.label],
+            amount: [item.amount],
+          }),
+        ) || [],
+      ),
+      seniorPriceBreakdown: this.fb.array(
+        quotation?.seniorPriceBreakdown?.map((item) =>
           this.fb.group({
             label: [item.label],
             amount: [item.amount],

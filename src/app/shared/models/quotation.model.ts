@@ -8,6 +8,7 @@ export interface ClientQuotation {
   noOfPax: number;
   ratePerPax: number;
   ratePerChild: number | null;
+  ratePerSenior: number | null;
   flightDetails: {
     departure: Flight | null;
     arrival: Flight | null;
@@ -19,6 +20,7 @@ export interface ClientQuotation {
   showPriceBreakdown: boolean;
   priceBreakdown: Breakdown[] | null;
   childPriceBreakdown: Breakdown[] | null;
+  seniorPriceBreakdown: Breakdown[] | null;
 }
 
 export interface Flight {
