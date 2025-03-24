@@ -6,12 +6,14 @@
 
   <form [formGroup]="bookingForm" class="max-w-7xl mx-auto">
     <div class="flex justify-between align-items-center mb-3">
-      <p-button
-        (click)="goBack()"
-        [text]="true"
-        icon="pi pi-arrow-left"
-        label="Back"
-      ></p-button>
+      <div class="flex gap-2">
+        <p-button
+          (click)="goBack()"
+          [text]="true"
+          icon="pi pi-arrow-left"
+          label="Back"
+        ></p-button>
+      </div>
       <h2 class="font-bold">{{ bookingId ? "Edit" : "New" }} Booking</h2>
     </div>
 
@@ -161,7 +163,25 @@
     <!-- Price Breakdown Section -->
     <section *ngIf="bookingId" class="mb-8">
       <div class="flex justify-between items-center mb-4">
-        <h3 class="font-bold border-b pb-2">Price Breakdown</h3>
+        <div class="flex items-center gap-4">
+          <h3 class="font-bold border-b pb-2">Price Breakdown</h3>
+          <div class="flex gap-2">
+            <p-button
+              (onClick)="generateStatementOfAccount()"
+              [disabled]="loading"
+              icon="pi pi-file-pdf"
+              label="SOA (PDF)"
+              styleClass="p-button-danger"
+            ></p-button>
+            <p-button
+              (onClick)="generateStatementOfAccount('docx')"
+              [disabled]="loading"
+              icon="pi pi-file-word"
+              label="SOA (Word)"
+              styleClass="p-button-info"
+            ></p-button>
+          </div>
+        </div>
         <p-button
           (onClick)="addNewPriceBreakdownRow()"
           [outlined]="true"
@@ -738,21 +758,4 @@
       </div>
     </section>
   </form>
-
-  <!-- Side Actions Panel -->
-  <div class="mt-8 p-4 border rounded-lg bg-gray-50" *ngIf="bookingId">
-    <h3 class="font-bold mb-4 border-b pb-2">Actions</h3>
-    <div class="grid grid-cols-1 gap-4">
-      <div>
-        <h4 class="font-semibold mb-2">Documents</h4>
-        <p-button
-          (onClick)="generateStatementOfAccount()"
-          [disabled]="loading"
-          icon="pi pi-file-pdf"
-          label="Generate Statement of Account"
-          styleClass="p-button-info w-full mb-2"
-        ></p-button>
-      </div>
-    </div>
-  </div>
 </section>

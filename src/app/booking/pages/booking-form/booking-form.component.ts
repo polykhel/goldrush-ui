@@ -521,7 +521,7 @@ export class BookingFormComponent implements OnInit, CanComponentDeactivate {
     );
   }
 
-  generateStatementOfAccount(): void {
+  generateStatementOfAccount(format: 'pdf' | 'docx' = 'pdf'): void {
     if (!this.bookingId) return;
 
     if (this.bookingForm.invalid) {
@@ -541,7 +541,7 @@ export class BookingFormComponent implements OnInit, CanComponentDeactivate {
 
     this.loading = true;
     this.bookingService
-      .generateStatementOfAccount(this.bookingId)
+      .generateStatementOfAccount(this.bookingId, format)
       .pipe(finalize(() => (this.loading = false)))
       .subscribe({
         next: (response) => {
@@ -570,7 +570,7 @@ export class BookingFormComponent implements OnInit, CanComponentDeactivate {
           const a = document.createElement('a');
           a.href = fileURL;
           a.target = '_blank';
-          a.download = fileName ?? 'statement-of-account.pdf';
+          a.download = fileName ?? `statement-of-account.${format}`;
           document.body.appendChild(a); // Required for Firefox
           a.click();
           document.body.removeChild(a); // Clean up
