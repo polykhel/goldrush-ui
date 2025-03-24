@@ -521,7 +521,7 @@ export class BookingFormComponent implements OnInit, CanComponentDeactivate {
     );
   }
 
-  generateStatementOfAccount(format: 'pdf' | 'docx' = 'pdf'): void {
+  generateStatementOfAccount(format: 'pdf' | 'rtf' = 'pdf'): void {
     if (!this.bookingId) return;
 
     if (this.bookingForm.invalid) {

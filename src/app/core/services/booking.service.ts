@@ -28,7 +28,7 @@ export class BookingService extends AbstractCrudService<Booking> {
 
   generateStatementOfAccount(
     id: string,
-    format: 'pdf' | 'docx' = 'pdf',
+    format: 'pdf' | 'rtf' = 'pdf',
   ): Observable<HttpResponse<Blob>> {
     return this.http.get(
       `${this.baseUrl}/${id}/statement-of-account?format=${format.toUpperCase()}`,
