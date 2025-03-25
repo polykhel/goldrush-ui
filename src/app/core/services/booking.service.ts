@@ -1,7 +1,7 @@
 import { HttpClient, HttpResponse } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { environment } from '@env/environment';
-import { Booking } from '@models/booking.model';
+import { Attachment, Booking } from '@models/booking.model';
 import { Observable } from 'rxjs';
 import { AbstractCrudService } from './abstract-crud.service';
 
@@ -49,6 +49,40 @@ export class BookingService extends AbstractCrudService<Booking> {
         responseType: 'blob',
         observe: 'response',
       },
+    );
+  }
+
+  uploadAttachment(bookingId: string, file: File): Observable<Attachment> {
+    const formData = new FormData();
+    formData.append('file', file);
+    return this.http.post<Attachment>(
+      `${this.baseUrl}/${bookingId}/attachments`,
+      formData,
+    );
+  }
+
+  getAttachments(bookingId: string): Observable<Attachment[]> {
+    return this.http.get<Attachment[]>(
+      `${this.baseUrl}/${bookingId}/attachments`,
+    );
+  }
+
+  downloadAttachment(
+    bookingId: string,
+    attachmentId: number,
+  ): Observable<HttpResponse<Blob>> {
+    return this.http.get(
+      `${this.baseUrl}/${bookingId}/attachments/${attachmentId}`,
+      {
+        responseType: 'blob',
+        observe: 'response',
+      },
+    );
+  }
+
+  deleteAttachment(bookingId: string, attachmentId: number): Observable<void> {
+    return this.http.delete<void>(
+      `${this.baseUrl}/${bookingId}/attachments/${attachmentId}`,
     );
   }
 }

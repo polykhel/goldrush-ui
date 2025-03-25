@@ -1,0 +1,86 @@
+<div class="p-4">
+  <p-confirmDialog></p-confirmDialog>
+  <h3 class="text-lg font-semibold mb-4">Attachments</h3>
+  <p-fileUpload
+    #fileUpload
+    (onClear)="onClear($event)"
+    (onError)="onUploadError($event)"
+    (uploadHandler)="onFileSelected($event)"
+    [auto]="false"
+    [disabled]="uploading"
+    [multiple]="true"
+    accept="image/*,application/pdf"
+    customUpload="true"
+    dragDropSupport="true"
+    maxFileSize="5000000"
+    name="files[]"
+    url=""
+  >
+    <ng-template pTemplate="empty">
+      <div>Drag and drop files to here to upload.</div>
+    </ng-template>
+    <ng-template let-files pTemplate="content">
+      <div class="flex flex-col gap-4">
+        <div *ngIf="files?.length > 0">
+          <h5 class="text-base font-medium mb-2">Pending</h5>
+          <div class="flex flex-wrap gap-4">
+            <div
+              *ngFor="let file of files"
+              class="p-4 border border-gray-200 rounded-lg shadow-sm"
+            >
+              <div class="flex items-center justify-between gap-2 mb-2">
+                <span class="text-sm font-medium truncate">{{
+                  file.name
+                }}</span>
+                <span class="text-sm text-gray-500">{{
+                  formatFileSize(file.size)
+                }}</span>
+              </div>
+              <p-progressBar
+                [showValue]="false"
+                [value]="file.progress"
+              ></p-progressBar>
+            </div>
+          </div>
+        </div>
+      </div>
+    </ng-template>
+  </p-fileUpload>
+
+  <!-- List of existing attachments -->
+  <div *ngIf="attachments.length > 0" class="mt-6">
+    <h5 class="text-base font-medium mb-2">Existing Attachments</h5>
+    <div class="flex flex-wrap gap-4">
+      <div
+        *ngFor="let attachment of attachments"
+        class="p-4 border border-gray-200 rounded-lg shadow-sm"
+      >
+        <div class="flex items-center justify-between gap-2">
+          <span class="text-sm font-medium truncate">{{
+            attachment.fileName
+          }}</span>
+          <div class="flex items-center gap-2">
+            <span class="text-sm text-gray-500">{{
+              formatFileSize(attachment.fileSize)
+            }}</span>
+            <p-button
+              (onClick)="downloadAttachment(attachment)"
+              [outlined]="true"
+              [rounded]="true"
+              icon="pi pi-download"
+              size="small"
+            ></p-button>
+            <p-button
+              (onClick)="deleteAttachment(attachment)"
+              [outlined]="true"
+              [rounded]="true"
+              icon="pi pi-trash"
+              severity="danger"
+              size="small"
+            ></p-button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

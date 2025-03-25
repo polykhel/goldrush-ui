@@ -39,6 +39,7 @@ import { Textarea } from 'primeng/textarea';
 import { ToastModule } from 'primeng/toast';
 import { ToolbarModule } from 'primeng/toolbar';
 import { distinctUntilChanged, finalize, Observable } from 'rxjs';
+import { BookingAttachmentsComponent } from '../../components/booking-attachments/booking-attachments.component';
 
 @UntilDestroy()
 @Component({
@@ -66,6 +67,7 @@ import { distinctUntilChanged, finalize, Observable } from 'rxjs';
     TableModule,
     DialogModule,
     DecimalPipe,
+    BookingAttachmentsComponent,
   ],
   providers: [ConfirmationService],
 })

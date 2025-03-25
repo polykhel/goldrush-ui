@@ -50,3 +50,12 @@ export interface PaymentHistory {
   feePercentage: number | null;
   remarks?: string;
 }
+
+export interface Attachment {
+  id: number;
+  fileName: string;
+  contentType: string;
+  fileSize: number;
+  uploadedAt: string;
+  uploadedBy: string;
+}
