@@ -153,10 +153,12 @@ export class ProviderQuotationComponent implements OnInit {
       },
     );
 
-    // Calculate initial breakdown total
-    this.handleBreakdown('regular', 'update');
-    this.handleBreakdown('child', 'update');
-    this.handleBreakdown('senior', 'update');
+    if (this.formGroup.get('showPriceBreakdown')?.value) {
+      // Calculate initial breakdown total
+      this.handleBreakdown('regular', 'update');
+      this.handleBreakdown('child', 'update');
+      this.handleBreakdown('senior', 'update');
+    }
   }
 
   onPriceInput(event: InputNumberInputEvent) {
