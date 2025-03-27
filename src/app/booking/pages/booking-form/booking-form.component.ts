@@ -20,6 +20,7 @@ import { OptionsService } from '@services/options.service';
 import { ToastService } from '@services/toast.service';
 import { PACKAGE_OPTIONS } from '@utils/package.util';
 import dayjs from 'dayjs';
+import { saveAs } from 'file-saver';
 import { ConfirmationService } from 'primeng/api';
 import { ButtonModule } from 'primeng/button';
 import { CalendarModule } from 'primeng/calendar';
@@ -568,15 +569,12 @@ export class BookingFormComponent implements OnInit, CanComponentDeactivate {
             'Success',
             'Statement of Account generated successfully',
           );
-          const fileURL = URL.createObjectURL(response.body);
-          const a = document.createElement('a');
-          a.href = fileURL;
-          a.target = '_blank';
-          a.download = fileName ?? `statement-of-account.${format}`;
-          document.body.appendChild(a); // Required for Firefox
-          a.click();
-          document.body.removeChild(a); // Clean up
-          URL.revokeObjectURL(fileURL); // Release the object URL
+          const blob = new Blob([response.body], {
+            type:
+              response.headers.get('content-type') ||
+              'application/octet-stream',
+          });
+          saveAs(blob, fileName ?? `statement-of-account.${format}`);
         },
         error: (error) => {
           this.toastService.error(
