@@ -20,12 +20,12 @@ interface MenuChangeEvent {
 }
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class LayoutService {
   _config: LayoutConfig = {
     darkMode: false,
-    menuMode: 'static'
+    menuMode: 'static',
   };
 
   _state: LayoutState = {
@@ -33,7 +33,7 @@ export class LayoutService {
     overlayMenuActive: false,
     configSidebarVisible: false,
     staticMenuMobileActive: false,
-    menuHoverActive: false
+    menuHoverActive: false,
   };
 
   layoutConfig = signal<LayoutConfig>(this._config);
@@ -61,6 +61,16 @@ export class LayoutService {
   private initialized = false;
 
   constructor() {
+    const savedDarkMode = localStorage.getItem('darkMode');
+    if (savedDarkMode !== null) {
+      this.layoutConfig.update((config) => ({
+        ...config,
+        darkMode: savedDarkMode === 'true',
+      }));
+
+      this.toggleDarkMode();
+    }
+
     effect(() => {
       const config = this.layoutConfig();
       if (config) {
@@ -76,6 +86,7 @@ export class LayoutService {
         return;
       }
 
+      localStorage.setItem('darkMode', config.darkMode.toString());
       this.handleDarkModeTransition(config);
     });
   }
@@ -95,11 +106,10 @@ export class LayoutService {
     });
 
     transition.ready
-    .then(() => {
-      this.onTransitionEnd();
-    })
-    .catch(() => {
-    });
+      .then(() => {
+        this.onTransitionEnd();
+      })
+      .catch(() => {});
   }
 
   toggleDarkMode(config?: LayoutConfig): void {
@@ -122,12 +132,13 @@ export class LayoutService {
     if (this.isDesktop()) {
       this.layoutState.update((prev) => ({
         ...prev,
-        staticMenuDesktopInactive: !this.layoutState().staticMenuDesktopInactive
+        staticMenuDesktopInactive:
+          !this.layoutState().staticMenuDesktopInactive,
       }));
     } else {
       this.layoutState.update((prev) => ({
         ...prev,
-        staticMenuMobileActive: !this.layoutState().staticMenuMobileActive
+        staticMenuMobileActive: !this.layoutState().staticMenuMobileActive,
       }));
 
       if (this.layoutState().staticMenuMobileActive) {
@@ -145,7 +156,7 @@ export class LayoutService {
   }
 
   onConfigUpdate() {
-    this._config = {...this.layoutConfig()};
+    this._config = { ...this.layoutConfig() };
     this.configUpdate.next(this.layoutConfig());
   }
 
