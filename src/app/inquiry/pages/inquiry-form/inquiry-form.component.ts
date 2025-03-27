@@ -403,7 +403,7 @@ export class InquiryFormComponent implements OnInit {
 
     this.quotationData = {
       clientName: inquiry.clientName,
-      title: `${inquiry.travelDetails.days}D${inquiry.travelDetails.nights}N ${inquiry.travelDetails.destination} Package`,
+      title: this.getQuotationTitle(inquiry),
       travelDates: {
         start: inquiry.travelDetails.startDate,
         end: inquiry.travelDetails.endDate,
@@ -441,6 +441,30 @@ export class InquiryFormComponent implements OnInit {
         .subscribe();
     }
     this.showQuotationPreview = true;
+  }
+
+  getQuotationTitle(inquiry: any) {
+    const { packageType, customPackageOptions } = inquiry;
+    const duration = `${inquiry.travelDetails.days}D${inquiry.travelDetails.nights}N`;
+    const destination = inquiry.travelDetails.destination;
+
+    if (packageType === 'ALL_INCLUSIVE') {
+      return `${duration} ${destination} Package`;
+    }
+
+    if (packageType === 'CUSTOM' && customPackageOptions) {
+      const selectedOptions = customPackageOptions
+        .filter(Boolean)
+        .map(
+          (customPackageOption: string) =>
+            this.packageOptions.find(
+              (option) => option.id === customPackageOption,
+            )?.label,
+        );
+      return `${duration} ${destination} ${selectedOptions.join(' + ')}`;
+    }
+
+    return `${duration} ${destination} Package`;
   }
 
   goBack() {
