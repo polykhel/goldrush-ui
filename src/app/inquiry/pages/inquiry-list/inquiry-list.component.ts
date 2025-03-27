@@ -4,9 +4,11 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { Inquiry } from '@models/inquiry.model';
 import { Option } from '@models/option';
+import { TravelDetails } from '@models/travel-details.model';
 import { InquiryService } from '@services/inquiry.service';
 import { OptionsService } from '@services/options.service';
 import { ToastService } from '@services/toast.service';
+import dayjs from 'dayjs';
 import { ConfirmationService } from 'primeng/api';
 import { Button } from 'primeng/button';
 import { Card } from 'primeng/card';
@@ -18,7 +20,13 @@ import { Select } from 'primeng/select';
 import { TableModule } from 'primeng/table';
 import { Toast } from 'primeng/toast';
 import { Tooltip } from 'primeng/tooltip';
-import { debounceTime, distinctUntilChanged, firstValueFrom, Subject, takeUntil } from 'rxjs';
+import {
+  debounceTime,
+  distinctUntilChanged,
+  firstValueFrom,
+  Subject,
+  takeUntil,
+} from 'rxjs';
 
 @Component({
   selector: 'app-inquiry-list',
@@ -35,7 +43,7 @@ import { debounceTime, distinctUntilChanged, firstValueFrom, Subject, takeUntil 
     InputText,
     FormsModule,
     Tooltip,
-    Select
+    Select,
   ],
   providers: [ConfirmationService],
   templateUrl: './inquiry-list.component.html',
@@ -66,11 +74,9 @@ export class InquiryListComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
-    this.optionsService
-      .getInquiryStatuses()
-      .subscribe((data) => {
-        this.statusOptions = [{label: 'All', value: ''}, ...data];
-      });
+    this.optionsService.getInquiryStatuses().subscribe((data) => {
+      this.statusOptions = [{ label: 'All', value: '' }, ...data];
+    });
 
     this.loadInquiries();
   }
@@ -139,9 +145,11 @@ export class InquiryListComponent implements OnInit, OnDestroy {
       }
       this.loading = true;
       const duplicatedInquiry = await firstValueFrom(
-        this.inquiryService.duplicateInquiry(inquiry.id)
+        this.inquiryService.duplicateInquiry(inquiry.id),
       );
-      await this.router.navigate(['/inquiries', duplicatedInquiry.id], {state: {duplicate: true}});
+      await this.router.navigate(['/inquiries', duplicatedInquiry.id], {
+        state: { duplicate: true },
+      });
     } catch (error) {
       this.toastService.defaultError('Failed to duplicate inquiry');
       this.loading = false;
@@ -180,5 +188,15 @@ export class InquiryListComponent implements OnInit, OnDestroy {
           this.loading = false;
         },
       });
+  }
+
+  getTravelDates(travelDetails: TravelDetails) {
+    let travelDates = dayjs(travelDetails.startDate).format('MMM D, YYYY');
+
+    if (travelDetails.endDate) {
+      travelDates += ' - ' + dayjs(travelDetails.endDate).format('MMM D, YYYY');
+    }
+
+    return travelDates;
   }
 }

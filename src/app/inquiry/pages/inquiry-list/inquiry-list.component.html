@@ -59,7 +59,7 @@
           Destination
           <p-sortIcon field="travelDetails.destination"></p-sortIcon>
         </th>
-        <th id="travelDates">Travel Dates</th>
+        <th id="travelDates">Travel Date(s)</th>
         <th id="status" pSortableColumn="inquiryStatus">
           Status
           <p-sortIcon field="inquiryStatus"></p-sortIcon>
@@ -76,7 +76,7 @@
         <td>{{ inquiry.clientName }}</td>
         <td>{{ inquiry.travelDetails.destination }}</td>
         <td>
-          {{ inquiry.travelDetails.startDate | date }} - {{ inquiry.travelDetails.endDate | date }}
+          {{ getTravelDates(inquiry.travelDetails) }}
         </td>
         <td>
           {{ inquiry.status }}
