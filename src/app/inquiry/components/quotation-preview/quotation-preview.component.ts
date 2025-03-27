@@ -54,16 +54,18 @@ export class QuotationPreviewComponent {
       return '';
     }
 
-    const startDate = dayjs(flightDetail.startDate);
-    const endDate = dayjs(flightDetail.endDate);
+    const startDate = flightDetail.startDate
+      ? dayjs(flightDetail.startDate)
+      : null;
+    const endDate = flightDetail.endDate ? dayjs(flightDetail.endDate) : null;
     const route = formatPairedValues(flightDetail.airportCode, nextCode);
     const dateRange = formatPairedValues(
-      startDate.format('MM/DD/YY'),
-      endDate.format('MM/DD/YY'),
+      startDate?.format('MM/DD/YY'),
+      endDate?.format('MM/DD/YY'),
     );
     const timeRange = formatPairedValues(
-      startDate.format('HH:mm'),
-      endDate.format('HH:mm'),
+      startDate?.format('HH:mm'),
+      endDate?.format('HH:mm'),
     );
 
     return [formatValue(flightDetail.flightNumber), route, dateRange, timeRange]
