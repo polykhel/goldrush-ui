@@ -104,7 +104,7 @@
       </div>
 
       <!-- Flight Information -->
-      @if (quotation.flightDetails) {
+      @if (showFlightDetails && quotation.flightDetails) {
         <div class="p-2 rounded-lg">
           <div class="font-semibold">
             FLIGHT DETAILS
@@ -139,18 +139,20 @@
       }
 
       <!-- Package Details -->
-      <div class="bg-gray-50 p-2 rounded-lg">
-        <div class="font-semibold">INCLUSIONS</div>
-        <ul class="space-y-1">
-          @for (inclusion of quotation.inclusions; track inclusion) {
-            <li class="flex items-start">
-              @if (inclusion) {
-                <span class="mr-2">•</span> {{ inclusion }}
-              }
-            </li>
-          }
-        </ul>
-      </div>
+      @if (quotation.inclusions ? quotation.inclusions.length > 0 : false) {
+        <div class="bg-gray-50 p-2 rounded-lg">
+          <div class="font-semibold">INCLUSIONS</div>
+          <ul class="space-y-1">
+            @for (inclusion of quotation.inclusions; track inclusion) {
+              <li class="flex items-start">
+                @if (inclusion) {
+                  <span class="mr-2">•</span> {{ inclusion }}
+                }
+              </li>
+            }
+          </ul>
+        </div>
+      }
       @if (quotation.exclusions ? quotation.exclusions.length > 0 : false) {
         <div class="p-2 rounded-lg">
           <div class="font-semibold">EXCLUSIONS</div>

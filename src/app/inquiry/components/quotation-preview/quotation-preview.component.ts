@@ -1,5 +1,11 @@
 import { CurrencyPipe } from '@angular/common';
-import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  EventEmitter,
+  Input,
+  Output,
+} from '@angular/core';
 
 import { DateRange } from '@models/date-range.model';
 import { ClientQuotation, Flight } from '@models/quotation.model';
@@ -22,14 +28,14 @@ import { Dialog } from 'primeng/dialog';
 export class QuotationPreviewComponent {
   @Input() visible = false;
   @Input({ required: true }) quotation!: ClientQuotation;
+  @Input() showFlightDetails = false;
 
   @Output() visibleChange = new EventEmitter<boolean>();
   @Output() cancel = new EventEmitter<void>();
 
   today = dayjs().format('MMM DD, YYYY');
 
-  constructor(private toastService: ToastService) {
-  }
+  constructor(private toastService: ToastService) {}
 
   formatTravelDates(travelDates?: DateRange | null): string {
     return formatDateRange(travelDates);
@@ -80,11 +86,11 @@ export class QuotationPreviewComponent {
         useCORS: true,
         scale: 2,
         logging: false,
-        backgroundColor: '#ffffff'
+        backgroundColor: '#ffffff',
       };
 
       if (type === 'img') {
-       this.generateImage(element, canvasOptions);
+        this.generateImage(element, canvasOptions);
       } else if (type === 'pdf') {
         this.generatePDF(element, canvasOptions);
       } else if (type === 'clipboard') {
@@ -104,7 +110,7 @@ export class QuotationPreviewComponent {
   }
 
   private generatePDF(element: HTMLElement, canvasOptions: any) {
-    html2canvas(element, canvasOptions).then(canvas => {
+    html2canvas(element, canvasOptions).then((canvas) => {
       const imgData = canvas.toDataURL('image/jpeg', 1.0);
 
       const imgWidth = 210;
@@ -133,16 +139,18 @@ export class QuotationPreviewComponent {
   }
 
   private copyToClipboard(element: HTMLElement, canvasOptions: any) {
-    html2canvas(element, canvasOptions).then(canvas => {
+    html2canvas(element, canvasOptions).then((canvas) => {
       canvas.toBlob(async (blob) => {
         if (blob) {
           try {
             await navigator.clipboard.write([
               new ClipboardItem({
-                'image/png': blob
-              })
+                'image/png': blob,
+              }),
             ]);
-            this.toastService.defaultSuccess('Successfully copied to clipboard');
+            this.toastService.defaultSuccess(
+              'Successfully copied to clipboard',
+            );
           } catch (err) {
             console.error('Failed to copy image to clipboard: ', err);
             this.toastService.defaultError('Failed to copy image to clipboard');
