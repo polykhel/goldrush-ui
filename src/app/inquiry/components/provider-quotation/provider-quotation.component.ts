@@ -28,6 +28,7 @@ import { InputGroup } from 'primeng/inputgroup';
 import { InputGroupAddon } from 'primeng/inputgroupaddon';
 import { InputNumber, InputNumberInputEvent } from 'primeng/inputnumber';
 import { InputText } from 'primeng/inputtext';
+import { RadioButton } from 'primeng/radiobutton';
 import { Select } from 'primeng/select';
 import { Textarea } from 'primeng/textarea';
 
@@ -50,6 +51,7 @@ import { Textarea } from 'primeng/textarea';
     Fluid,
     Checkbox,
     ConfirmDialog,
+    RadioButton,
   ],
   providers: [ConfirmationService],
 })

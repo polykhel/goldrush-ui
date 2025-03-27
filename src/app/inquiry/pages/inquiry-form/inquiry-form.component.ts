@@ -421,6 +421,8 @@ export class InquiryFormComponent implements OnInit {
       flightDetails:
         providerQuotation.status === 'RECEIVED'
           ? {
+              tripType:
+                providerQuotation.flightDetails?.tripType ?? 'ROUND_TRIP',
               departure: providerQuotation.flightDetails?.departure ?? null,
               arrival: providerQuotation.flightDetails?.arrival ?? null,
             }
@@ -616,6 +618,7 @@ export class InquiryFormComponent implements OnInit {
         ) || [],
       ),
       flightDetails: this.fb.group({
+        tripType: [quotation?.flightDetails?.tripType ?? 'ROUND_TRIP'],
         departure: this.buildFlightDetailsForm(
           quotation?.flightDetails?.departure,
         ),

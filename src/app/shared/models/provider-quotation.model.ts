@@ -23,8 +23,9 @@ export interface ProviderQuotation {
   providerId: string;
   sent: boolean;
   flightDetails: {
+    tripType: 'ONE_WAY' | 'ROUND_TRIP';
     departure: Flight | null;
-    arrival: Flight | null;
+    arrival?: Flight | null;
   } | null;
   inclusions: string | null;
   exclusions: string | null;

@@ -343,6 +343,19 @@
           @if (showFlightSection) {
             <div formGroupName="flightDetails" class="p-4 border rounded">
               <h5 class="font-medium mb-3">Flight Details</h5>
+              <div class="mb-4">
+                <label class="font-semibold block mb-2">Trip Type</label>
+                <div class="flex gap-4">
+                  <div class="flex items-center">
+                    <p-radio-button formControlName="tripType" inputId="round_trip" value="ROUND_TRIP" />
+                    <label class="ml-2" for="round_trip">Round Trip</label>
+                  </div>
+                  <div class="flex items-center">
+                    <p-radio-button formControlName="tripType" inputId="one_way" value="ONE_WAY" />
+                    <label class="ml-2" for="one_way">One Way</label>
+                  </div>
+                </div>
+              </div>
               <div class="grid grid-cols-2 gap-4">
                 <p-fluid formGroupName="departure" class="flex flex-col gap-2">
                   <span class="font-semibold">Departure</span>
@@ -373,73 +386,76 @@
                     />
                     <label for="departureAirportCode">Airport Code</label>
                   </p-float-label>
-                  <div class="grid grid-cols-2 gap-1">
+                  <p-float-label variant="on">
+                    <p-date-picker
+                      [showIcon]="true"
+                      formControlName="startDate"
+                      [showTime]="true"
+                      [showSeconds]="false"
+                    ></p-date-picker>
+                    <label for="departureStartDate">Departure Date & Time</label>
+                  </p-float-label>
+                  <p-float-label variant="on">
+                    <p-date-picker
+                      [showIcon]="true"
+                      formControlName="endDate"
+                      [showTime]="true"
+                      [showSeconds]="false"
+                    ></p-date-picker>
+                    <label for="departureEndDate">Arrival Date & Time</label>
+                  </p-float-label>
+                </p-fluid>
+
+                @if (formGroup.get('flightDetails.tripType')?.value === 'ROUND_TRIP') {
+                  <p-fluid formGroupName="arrival" class="flex flex-col gap-2">
+                    <span class="font-semibold">Return</span>
+                    <p-float-label variant="on">
+                      <input
+                        type="text"
+                        pInputText
+                        id="arrivalAirline"
+                        formControlName="airline"
+                      />
+                      <label for="arrivalAirline">Airline</label>
+                    </p-float-label>
+                    <p-float-label variant="on">
+                      <input
+                        type="text"
+                        pInputText
+                        id="arrivalFlightNumber"
+                        formControlName="flightNumber"
+                      />
+                      <label for="arrivalFlightNumber">Flight Number</label>
+                    </p-float-label>
+                    <p-float-label variant="on">
+                      <input
+                        type="text"
+                        pInputText
+                        id="arrivalAirportCode"
+                        formControlName="airportCode"
+                      />
+                      <label for="arrivalAirportCode">Airport Code</label>
+                    </p-float-label>
                     <p-float-label variant="on">
                       <p-date-picker
-                        id="departureStartDate"
+                        [showIcon]="true"
                         formControlName="startDate"
                         [showTime]="true"
+                        [showSeconds]="false"
                       ></p-date-picker>
-                      <label for="departureStartDate">Start Date</label>
+                      <label for="arrivalStartDate">Departure Date & Time</label>
                     </p-float-label>
                     <p-float-label variant="on">
                       <p-date-picker
-                        id="departureEndDate"
+                        [showIcon]="true"
                         formControlName="endDate"
                         [showTime]="true"
+                        [showSeconds]="false"
                       ></p-date-picker>
-                      <label for="departureEndDate">End Date</label>
+                      <label for="arrivalEndDate">Arrival Date & Time</label>
                     </p-float-label>
-                  </div>
-                </p-fluid>
-                <p-fluid formGroupName="arrival" class="flex flex-col gap-2">
-                  <span class="font-semibold">Arrival</span>
-                  <p-float-label variant="on">
-                    <input
-                      type="text"
-                      pInputText
-                      id="arrivalAirline"
-                      formControlName="airline"
-                    />
-                    <label for="arrivalAirline">Airline</label>
-                  </p-float-label>
-                  <p-float-label variant="on">
-                    <input
-                      type="text"
-                      pInputText
-                      id="arrivalFlightNumber"
-                      formControlName="flightNumber"
-                    />
-                    <label for="arrivalFlightNumber">Flight Number</label>
-                  </p-float-label>
-                  <p-float-label variant="on">
-                    <input
-                      type="text"
-                      pInputText
-                      id="arrivalAirportCode"
-                      formControlName="airportCode"
-                    />
-                    <label for="arrivalAirportCode">Airport Code</label>
-                  </p-float-label>
-                  <div class="grid grid-cols-2 gap-1">
-                    <p-float-label variant="on">
-                      <p-date-picker
-                        id="arrivalStartDate"
-                        formControlName="startDate"
-                        [showTime]="true"
-                      ></p-date-picker>
-                      <label for="arrivalStartDate">Start Date</label>
-                    </p-float-label>
-                    <p-float-label variant="on">
-                      <p-date-picker
-                        id="arrivalEndDate"
-                        formControlName="endDate"
-                        [showTime]="true"
-                      ></p-date-picker>
-                      <label for="arrivalEndDate">End Date</label>
-                    </p-float-label>
-                  </div>
-                </p-fluid>
+                  </p-fluid>
+                }
               </div>
             </div>
           }

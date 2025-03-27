@@ -120,20 +120,21 @@
               {{
                 getFlightDetails(
                   quotation.flightDetails.departure,
-                  quotation.flightDetails.arrival?.airportCode
+                  quotation.flightDetails.tripType === 'ROUND_TRIP' ? quotation.flightDetails.arrival?.airportCode : null
                 )
               }}
             </li>
-            <li>
-              <span class="mr-2">•</span>
-              {{
-                getFlightDetails(
-                  quotation.flightDetails.arrival,
-                  quotation.flightDetails.departure?.airportCode
-                )
-              }}
-            </li>
-            <span></span>
+            @if (quotation.flightDetails.tripType === 'ROUND_TRIP' && quotation.flightDetails.arrival) {
+              <li>
+                <span class="mr-2">•</span>
+                {{
+                  getFlightDetails(
+                    quotation.flightDetails.arrival,
+                    quotation.flightDetails.departure?.airportCode
+                  )
+                }}
+              </li>
+            }
           </ul>
         </div>
       }
