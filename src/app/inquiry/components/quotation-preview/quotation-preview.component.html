@@ -17,7 +17,7 @@
     <!-- Main Content -->
     <div class="grid gap-1 mb-6">
       <!-- Essential Information -->
-      <div class="bg-gray-50 dark:bg-gray-700 p-2 rounded-lg">
+      <div class="p-2 rounded-lg">
         <div class="font-semibold">TRAVEL DATES</div>
         <div>{{ formatTravelDates(quotation.travelDates) }}</div>
       </div>
@@ -25,7 +25,7 @@
         <div class="font-semibold">NO. OF PAX</div>
         <div>{{ quotation.noOfPax }}</div>
       </div>
-      <div class="bg-gray-50 dark:bg-gray-700 p-2 rounded-lg">
+      <div class="p-2 rounded-lg">
         <div class="font-semibold">
           RATE PER PAX
           @if (quotation.showPriceBreakdown && quotation.priceBreakdown) {
@@ -141,7 +141,7 @@
 
       <!-- Package Details -->
       @if (quotation.inclusions ? quotation.inclusions.length > 0 : false) {
-        <div class="bg-gray-50 dark:bg-gray-700 p-2 rounded-lg">
+        <div class="p-2 rounded-lg">
           <div class="font-semibold">INCLUSIONS</div>
           <ul class="space-y-1">
             @for (inclusion of quotation.inclusions; track inclusion) {
@@ -169,7 +169,7 @@
         </div>
       }
       @if (quotation.optionalTours ? quotation.optionalTours.length > 0 : false) {
-        <div class="bg-gray-50 dark:bg-gray-700 p-2 rounded-lg">
+        <div class="p-2 rounded-lg">
           <div class="font-semibold">OPTIONAL ACTIVITIES</div>
           <ul class="space-y-1">
             @for (activity of quotation.optionalTours; track activity) {
@@ -191,7 +191,7 @@
     </div>
 
     <!-- Terms and Conditions -->
-    <div class="bg-gray-50 dark:bg-gray-700 p-2 rounded-lg mb-6">
+    <div class="p-2 rounded-lg border-2 mb-6">
       <h3 class="font-bold text-lg mb-3">Terms and Conditions</h3>
       <ul class="space-y-2">
         <li class="flex items-start">

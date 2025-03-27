@@ -24,6 +24,16 @@ import { Dialog } from 'primeng/dialog';
   imports: [Dialog, Button, CurrencyPipe],
   templateUrl: './quotation-preview.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  styles: `
+    #preview {
+      background-color: #ffffff;
+      color: #000000;
+    }
+
+    h3 {
+      color: #000000;
+    }
+  `,
 })
 export class QuotationPreviewComponent {
   @Input() visible = false;
