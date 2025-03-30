@@ -8,6 +8,7 @@ import { TravelDetails } from '@models/travel-details.model';
 import { InquiryService } from '@services/inquiry.service';
 import { OptionsService } from '@services/options.service';
 import { ToastService } from '@services/toast.service';
+import { UntilDestroy, untilDestroyed } from '@ngneat/until-destroy';
 import dayjs from 'dayjs';
 import { ConfirmationService } from 'primeng/api';
 import { Button } from 'primeng/button';
@@ -28,6 +29,7 @@ import {
   takeUntil,
 } from 'rxjs';
 
+@UntilDestroy()
 @Component({
   selector: 'app-inquiry-list',
   standalone: true,
@@ -158,7 +160,7 @@ export class InquiryListComponent implements OnInit, OnDestroy {
 
   private setupSearch() {
     this.searchSubject
-      .pipe(debounceTime(300), distinctUntilChanged())
+      .pipe(debounceTime(300), distinctUntilChanged(), untilDestroyed(this))
       .subscribe(() => {
         this.currentPage = 0;
         this.loadInquiries();
@@ -176,7 +178,7 @@ export class InquiryListComponent implements OnInit, OnDestroy {
         search: this.searchTerm,
         status: this.selectedStatus,
       })
-      .pipe(takeUntil(this.searchSubject))
+      .pipe(untilDestroyed(this))
       .subscribe({
         next: (response) => {
           this.inquiries = response.items;

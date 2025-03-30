@@ -1,4 +1,4 @@
-import { Component, HostBinding, Input, OnInit } from '@angular/core';
+import { Component, HostBinding, Input, OnDestroy, OnInit } from '@angular/core';
 import { MenuItem } from 'primeng/api';
 import { NgClass, NgForOf, NgIf } from '@angular/common';
 import { NavigationEnd, Router, RouterLink, RouterLinkActive } from '@angular/router';
@@ -6,7 +6,9 @@ import { LayoutService } from '../layout.service';
 import { animate, state, style, transition, trigger } from '@angular/animations';
 import { filter, Subscription } from 'rxjs';
 import { Ripple } from "primeng/ripple";
+import { UntilDestroy, untilDestroyed } from '@ngneat/until-destroy';
 
+@UntilDestroy()
 @Component({
   selector: '[app-menu-item]',
   templateUrl: './menu-item.component.html',
@@ -37,7 +39,7 @@ import { Ripple } from "primeng/ripple";
   ],
   standalone: true
 })
-export class MenuItemComponent implements OnInit {
+export class MenuItemComponent implements OnInit, OnDestroy {
   @Input() item!: MenuItem;
 
   @Input() index!: number;
@@ -58,7 +60,7 @@ export class MenuItemComponent implements OnInit {
       public router: Router,
       private layoutService: LayoutService
   ) {
-    this.menuSourceSubscription = this.layoutService.menuSource$.subscribe((value) => {
+    this.menuSourceSubscription = this.layoutService.menuSource$.pipe(untilDestroyed(this)).subscribe((value) => {
       Promise.resolve(null).then(() => {
         if (value.routeEvent) {
           this.active = value.key === this.key || value.key.startsWith(this.key + '-');
@@ -68,11 +70,14 @@ export class MenuItemComponent implements OnInit {
       });
     });
 
-    this.menuResetSubscription = this.layoutService.resetSource$.subscribe(() => {
+    this.menuResetSubscription = this.layoutService.resetSource$.pipe(untilDestroyed(this)).subscribe(() => {
       this.active = false;
     });
 
-    this.router.events.pipe(filter((event) => event instanceof NavigationEnd)).subscribe((params) => {
+    this.router.events.pipe(
+      filter((event) => event instanceof NavigationEnd),
+      untilDestroyed(this)
+    ).subscribe((params) => {
       if (this.item.routerLink) {
         this.updateActiveStateFromRoute();
       }
@@ -131,5 +136,14 @@ export class MenuItemComponent implements OnInit {
     }
 
     this.layoutService.onMenuStateChange({key: this.key});
+  }
+
+  ngOnDestroy() {
+    if (this.menuSourceSubscription) {
+      this.menuSourceSubscription.unsubscribe();
+    }
+    if (this.menuResetSubscription) {
+      this.menuResetSubscription.unsubscribe();
+    }
   }
 }

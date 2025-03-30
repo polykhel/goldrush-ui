@@ -49,7 +49,12 @@ export class AppComponent implements OnInit, OnDestroy {
         }
       });
 
-    this.router.events.pipe(filter((event) => event instanceof NavigationEnd)).subscribe(() => {
+    this.router.events
+      .pipe(
+        filter((event) => event instanceof NavigationEnd),
+        untilDestroyed(this)
+      )
+      .subscribe(() => {
       this.hideMenu();
     });
   }
@@ -64,9 +69,11 @@ export class AppComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
-    this.auth.isAuthenticated$.subscribe((authenticated) => {
-      this.isLoggedIn = authenticated;
-    });
+    this.auth.isAuthenticated$
+      .pipe(untilDestroyed(this))
+      .subscribe((authenticated) => {
+        this.isLoggedIn = authenticated;
+      });
   }
 
   isOutsideClicked(event: MouseEvent) {
@@ -115,6 +122,10 @@ export class AppComponent implements OnInit, OnDestroy {
   ngOnDestroy() {
     if (this.menuOutsideClickListener) {
       this.menuOutsideClickListener();
+      this.menuOutsideClickListener = null;
+    }
+    if (this.overlayMenuOpenSubscription) {
+      this.overlayMenuOpenSubscription.unsubscribe();
     }
   }
 }
