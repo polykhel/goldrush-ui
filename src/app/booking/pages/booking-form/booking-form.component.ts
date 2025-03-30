@@ -504,6 +504,7 @@ export class BookingFormComponent implements OnInit, CanComponentDeactivate {
       feeAmount: paymentMethod === 'CREDIT_CARD' ? feeAmount : null,
       feePercentage: paymentMethod === 'CREDIT_CARD' ? feePercentage : null,
       remarks: formValue.remarks,
+      bookingId: this.bookingForm.get('id')?.value ?? null
     };
 
     if (this.isEditingPayment && this.editingPaymentIndex !== null) {

@@ -49,6 +49,7 @@ export interface PaymentHistory {
   feeAmount: number | null;
   feePercentage: number | null;
   remarks?: string;
+  bookingId: string | null;
 }
 
 export interface Attachment {
