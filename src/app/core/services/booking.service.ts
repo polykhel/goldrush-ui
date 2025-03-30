@@ -4,6 +4,7 @@ import { environment } from '@env/environment';
 import { Attachment, Booking } from '@models/booking.model';
 import { Observable } from 'rxjs';
 import { AbstractCrudService } from './abstract-crud.service';
+import { ReportFormat } from '@models/report.model';
 
 @Injectable({
   providedIn: 'root',
@@ -28,10 +29,10 @@ export class BookingService extends AbstractCrudService<Booking> {
 
   generateStatementOfAccount(
     id: string,
-    format: 'pdf' | 'rtf' = 'pdf',
+    format: ReportFormat,
   ): Observable<HttpResponse<Blob>> {
     return this.http.get(
-      `${this.baseUrl}/${id}/statement-of-account?format=${format.toUpperCase()}`,
+      `${this.baseUrl}/${id}/statement-of-account?format=${format}`,
       {
         responseType: 'blob',
         observe: 'response',

@@ -167,14 +167,14 @@
           <h3 class="font-bold border-b pb-2">Price Breakdown</h3>
           <div class="flex gap-2">
             <p-button
-              (onClick)="generateStatementOfAccount()"
+              (onClick)="generateStatementOfAccount(ReportFormat.PDF)"
               [disabled]="loading"
               icon="pi pi-file-pdf"
               label="SOA (PDF)"
               styleClass="p-button-danger"
             ></p-button>
             <p-button
-              (onClick)="generateStatementOfAccount('rtf')"
+              (onClick)="generateStatementOfAccount(ReportFormat.WORD)"
               [disabled]="loading"
               icon="pi pi-file-word"
               label="SOA (Word)"

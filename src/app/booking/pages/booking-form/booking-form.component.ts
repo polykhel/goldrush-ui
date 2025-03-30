@@ -41,7 +41,7 @@ import { ToastModule } from 'primeng/toast';
 import { ToolbarModule } from 'primeng/toolbar';
 import { distinctUntilChanged, finalize, Observable } from 'rxjs';
 import { BookingAttachmentsComponent } from '../../components/booking-attachments/booking-attachments.component';
-import { FileResponse } from '@models/report.model';
+import { FileResponse, ReportFormat } from '@models/report.model';
 
 @UntilDestroy()
 @Component({
@@ -525,7 +525,7 @@ export class BookingFormComponent implements OnInit, CanComponentDeactivate {
     );
   }
 
-  generateStatementOfAccount(format: 'pdf' | 'rtf' = 'pdf'): void {
+  generateStatementOfAccount(format: ReportFormat): void {
     if (!this.bookingId) return;
 
     if (this.bookingForm.invalid) {
@@ -917,4 +917,6 @@ export class BookingFormComponent implements OnInit, CanComponentDeactivate {
       { emitEvent: false },
     );
   }
+
+  protected readonly ReportFormat = ReportFormat;
 }
