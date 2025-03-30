@@ -1,0 +1,54 @@
+<div class="p-4 bg-white rounded-lg shadow-sm">
+  <h2 class="text-xl font-semibold mb-4">{{ title }}</h2>
+
+  <form [formGroup]="filterForm" (ngSubmit)="onSubmit()" class="space-y-4">
+    <div formGroupName="dateRange" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div class="flex flex-col">
+        <label for="startDate" class="mb-1 text-sm font-medium">Start Date</label>
+        <p-date-picker
+          id="startDate"
+          formControlName="startDate"
+          [showIcon]="true"
+          dateFormat="dd/mm/yy"
+          [maxDate]="filterForm.get('dateRange.endDate')?.value"
+          styleClass="w-full"
+          inputStyleClass="w-full"
+        ></p-date-picker>
+      </div>
+
+      <div class="flex flex-col">
+        <label for="endDate" class="mb-1 text-sm font-medium">End Date</label>
+        <p-date-picker
+          id="endDate"
+          formControlName="endDate"
+          [showIcon]="true"
+          dateFormat="dd/mm/yy"
+          [minDate]="filterForm.get('dateRange.startDate')?.value"
+          styleClass="w-full"
+          inputStyleClass="w-full"
+        ></p-date-picker>
+      </div>
+    </div>
+
+    <div class="flex flex-col">
+      <label for="format" class="mb-1 text-sm font-medium">Export Format</label>
+      <p-select
+        id="format"
+        formControlName="format"
+        [options]="exportFormats"
+        optionLabel="label"
+        optionValue="value"
+        styleClass="w-full"
+      ></p-select>
+    </div>
+
+    <div class="flex justify-end">
+      <p-button
+        type="submit"
+        label="Generate Report"
+        icon="pi pi-file"
+        [disabled]="filterForm.invalid"
+      ></p-button>
+    </div>
+  </form>
+</div>

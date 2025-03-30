@@ -32,6 +32,12 @@ export const routes: Routes = [
       import('./payment/payment.routes').then((m) => m.PAYMENT_ROUTES)
   },
   {
+    path: 'reports',
+    canActivate: [authGuardFn],
+    loadChildren: () =>
+      import('./reports/reports.routes').then((m) => m.REPORTS_ROUTES)
+  },
+  {
     path: 'tools',
     canActivate: [authGuardFn],
     loadChildren: () =>

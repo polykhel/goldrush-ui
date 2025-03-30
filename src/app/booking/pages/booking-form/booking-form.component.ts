@@ -41,6 +41,7 @@ import { ToastModule } from 'primeng/toast';
 import { ToolbarModule } from 'primeng/toolbar';
 import { distinctUntilChanged, finalize, Observable } from 'rxjs';
 import { BookingAttachmentsComponent } from '../../components/booking-attachments/booking-attachments.component';
+import { FileResponse } from '@models/report.model';
 
 @UntilDestroy()
 @Component({
@@ -559,22 +560,15 @@ export class BookingFormComponent implements OnInit, CanComponentDeactivate {
             );
             return;
           }
-
-          const fileName = response.headers
-            .get('Content-Disposition')
-            ?.split(';')[1]
-            ?.split('=')[1];
-
           this.toastService.success(
             'Success',
             'Statement of Account generated successfully',
           );
-          const blob = new Blob([response.body], {
-            type:
-              response.headers.get('content-type') ||
-              'application/octet-stream',
-          });
-          saveAs(blob, fileName ?? `statement-of-account.${format}`);
+          const fileResponse = new FileResponse(response);
+          saveAs(
+            fileResponse.fileContent,
+            fileResponse.fileName ?? `statement-of-account.${format}`,
+          );
         },
         error: (error) => {
           this.toastService.error(
@@ -615,24 +609,12 @@ export class BookingFormComponent implements OnInit, CanComponentDeactivate {
             return;
           }
 
-          const fileName = response.headers
-            .get('Content-Disposition')
-            ?.split(';')[1]
-            ?.split('=')[1];
-
+          const fileResponse = new FileResponse(response);
           this.toastService.success(
             'Success',
             'Payment Acknowledgement generated successfully',
           );
-          const fileURL = URL.createObjectURL(response.body);
-          const a = document.createElement('a');
-          a.href = fileURL;
-          a.target = '_blank';
-          a.download = fileName ?? 'payment-acknowledgement.pdf';
-          document.body.appendChild(a); // Required for Firefox
-          a.click();
-          document.body.removeChild(a); // Clean up
-          URL.revokeObjectURL(fileURL); // Release the object URL
+          saveAs(fileResponse.fileContent, fileResponse.fileName);
         },
         error: (error) => {
           this.toastService.error(

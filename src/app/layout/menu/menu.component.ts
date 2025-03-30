@@ -39,6 +39,32 @@ export class MenuComponent implements OnInit {
             label: 'Bookings',
             icon: 'pi pi-calendar',
             routerLink: ['/bookings']
+          },
+          {
+            label: 'Reports',
+            icon: 'pi pi-file-check',
+            items: [
+              {
+                label: 'Revenue Report',
+                icon: 'pi pi-file-check',
+                routerLink: ['/reports/revenue'],
+              },
+              {
+                label: 'Service Fees Report',
+                icon: 'pi pi-file-check',
+                routerLink: ['/reports/service-fees'],
+              },
+              {
+                label: 'Payment Methods Report',
+                icon: 'pi pi-file-check',
+                routerLink: ['/reports/payment-methods'],
+              },
+              {
+                label: 'Commissions Report',
+                icon: 'pi pi-file-check',
+                routerLink: ['/reports/commissions'],
+              }
+            ]
           }
         ]
       },
