@@ -5,10 +5,10 @@ import { Router } from '@angular/router';
 import { Inquiry } from '@models/inquiry.model';
 import { Option } from '@models/option';
 import { TravelDetails } from '@models/travel-details.model';
+import { UntilDestroy, untilDestroyed } from '@ngneat/until-destroy';
 import { InquiryService } from '@services/inquiry.service';
 import { OptionsService } from '@services/options.service';
 import { ToastService } from '@services/toast.service';
-import { UntilDestroy, untilDestroyed } from '@ngneat/until-destroy';
 import dayjs from 'dayjs';
 import { ConfirmationService } from 'primeng/api';
 import { Button } from 'primeng/button';
@@ -26,7 +26,6 @@ import {
   distinctUntilChanged,
   firstValueFrom,
   Subject,
-  takeUntil,
 } from 'rxjs';
 
 @UntilDestroy()
@@ -200,5 +199,9 @@ export class InquiryListComponent implements OnInit, OnDestroy {
     }
 
     return travelDates;
+  }
+
+  getStatusLabel(status: string) {
+    return this.statusOptions.find((option) => option.value === status)?.label;
   }
 }

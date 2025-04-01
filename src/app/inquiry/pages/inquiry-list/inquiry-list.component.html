@@ -79,7 +79,7 @@
           {{ getTravelDates(inquiry.travelDetails) }}
         </td>
         <td>
-          {{ inquiry.status }}
+          {{ getStatusLabel(inquiry.status) }}
         </td>
         <td>{{ inquiry.createdAt | date }}</td>
         <td>
