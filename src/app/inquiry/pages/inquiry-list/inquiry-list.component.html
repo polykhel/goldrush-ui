@@ -51,6 +51,10 @@
   >
     <ng-template pTemplate="header">
       <tr>
+        <th id="date" pSortableColumn="date">
+          Date
+          <p-sortIcon field="date"></p-sortIcon>
+        </th>
         <th id="clientName" pSortableColumn="clientName">
           Client Name
           <p-sortIcon field="clientName"></p-sortIcon>
@@ -73,6 +77,7 @@
     </ng-template>
     <ng-template pTemplate="body" let-inquiry>
       <tr>
+        <td>{{ inquiry.date }}</td>
         <td>{{ inquiry.clientName }}</td>
         <td>{{ inquiry.travelDetails.destination }}</td>
         <td>

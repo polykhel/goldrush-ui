@@ -55,7 +55,7 @@ export class InquiryListComponent implements OnInit, OnDestroy {
   rows = 10;
   totalRecords = 0;
   loading = false;
-  sortField: string = 'createdAt';
+  sortField: string = 'date';
   sortOrder: number = -1;
   searchTerm: string = '';
   statusOptions: Option[] = [];
