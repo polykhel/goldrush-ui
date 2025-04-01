@@ -8,12 +8,14 @@ import {
 import { ActivatedRoute, Router } from '@angular/router';
 import { CanComponentDeactivate } from '@core/guards/can-deactivate.guard';
 import {
+  Attachment,
   Booking,
   BookingStatus,
   PaymentHistory,
   PriceBreakdown,
 } from '@models/booking.model';
 import { Option } from '@models/option';
+import { FileResponse, ReportFormat } from '@models/report.model';
 import { UntilDestroy, untilDestroyed } from '@ngneat/until-destroy';
 import { BookingService } from '@services/booking.service';
 import { OptionsService } from '@services/options.service';
@@ -41,7 +43,6 @@ import { ToastModule } from 'primeng/toast';
 import { ToolbarModule } from 'primeng/toolbar';
 import { distinctUntilChanged, finalize, Observable } from 'rxjs';
 import { BookingAttachmentsComponent } from '../../components/booking-attachments/booking-attachments.component';
-import { FileResponse, ReportFormat } from '@models/report.model';
 
 @UntilDestroy()
 @Component({
@@ -97,6 +98,8 @@ export class BookingFormComponent implements OnInit, CanComponentDeactivate {
 
   isEditingPayment = false;
   editingPaymentIndex: number | null = null;
+
+  attachments: Attachment[] = [];
 
   protected readonly packageOptions = PACKAGE_OPTIONS;
 
@@ -504,7 +507,7 @@ export class BookingFormComponent implements OnInit, CanComponentDeactivate {
       feeAmount: paymentMethod === 'CREDIT_CARD' ? feeAmount : null,
       feePercentage: paymentMethod === 'CREDIT_CARD' ? feePercentage : null,
       remarks: formValue.remarks,
-      bookingId: this.bookingForm.get('id')?.value ?? null
+      bookingId: this.bookingForm.get('id')?.value ?? null,
     };
 
     if (this.isEditingPayment && this.editingPaymentIndex !== null) {
@@ -570,15 +573,43 @@ export class BookingFormComponent implements OnInit, CanComponentDeactivate {
             fileResponse.fileContent,
             fileResponse.fileName ?? `statement-of-account.${format}`,
           );
+          this.loadAttachments();
         },
-        error: (error) => {
-          this.toastService.error(
-            'Error',
-            'Failed to generate Statement of Account',
-          );
-          console.error('Error generating Statement of Account:', error);
+        error: async (error) => {
+          const message = await error.error.text();
+          if (message?.includes('already exists')) {
+            this.confirmationService.confirm({
+              message:
+                'A statement of account already exists. Do you want to regenerate it?',
+              header: 'Confirm Regeneration',
+              icon: 'pi pi-exclamation-triangle',
+              accept: () => {
+                this.regenerateStatementOfAccount(format);
+              },
+            });
+          } else {
+            this.toastService.error(
+              'Error',
+              'Failed to generate Statement of Account',
+            );
+            console.error('Error generating Statement of Account:', error);
+          }
         },
       });
+  }
+
+  loadAttachments(): void {
+    if (!this.bookingId) return;
+
+    this.bookingService.getAttachments(this.bookingId).subscribe({
+      next: (attachments) => {
+        this.attachments = attachments;
+      },
+      error: (error) => {
+        this.toastService.error('Error', 'Failed to load attachments');
+        console.error('Error loading attachments:', error);
+      },
+    });
   }
 
   generatePaymentAcknowledgement(paymentHistoryId: string): void {
@@ -917,6 +948,47 @@ export class BookingFormComponent implements OnInit, CanComponentDeactivate {
       },
       { emitEvent: false },
     );
+  }
+
+  private regenerateStatementOfAccount(format: ReportFormat): void {
+    if (!this.bookingId) return;
+
+    this.loading = true;
+    this.bookingService
+      .regenerateStatementOfAccount(this.bookingId, format)
+      .pipe(finalize(() => (this.loading = false)))
+      .subscribe({
+        next: (response) => {
+          if (
+            response?.status !== 200 ||
+            !response.body ||
+            response.body.size === 0
+          ) {
+            this.toastService.warn(
+              'Warning',
+              'No data found for Statement of Account',
+            );
+            return;
+          }
+          this.toastService.success(
+            'Success',
+            'Statement of Account regenerated successfully',
+          );
+          const fileResponse = new FileResponse(response);
+          saveAs(
+            fileResponse.fileContent,
+            fileResponse.fileName ?? `statement-of-account.${format}`,
+          );
+          this.loadAttachments();
+        },
+        error: (error) => {
+          this.toastService.error(
+            'Error',
+            'Failed to regenerate Statement of Account',
+          );
+          console.error('Error regenerating Statement of Account:', error);
+        },
+      });
   }
 
   protected readonly ReportFormat = ReportFormat;

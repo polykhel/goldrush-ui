@@ -64,6 +64,14 @@
               formatFileSize(attachment.fileSize)
             }}</span>
             <p-button
+              (onClick)="viewAttachment(attachment)"
+              [outlined]="true"
+              [rounded]="true"
+              icon="pi pi-eye"
+              severity="info"
+              size="small"
+            ></p-button>
+            <p-button
               (onClick)="downloadAttachment(attachment)"
               [outlined]="true"
               [rounded]="true"

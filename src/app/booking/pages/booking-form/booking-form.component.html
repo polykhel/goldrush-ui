@@ -749,7 +749,8 @@
     <!-- Attachments Section -->
     <section *ngIf="bookingId" class="mb-8">
       <h3 class="font-bold mb-4 border-b pb-2">Attachments</h3>
-      <app-booking-attachments [bookingId]="bookingId"></app-booking-attachments>
+      <app-booking-attachments (loadAttachments)="loadAttachments()" [attachments]="attachments"
+                               [bookingId]="bookingId"></app-booking-attachments>
     </section>
 
     <!-- Actions Section -->

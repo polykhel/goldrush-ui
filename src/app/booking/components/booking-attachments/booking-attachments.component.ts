@@ -1,5 +1,12 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input, OnInit, ViewChild } from '@angular/core';
+import {
+  Component,
+  EventEmitter,
+  Input,
+  OnInit,
+  Output,
+  ViewChild,
+} from '@angular/core';
 import { BookingService } from '@core/services/booking.service';
 import { ToastService } from '@core/services/toast.service';
 import { Attachment } from '@models/booking.model';
@@ -26,10 +33,11 @@ import { firstValueFrom } from 'rxjs';
 })
 export class BookingAttachmentsComponent implements OnInit {
   @Input() bookingId!: string;
-  attachments: Attachment[] = [];
+  @Input() attachments: Attachment[] = [];
   uploading = false;
   uploadedFiles: any[] = [];
   @ViewChild('fileUpload', { static: false }) fileUpload!: any;
+  @Output() loadAttachments = new EventEmitter<void>();
 
   constructor(
     private bookingService: BookingService,
@@ -38,7 +46,7 @@ export class BookingAttachmentsComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.loadAttachments();
+    this.loadAttachments.emit();
   }
 
   onFileSelected(event: any): void {
@@ -56,7 +64,7 @@ export class BookingAttachmentsComponent implements OnInit {
       .then(() => {
         this.toastService.success('Success', 'Files uploaded successfully');
         this.uploadedFiles = [...this.uploadedFiles, ...files];
-        this.loadAttachments();
+        this.loadAttachments.emit();
       })
       .catch((error) => {
         this.toastService.error('Error', 'Failed to upload files');
@@ -99,6 +107,33 @@ export class BookingAttachmentsComponent implements OnInit {
       });
   }
 
+  viewAttachment(attachment: Attachment): void {
+    this.bookingService
+      .downloadAttachment(this.bookingId, attachment.id)
+      .subscribe({
+        next: (response) => {
+          if (response.body) {
+            // Create a Blob from the response body
+            const blob = new Blob([response.body], {
+              type:
+                response.headers.get('content-type') ||
+                'application/octet-stream',
+            });
+
+            // Generate a URL for the Blob
+            const fileUrl = URL.createObjectURL(blob);
+
+            // Open the Blob URL in a new tab
+            window.open(fileUrl, '_blank');
+          }
+        },
+        error: (error) => {
+          this.toastService.error('Error', 'Failed to view file');
+          console.error('Error viewing file:', error);
+        },
+      });
+  }
+
   formatFileSize(bytes: number): string {
     if (bytes === 0) return '0 Bytes';
     const k = 1024;
@@ -118,25 +153,13 @@ export class BookingAttachmentsComponent implements OnInit {
           .subscribe({
             next: () => {
               this.toastService.success('Success', 'File deleted successfully');
-              this.loadAttachments();
+              this.loadAttachments.emit();
             },
             error: (error) => {
               this.toastService.error('Error', 'Failed to delete file');
               console.error('Error deleting file:', error);
             },
           });
-      },
-    });
-  }
-
-  private loadAttachments(): void {
-    this.bookingService.getAttachments(this.bookingId).subscribe({
-      next: (attachments) => {
-        this.attachments = attachments;
-      },
-      error: (error) => {
-        this.toastService.error('Error', 'Failed to load attachments');
-        console.error('Error loading attachments:', error);
       },
     });
   }

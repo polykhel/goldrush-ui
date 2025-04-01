@@ -2,9 +2,9 @@ import { HttpClient, HttpResponse } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { environment } from '@env/environment';
 import { Attachment, Booking } from '@models/booking.model';
+import { ReportFormat } from '@models/report.model';
 import { Observable } from 'rxjs';
 import { AbstractCrudService } from './abstract-crud.service';
-import { ReportFormat } from '@models/report.model';
 
 @Injectable({
   providedIn: 'root',
@@ -33,6 +33,20 @@ export class BookingService extends AbstractCrudService<Booking> {
   ): Observable<HttpResponse<Blob>> {
     return this.http.get(
       `${this.baseUrl}/${id}/statement-of-account?format=${format}`,
+      {
+        responseType: 'blob',
+        observe: 'response',
+      },
+    );
+  }
+
+  regenerateStatementOfAccount(
+    id: string,
+    format: ReportFormat,
+  ): Observable<HttpResponse<Blob>> {
+    return this.http.post(
+      `${this.baseUrl}/${id}/statement-of-account/regenerate?format=${format}`,
+      null,
       {
         responseType: 'blob',
         observe: 'response',
