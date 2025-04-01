@@ -483,6 +483,30 @@ export class InquiryFormComponent implements OnInit {
         const group = this.buildProviderQuotationForm();
         group.controls.providerId.setValue(this.selectedProvider);
 
+        // Set default flight dates from travel details
+        const travelDetails = this.inquiryForm.get('travelDetails');
+        const startDate = travelDetails?.get('startDate')?.value;
+        const endDate = travelDetails?.get('endDate')?.value;
+
+        if (startDate || endDate) {
+          const flightDetails = group.get('flightDetails');
+          if (flightDetails) {
+            // Set departure dates
+            const departure = flightDetails.get('departure');
+            if (startDate && departure) {
+              departure.get('startDate')?.setValue(startDate);
+              departure.get('endDate')?.setValue(startDate);
+            }
+
+            // Set arrival dates for round trip
+            const arrival = flightDetails.get('arrival');
+            if (endDate && arrival) {
+              arrival.get('startDate')?.setValue(endDate);
+              arrival.get('endDate')?.setValue(endDate);
+            }
+          }
+        }
+
         this.quotations.push(group);
         this.selectedProvider = null;
         this.updateAvailableProviders();
@@ -685,8 +709,12 @@ export class InquiryFormComponent implements OnInit {
       date: new Date(inquiry.date),
       travelDetails: {
         ...inquiry.travelDetails,
-        startDate: new Date(inquiry.travelDetails.startDate),
-        endDate: new Date(inquiry.travelDetails.endDate),
+        startDate: inquiry.travelDetails.startDate
+          ? new Date(inquiry.travelDetails.startDate)
+          : null,
+        endDate: inquiry.travelDetails.endDate
+          ? new Date(inquiry.travelDetails.endDate)
+          : null,
       },
       customPackageOptions: inquiry.customPackageOptions?.split(';') || [],
     });
