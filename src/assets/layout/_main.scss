@@ -5,6 +5,10 @@
   justify-content: space-between;
   padding: 6rem 2rem 0 2rem;
   transition: margin-left var(--layout-section-transition-duration);
+
+  &.no-sidebar {
+    margin-left: 0 !important; // Override margin when sidebar is not rendered
+  }
 }
 
 .layout-main {

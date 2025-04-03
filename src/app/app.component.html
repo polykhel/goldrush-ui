@@ -6,7 +6,7 @@
     @if (isLoggedIn) {
       <app-sidebar/>
     }
-    <div class="layout-main-container">
+    <div class="layout-main-container" [class.no-sidebar]="!isLoggedIn">
       <main #mainContent class="layout-main" (scroll)="onScroll($event)">
         <router-outlet></router-outlet>
         @if (showScrollButton) {
