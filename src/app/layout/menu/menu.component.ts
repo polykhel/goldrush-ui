@@ -28,7 +28,7 @@ export class MenuComponent implements OnInit {
           {
             label: 'Inquiries',
             icon: 'pi pi-address-book',
-            routerLink: ['/inquiries']
+            routerLink: ['/inquiries'],
           },
           {
             label: 'Payments',
@@ -39,6 +39,11 @@ export class MenuComponent implements OnInit {
             label: 'Bookings',
             icon: 'pi pi-calendar',
             routerLink: ['/bookings']
+          },
+          {
+            label: 'Expenses',
+            icon: 'pi pi-wallet',
+            routerLink: ['/expenses']
           },
           {
             label: 'Reports',
@@ -63,10 +68,10 @@ export class MenuComponent implements OnInit {
                 label: 'Commissions Report',
                 icon: 'pi pi-file-check',
                 routerLink: ['/reports/commissions'],
-              }
-            ]
-          }
-        ]
+              },
+            ],
+          },
+        ],
       },
       {
         label: 'Maintenance',
@@ -85,9 +90,9 @@ export class MenuComponent implements OnInit {
             label: 'Emails',
             icon: 'pi pi-envelope',
             routerLink: ['/maintenance/emails']
-          }
-        ]
-      }
+          },
+        ],
+      },
     ];
   }
 }

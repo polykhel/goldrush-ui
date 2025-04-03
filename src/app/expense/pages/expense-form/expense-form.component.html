@@ -1,0 +1,227 @@
+<section
+  class="card container mx-auto max-w-3xl p-8 rounded-lg shadow-lg hover:shadow-xl border border-gray-100"
+>
+  <form
+    (ngSubmit)="onSubmit()"
+    [formGroup]="expenseForm"
+    class="max-w-3xl mx-auto"
+  >
+    <div class="flex justify-between items-center mb-6">
+      <button
+        (click)="cancel()"
+        class="p-button-text"
+        icon="pi pi-arrow-left"
+        label="Back"
+        pButton
+        pRipple
+        type="button"
+      ></button>
+      <h2 class="text-xl font-bold">
+        {{ isEditMode ? "Edit" : "New" }} Expense
+      </h2>
+      <div></div>
+      <!-- Spacer -->
+    </div>
+
+    <div
+      *ngIf="isLoading"
+      class="flex justify-center items-center"
+      style="height: 200px"
+    >
+      <i class="pi pi-spin pi-spinner" style="font-size: 2rem"></i>
+    </div>
+
+    <ng-container *ngIf="!isLoading">
+      <section class="mb-8">
+        <h3 class="text-lg font-semibold mb-4 border-b pb-2">
+          Expense Details
+        </h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div class="field col-span-2">
+            <p-float-label>
+              <textarea
+                [autoResize]="true"
+                [ngClass]="{
+                  'ng-invalid ng-dirty':
+                    expenseForm.get('description')?.invalid &&
+                    expenseForm.get('description')?.touched,
+                }"
+                [required]="true"
+                class="w-full"
+                formControlName="description"
+                id="description"
+                pTextarea
+                rows="3"
+              ></textarea>
+              <label for="description">Description</label>
+            </p-float-label>
+            <small
+              *ngIf="
+                expenseForm.get('description')?.invalid &&
+                expenseForm.get('description')?.touched
+              "
+              class="p-error block mt-1"
+            >
+              Description is required.
+            </small>
+          </div>
+
+          <div class="field">
+            <p-float-label>
+              <p-inputNumber
+                [ngClass]="{
+                  'ng-invalid ng-dirty':
+                    expenseForm.get('amount')?.invalid &&
+                    expenseForm.get('amount')?.touched,
+                }"
+                [required]="true"
+                class="w-full"
+                currency="PHP"
+                formControlName="amount"
+                inputId="amount"
+                locale="en-PH"
+                mode="currency"
+              ></p-inputNumber>
+              <label for="amount">Amount</label>
+            </p-float-label>
+            <small
+              *ngIf="
+                expenseForm.get('amount')?.invalid &&
+                expenseForm.get('amount')?.touched
+              "
+              class="p-error block mt-1"
+            >
+              Amount is required and must be positive.
+            </small>
+          </div>
+
+          <div class="field">
+            <p-float-label>
+              <p-date-picker
+                [ngClass]="{
+                  'ng-invalid ng-dirty':
+                    expenseForm.get('expenseDate')?.invalid &&
+                    expenseForm.get('expenseDate')?.touched,
+                }"
+                [required]="true"
+                [showIcon]="true"
+                dateFormat="yy-mm-dd"
+                formControlName="expenseDate"
+                inputId="expenseDate"
+                styleClass="w-full"
+              ></p-date-picker>
+              <label for="expenseDate">Expense Date</label>
+            </p-float-label>
+            <small
+              *ngIf="
+                expenseForm.get('expenseDate')?.invalid &&
+                expenseForm.get('expenseDate')?.touched
+              "
+              class="p-error block mt-1"
+            >
+              Expense date is required.
+            </small>
+          </div>
+
+          <div class="field">
+            <p-float-label>
+              <p-select
+                [ngClass]="{
+                  'ng-invalid ng-dirty':
+                    expenseForm.get('category')?.invalid &&
+                    expenseForm.get('category')?.touched,
+                }"
+                [options]="categoryOptions"
+                [required]="true"
+                formControlName="category"
+                inputId="category"
+                optionLabel="label"
+                optionValue="value"
+                placeholder="Select a Category"
+                styleClass="w-full"
+              ></p-select>
+              <label for="category">Category</label>
+            </p-float-label>
+            <small
+              *ngIf="
+                expenseForm.get('category')?.invalid &&
+                expenseForm.get('category')?.touched
+              "
+              class="p-error block mt-1"
+            >
+              Category is required.
+            </small>
+          </div>
+
+          <div class="field">
+            <label
+              class="block mb-2 text-sm font-medium text-gray-700"
+              for="receipt"
+              >Receipt</label
+            >
+            <p-fileUpload
+              #fileUpload
+              (onClear)="onFileRemove()"
+              (onSelect)="onFileSelect($event)"
+              accept="image/*,application/pdf,.docx,.doc"
+              chooseLabel="Choose Receipt"
+              maxFileSize="10000000"
+              mode="basic"
+              name="receiptFile"
+              styleClass="w-full"
+            >
+            </p-fileUpload>
+            <div
+              *ngIf="existingReceiptFilename"
+              class="mt-2 text-sm flex items-center"
+            >
+              <span>Current: {{ existingReceiptFilename }}</span>
+              <p-button
+                (click)="viewExistingReceipt()"
+                class="p-button-text p-button-sm p-button-secondary"
+                icon="pi pi-eye"
+                pRipple
+                pTooltip="View Current Receipt"
+                tooltipPosition="top"
+                type="button"
+              ></p-button>
+              <p-button
+                (click)="downloadExistingReceipt()"
+                class="p-button-text p-button-sm p-button-info ml-1"
+                icon="pi pi-download"
+                pRipple
+                pTooltip="Download Current Receipt"
+                tooltipPosition="top"
+                type="button"
+              ></p-button>
+            </div>
+            <small *ngIf="selectedFile" class="mt-1 block text-sm"
+              >Selected: {{ selectedFile.name }}</small
+            >
+          </div>
+        </div>
+      </section>
+
+      <div class="flex justify-end gap-2 mt-8">
+        <p-button
+          (click)="cancel()"
+          class="p-button-secondary"
+          icon="pi pi-times"
+          label="Cancel"
+          pRipple
+          type="button"
+        ></p-button>
+        <p-button
+          [disabled]="expenseForm.invalid || isLoading"
+          [label]="isEditMode ? 'Update' : 'Save'"
+          [loading]="isLoading"
+          class="p-button-primary"
+          icon="pi pi-check"
+          pRipple
+          type="submit"
+        ></p-button>
+      </div>
+    </ng-container>
+  </form>
+  <p-toast></p-toast>
+</section>

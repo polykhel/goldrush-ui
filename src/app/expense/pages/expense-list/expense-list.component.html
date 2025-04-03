@@ -1,0 +1,136 @@
+<p-toast></p-toast>
+<p-confirmDialog [style]="{ width: '450px' }"></p-confirmDialog>
+
+<p-card header="Expenses">
+  <p-toolbar styleClass="mb-4">
+    <ng-template pTemplate="left">
+      <p-button
+        (click)="createExpense()"
+        class="p-button-success mr-2"
+        icon="pi pi-plus"
+        label="New Expense"
+        pRipple
+      ></p-button>
+      <!-- Add multi-delete button if needed -->
+      <!-- <button pButton pRipple label="Delete Selected" icon="pi pi-trash" class="p-button-danger" (click)="deleteSelectedEntities(selectedEntities)" [disabled]="!selectedEntities || !selectedEntities.length"></button> -->
+    </ng-template>
+    <ng-template pTemplate="right">
+      <p-inputGroup>
+        <input
+          (input)="onSearch($event)"
+          pInputText
+          placeholder="Search..."
+          type="text"
+        />
+        <p-inputGroupAddon>
+          <i class="pi pi-search"></i>
+        </p-inputGroupAddon>
+      </p-inputGroup>
+    </ng-template>
+  </p-toolbar>
+
+  <p-table
+    #dt
+    (onLazyLoad)="onPage($event); onSort($event)"
+    [columns]="columns"
+    [lazy]="true"
+    [loading]="loading"
+    [paginator]="true"
+    [rowsPerPageOptions]="[10, 20, 30]"
+    [rows]="rows"
+    [showCurrentPageReport]="true"
+    [sortField]="sortField"
+    [sortOrder]="sortOrder"
+    [totalRecords]="totalRecords"
+    [value]="entities"
+    currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
+    dataKey="id"
+    paginatorPosition="bottom"
+    responsiveLayout="scroll"
+    styleClass="p-datatable-sm p-datatable-striped"
+  >
+    <ng-template let-columns pTemplate="header">
+      <tr>
+        <!-- Add selection checkbox if multi-delete is enabled -->
+        <!-- <th style="width: 3rem">
+          <p-tableHeaderCheckbox></p-tableHeaderCheckbox>
+        </th> -->
+        <th *ngFor="let col of columns" [pSortableColumn]="col.field">
+          {{ col.header }}
+          <p-sortIcon [field]="col.field"></p-sortIcon>
+        </th>
+        <th style="width: 10rem">Actions</th>
+      </tr>
+    </ng-template>
+    <ng-template let-columns="columns" let-expense pTemplate="body">
+      <tr>
+        <!-- Add selection checkbox if multi-delete is enabled -->
+        <!-- <td>
+          <p-tableCheckbox [value]="expense"></p-tableCheckbox>
+        </td> -->
+        <td *ngFor="let col of columns">
+          <ng-container [ngSwitch]="col.field">
+            <ng-container *ngSwitchCase="'expenseDate'">
+              {{ expense[col.field] | date: "MMM d, yyyy" }}
+            </ng-container>
+            <ng-container *ngSwitchCase="'amount'">
+              {{ expense[col.field] | currency: "PHP" : "symbol" : "1.2-2" }}
+            </ng-container>
+            <ng-container *ngSwitchCase="'categoryName'">
+              {{ getCategoryLabel(expense.category) }}
+            </ng-container>
+            <ng-container *ngSwitchCase="'receiptFilename'">
+              <p-button
+                (click)="viewReceipt(expense)"
+                *ngIf="expense.receiptFilename"
+                class="p-button-rounded p-button-text p-button-secondary"
+                icon="pi pi-eye"
+                pTooltip="View Receipt"
+                tooltipPosition="top"
+              ></p-button>
+              <p-button
+                (click)="downloadReceipt(expense)"
+                *ngIf="expense.receiptFilename"
+                class="p-button-rounded p-button-text p-button-info mr-1"
+                icon="pi pi-download"
+                pRipple
+                pTooltip="Download Receipt"
+                tooltipPosition="top"
+              ></p-button>
+              <span *ngIf="!expense.receiptFilename">-</span>
+            </ng-container>
+            <ng-container *ngSwitchDefault>
+              {{ expense[col.field] }}
+            </ng-container>
+          </ng-container>
+        </td>
+        <td>
+          <p-button
+            (click)="editExpense(expense)"
+            class="p-button-rounded p-button-success mr-2"
+            icon="pi pi-pencil"
+            pButton
+            pRipple
+            pTooltip="Edit"
+            tooltipPosition="top"
+          ></p-button>
+          <p-button
+            (click)="deleteEntity(expense)"
+            class="p-button-rounded p-button-warning"
+            icon="pi pi-trash"
+            pButton
+            pRipple
+            pTooltip="Delete"
+            tooltipPosition="top"
+          ></p-button>
+        </td>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="emptymessage">
+      <tr>
+        <td [attr.colspan]="columns.length + 1">No expenses found.</td>
+        <!-- Adjust colspan if selection is added -->
+      </tr>
+    </ng-template>
+  </p-table>
+</p-card>

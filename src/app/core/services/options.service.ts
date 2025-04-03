@@ -34,4 +34,8 @@ export class OptionsService {
   getSalutations() {
     return this.http.get<Option[]>(`${this.baseUrl}/salutations`);
   }
+
+  getExpenseCategories() {
+    return this.http.get<Option[]>(`${this.baseUrl}/expense-categories`);
+  }
 }

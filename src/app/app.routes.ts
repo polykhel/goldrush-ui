@@ -7,55 +7,63 @@ export const routes: Routes = [
   {
     path: '',
     redirectTo: 'home',
-    pathMatch: 'full'
+    pathMatch: 'full',
   },
   {
     path: 'home',
-    component: HomeComponent
+    component: HomeComponent,
   },
   {
     path: 'inquiries',
     canActivate: [authGuardFn],
     loadChildren: () =>
-      import('./inquiry/inquiry.routes').then((m) => m.INQUIRY_ROUTES)
+      import('./inquiry/inquiry.routes').then((m) => m.INQUIRY_ROUTES),
   },
   {
     path: 'bookings',
     canActivate: [authGuardFn],
     loadChildren: () =>
-      import('./booking/booking.routes').then((m) => m.BOOKING_ROUTES)
+      import('./booking/booking.routes').then((m) => m.BOOKING_ROUTES),
   },
   {
     path: 'payments',
     canActivate: [authGuardFn],
     loadChildren: () =>
-      import('./payment/payment.routes').then((m) => m.PAYMENT_ROUTES)
+      import('./payment/payment.routes').then((m) => m.PAYMENT_ROUTES),
+  },
+  {
+    path: 'expenses',
+    canActivate: [authGuardFn],
+    loadChildren: () =>
+      import('./expense/expense.routes').then((m) => m.EXPENSE_ROUTES), // Correct path and constant
   },
   {
     path: 'reports',
     canActivate: [authGuardFn],
     loadChildren: () =>
-      import('./reports/reports.routes').then((m) => m.REPORTS_ROUTES)
+      import('./reports/reports.routes').then((m) => m.REPORTS_ROUTES),
   },
   {
     path: 'tools',
     canActivate: [authGuardFn],
     loadChildren: () =>
-      import('./tools/tools.routes').then((m) => m.TOOLS_ROUTES)
+      import('./tools/tools.routes').then((m) => m.TOOLS_ROUTES),
   },
   {
     path: 'maintenance',
     canActivate: [authGuardFn],
     loadChildren: () =>
-      import('./maintenance/maintenance.routes').then((m) => m.MAINTENANCE_ROUTES)
+      import('./maintenance/maintenance.routes').then(
+        (m) => m.MAINTENANCE_ROUTES,
+      ),
   },
   {
     path: 'forbidden',
-    component: ForbiddenComponent
+    component: ForbiddenComponent,
   },
   {
     path: '**',
     redirectTo: 'home',
-    pathMatch: 'full'
-  }
+    pathMatch: 'full',
+  },
 ];
