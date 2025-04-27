@@ -137,7 +137,6 @@
                 inputId="category"
                 optionLabel="label"
                 optionValue="value"
-                placeholder="Select a Category"
                 styleClass="w-full"
               ></p-select>
               <label for="category">Category</label>
@@ -215,7 +214,7 @@
           [disabled]="expenseForm.invalid || isLoading"
           [label]="isEditMode ? 'Update' : 'Save'"
           [loading]="isLoading"
-          class="p-button-primary"
+          severity="success"
           icon="pi pi-check"
           pRipple
           type="submit"

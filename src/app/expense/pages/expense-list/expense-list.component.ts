@@ -17,18 +17,17 @@ import { ToastService } from '@services/toast.service';
 import { Expense } from '@shared/models/expense.model';
 import { saveAs } from 'file-saver';
 import { ConfirmationService } from 'primeng/api';
-import { ButtonModule } from 'primeng/button';
-import { CardModule } from 'primeng/card';
-import { ConfirmDialogModule } from 'primeng/confirmdialog';
-import { DropdownModule } from 'primeng/dropdown';
-import { InputGroup } from 'primeng/inputgroup';
-import { InputGroupAddon } from 'primeng/inputgroupaddon';
-import { InputTextModule } from 'primeng/inputtext';
+import { Button } from 'primeng/button';
+import { Card } from 'primeng/card';
+import { ConfirmDialog } from 'primeng/confirmdialog';
+import { IconField } from 'primeng/iconfield';
+import { InputIcon } from 'primeng/inputicon';
+import { InputText } from 'primeng/inputtext';
 import { Ripple } from 'primeng/ripple';
 import { TableModule } from 'primeng/table';
-import { ToastModule } from 'primeng/toast';
-import { ToolbarModule } from 'primeng/toolbar';
-import { TooltipModule } from 'primeng/tooltip';
+import { Toast } from 'primeng/toast';
+import { Toolbar } from 'primeng/toolbar';
+import { Tooltip } from 'primeng/tooltip';
 import { AbstractCrudComponent } from '../../../maintenance/abstract-crud.component';
 
 @Component({
@@ -37,24 +36,23 @@ import { AbstractCrudComponent } from '../../../maintenance/abstract-crud.compon
   templateUrl: './expense-list.component.html',
   imports: [
     TableModule,
-    ButtonModule,
-    InputTextModule,
-    DropdownModule,
-    CardModule,
-    ToolbarModule,
-    ToastModule,
-    ConfirmDialogModule,
+    Button,
+    InputText,
+    Card,
+    Toolbar,
+    Toast,
+    ConfirmDialog,
     DatePipe,
     CurrencyPipe,
-    InputGroup,
-    InputGroupAddon,
     NgForOf,
-    TooltipModule,
+    Tooltip,
     Ripple,
     NgSwitch,
     NgSwitchCase,
     NgIf,
     NgSwitchDefault,
+    IconField,
+    InputIcon,
   ],
   providers: [ConfirmationService],
 })

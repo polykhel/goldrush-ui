@@ -1,83 +1,90 @@
-<p-card>
+<p-card header="Bookings">
   <p-toast></p-toast>
   <p-confirmDialog></p-confirmDialog>
 
-  <div class="py-4 px-6 mb-4">
-    <div class="container mx-auto flex justify-between items-center">
-      <h1 class="text-2xl font-bold">Bookings</h1>
-    </div>
-  </div>
-
-  <div class="flex justify-center items-center gap-2 mb-4">
-    <p-inputgroup>
-      <p-inputgroup-addon>
-        <i class="pi pi-search"></i>
-      </p-inputgroup-addon>
-      <input
-        pInputText
-        type="text"
-        (input)="onSearch($event)"
-        placeholder="Search client or destination..."/>
-    </p-inputgroup>
-  </div>
+  <p-toolbar styleClass="mb-4">
+    <ng-template pTemplate="start">
+      <p-iconfield iconPosition="left">
+        <p-inputicon styleClass="pi pi-search" />
+        <input
+          (input)="onSearch($event)"
+          [value]="searchTerm"
+          pInputText
+          placeholder="Search"
+          type="text"
+        />
+      </p-iconfield>
+    </ng-template>
+  </p-toolbar>
 
   <p-table
-    [value]="entities"
-    [lazy]="true"
-    [paginator]="true"
-    [rows]="10"
-    [totalRecords]="totalRecords"
-    [loading]="loading"
-    [rowsPerPageOptions]="[10, 25, 50]"
-    [first]="first"
     (onLazyLoad)="onSort($event)"
     (onPage)="onPage($event)"
+    [first]="first"
+    [lazy]="true"
+    [loading]="loading"
+    [paginator]="true"
     [rowHover]="true"
-    dataKey="id"
+    [rowsPerPageOptions]="[10, 25, 50]"
+    [rows]="10"
     [showCurrentPageReport]="true"
+    [totalRecords]="totalRecords"
+    [value]="entities"
     currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
-    styleClass="p-datatable-gridlines">
+    dataKey="id"
+    styleClass="p-datatable-gridlines"
+  >
     <ng-template pTemplate="header">
       <tr>
-        <th *ngFor="let col of columns" [pSortableColumn]="col.field" id="col.field">
+        <th
+          *ngFor="let col of columns"
+          [pSortableColumn]="col.field"
+          id="col.field"
+        >
           {{ col.header }}
           <p-sortIcon [field]="col.field"></p-sortIcon>
         </th>
         <th id="actions">Actions</th>
       </tr>
     </ng-template>
-    <ng-template pTemplate="body" let-booking>
+    <ng-template let-booking pTemplate="body">
       <tr>
         <td>{{ booking.clientName }}</td>
-        <td>{{ booking.bookingDate | date:'mediumDate' }}</td>
-        <td>{{ booking.travelStartDate | date:'mediumDate' }}</td>
+        <td>{{ booking.bookingDate | date: "mediumDate" }}</td>
+        <td>{{ booking.travelStartDate | date: "mediumDate" }}</td>
         <td>{{ booking.destination }}</td>
-        <td>{{ booking.totalAmount | currency: 'PHP' }}</td>
-        <td>{{ booking.paidAmount | currency: 'PHP' }}</td>
+        <td>{{ booking.totalAmount | currency: "PHP" }}</td>
+        <td>{{ booking.paidAmount | currency: "PHP" }}</td>
         <td>
-          <span [ngClass]="{
-            'bg-blue-100 text-blue-700': booking.status === 'PENDING_PAYMENT',
-            'bg-yellow-100 text-yellow-700': booking.status === 'PARTIALLY_PAID',
-            'bg-green-100 text-green-700': booking.status === 'FULLY_PAID'
-          }" class="px-2 py-1 rounded-md text-xs font-medium">
+          <span
+            [ngClass]="{
+              'bg-blue-100 text-blue-700': booking.status === 'PENDING_PAYMENT',
+              'bg-yellow-100 text-yellow-700':
+                booking.status === 'PARTIALLY_PAID',
+              'bg-green-100 text-green-700': booking.status === 'FULLY_PAID',
+            }"
+            class="px-2 py-1 rounded-md text-xs font-medium"
+          >
             {{ getStatusLabel(booking.status) }}
           </span>
         </td>
         <td>
           <div class="flex gap-2">
             <p-button
-              icon="pi pi-pencil"
-              severity="secondary"
               (onClick)="viewBooking(booking)"
               [rounded]="true"
-              [text]="true">
+              [text]="true"
+              icon="pi pi-pencil"
+              severity="secondary"
+            >
             </p-button>
             <p-button
               (onClick)="deleteEntity(booking)"
               [rounded]="true"
               [text]="true"
               icon="pi pi-trash"
-              severity="danger">
+              severity="danger"
+            >
             </p-button>
           </div>
         </td>

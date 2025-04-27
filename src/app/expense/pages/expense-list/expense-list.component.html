@@ -3,34 +3,29 @@
 
 <p-card header="Expenses">
   <p-toolbar styleClass="mb-4">
-    <ng-template pTemplate="left">
+    <ng-template pTemplate="start">
+      <p-iconfield iconPosition="left">
+        <p-inputicon styleClass="pi pi-search" />
+        <input
+          pInputText
+          type="text"
+          (input)="onSearch($event)"
+          [value]="searchTerm"
+          placeholder="Search"/>
+      </p-iconfield>
+    </ng-template>
+    <ng-template pTemplate="end">
       <p-button
         (click)="createExpense()"
-        class="p-button-success mr-2"
+        severity="success"
         icon="pi pi-plus"
         label="New Expense"
         pRipple
       ></p-button>
-      <!-- Add multi-delete button if needed -->
-      <!-- <button pButton pRipple label="Delete Selected" icon="pi pi-trash" class="p-button-danger" (click)="deleteSelectedEntities(selectedEntities)" [disabled]="!selectedEntities || !selectedEntities.length"></button> -->
-    </ng-template>
-    <ng-template pTemplate="right">
-      <p-inputGroup>
-        <input
-          (input)="onSearch($event)"
-          pInputText
-          placeholder="Search..."
-          type="text"
-        />
-        <p-inputGroupAddon>
-          <i class="pi pi-search"></i>
-        </p-inputGroupAddon>
-      </p-inputGroup>
     </ng-template>
   </p-toolbar>
 
   <p-table
-    #dt
     (onLazyLoad)="onPage($event); onSort($event)"
     [columns]="columns"
     [lazy]="true"
@@ -83,19 +78,21 @@
               <p-button
                 (click)="viewReceipt(expense)"
                 *ngIf="expense.receiptFilename"
-                class="p-button-rounded p-button-text p-button-secondary"
                 icon="pi pi-eye"
+                severity="secondary"
                 pTooltip="View Receipt"
-                tooltipPosition="top"
+                [rounded]="true"
+                [text]="true"
               ></p-button>
               <p-button
                 (click)="downloadReceipt(expense)"
                 *ngIf="expense.receiptFilename"
-                class="p-button-rounded p-button-text p-button-info mr-1"
                 icon="pi pi-download"
+                severity="info"
                 pRipple
                 pTooltip="Download Receipt"
-                tooltipPosition="top"
+                [rounded]="true"
+                [text]="true"
               ></p-button>
               <span *ngIf="!expense.receiptFilename">-</span>
             </ng-container>
@@ -107,21 +104,21 @@
         <td>
           <p-button
             (click)="editExpense(expense)"
-            class="p-button-rounded p-button-success mr-2"
             icon="pi pi-pencil"
-            pButton
+            severity="secondary"
             pRipple
             pTooltip="Edit"
-            tooltipPosition="top"
+            [rounded]="true"
+            [text]="true"
           ></p-button>
           <p-button
             (click)="deleteEntity(expense)"
-            class="p-button-rounded p-button-warning"
             icon="pi pi-trash"
-            pButton
+            severity="danger"
             pRipple
             pTooltip="Delete"
-            tooltipPosition="top"
+            [rounded]="true"
+            [text]="true"
           ></p-button>
         </td>
       </tr>
@@ -129,7 +126,6 @@
     <ng-template pTemplate="emptymessage">
       <tr>
         <td [attr.colspan]="columns.length + 1">No expenses found.</td>
-        <!-- Adjust colspan if selection is added -->
       </tr>
     </ng-template>
   </p-table>

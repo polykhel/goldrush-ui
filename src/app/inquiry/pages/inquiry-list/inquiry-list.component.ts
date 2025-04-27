@@ -14,12 +14,14 @@ import { ConfirmationService } from 'primeng/api';
 import { Button } from 'primeng/button';
 import { Card } from 'primeng/card';
 import { ConfirmDialog } from 'primeng/confirmdialog';
-import { InputGroup } from 'primeng/inputgroup';
-import { InputGroupAddon } from 'primeng/inputgroupaddon';
+import { IconField } from 'primeng/iconfield';
+import { InputIcon } from 'primeng/inputicon';
 import { InputText } from 'primeng/inputtext';
+import { Ripple } from 'primeng/ripple';
 import { Select } from 'primeng/select';
 import { TableModule } from 'primeng/table';
 import { Toast } from 'primeng/toast';
+import { Toolbar } from 'primeng/toolbar';
 import { Tooltip } from 'primeng/tooltip';
 import {
   debounceTime,
@@ -39,12 +41,14 @@ import {
     Button,
     Card,
     DatePipe,
-    InputGroup,
-    InputGroupAddon,
     InputText,
     FormsModule,
     Tooltip,
     Select,
+    Ripple,
+    Toolbar,
+    IconField,
+    InputIcon,
   ],
   providers: [ConfirmationService],
   templateUrl: './inquiry-list.component.html',
@@ -157,6 +161,20 @@ export class InquiryListComponent implements OnInit, OnDestroy {
     }
   }
 
+  getTravelDates(travelDetails: TravelDetails) {
+    let travelDates = dayjs(travelDetails.startDate).format('MMM D, YYYY');
+
+    if (travelDetails.endDate) {
+      travelDates += ' - ' + dayjs(travelDetails.endDate).format('MMM D, YYYY');
+    }
+
+    return travelDates;
+  }
+
+  getStatusLabel(status: string) {
+    return this.statusOptions.find((option) => option.value === status)?.label;
+  }
+
   private setupSearch() {
     this.searchSubject
       .pipe(debounceTime(300), distinctUntilChanged(), untilDestroyed(this))
@@ -189,19 +207,5 @@ export class InquiryListComponent implements OnInit, OnDestroy {
           this.loading = false;
         },
       });
-  }
-
-  getTravelDates(travelDetails: TravelDetails) {
-    let travelDates = dayjs(travelDetails.startDate).format('MMM D, YYYY');
-
-    if (travelDetails.endDate) {
-      travelDates += ' - ' + dayjs(travelDetails.endDate).format('MMM D, YYYY');
-    }
-
-    return travelDates;
-  }
-
-  getStatusLabel(status: string) {
-    return this.statusOptions.find((option) => option.value === status)?.label;
   }
 }

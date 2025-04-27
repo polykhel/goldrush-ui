@@ -1,35 +1,34 @@
-<p-card>
-  <div class="py-4 px-6 mb-4">
-    <div class="container mx-auto flex justify-between items-center">
-      <h1 class="text-2xl font-bold">Inquiries</h1>
-      <p-button label="Create New Inquiry" icon="pi pi-plus" (onClick)="createInquiry()"></p-button>
-    </div>
-  </div>
-
-  <div class="flex justify-center items-center gap-2 mb-4">
-    <p-inputgroup>
-      <p-inputgroup-addon>
-        <i class="pi pi-search"></i>
-      </p-inputgroup-addon>
-      <input
-        pInputText
-        type="text"
-        (input)="onSearch($event)"
-        [value]="searchTerm"
-        placeholder="Search client or destination..."/>
-    </p-inputgroup>
-    <p-select
-      [options]="statusOptions"
-      [(ngModel)]="selectedStatus"
-      (onChange)="onStatusChange()"
-      placeholder="Filter Status"
-      optionLabel="label"
-      optionValue="value">
-      <ng-template pTemplate="item" let-status>
-        <span [class]="status.color">{{status.label}}</span>
-      </ng-template>
-    </p-select>
-  </div>
+<p-card header="Inquiries">
+  <p-toolbar styleClass="mb-4">
+    <ng-template pTemplate="start">
+      <div class="flex justify-center items-center gap-2">
+        <p-iconfield iconPosition="left">
+          <p-inputicon styleClass="pi pi-search" />
+          <input
+            pInputText
+            type="text"
+            (input)="onSearch($event)"
+            [value]="searchTerm"
+            placeholder="Search"/>
+        </p-iconfield>
+        <p-select
+          [options]="statusOptions"
+          [(ngModel)]="selectedStatus"
+          (onChange)="onStatusChange()"
+          placeholder="Filter Status"
+          optionLabel="label"
+          optionValue="value">
+          <ng-template pTemplate="item" let-status>
+            <span [class]="status.color">{{status.label}}</span>
+          </ng-template>
+        </p-select>
+      </div>
+    </ng-template>
+    <ng-template pTemplate="end">
+      <p-button label="New Inquiry" icon="pi pi-plus" (onClick)="createInquiry()"
+                severity="success" pRipple></p-button>
+    </ng-template>
+  </p-toolbar>
 
   <p-table
     [value]="inquiries"
