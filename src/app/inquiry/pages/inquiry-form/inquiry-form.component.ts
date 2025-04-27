@@ -1,4 +1,4 @@
-import { DatePipe } from '@angular/common';
+import { DatePipe, NgOptimizedImage } from '@angular/common';
 import { Component, inject, OnInit } from '@angular/core';
 import {
   FormArray,
@@ -72,6 +72,7 @@ import { QuotationPreviewComponent } from '../../components/quotation-preview/qu
     Checkbox,
     FormsModule,
     QuotationPreviewComponent,
+    NgOptimizedImage,
   ],
   templateUrl: './inquiry-form.component.html',
   providers: [ConfirmationService],

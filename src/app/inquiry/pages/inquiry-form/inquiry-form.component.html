@@ -1,9 +1,15 @@
 <section
-  class="card container mx-auto max-w-5xl p-8 rounded-lg shadow-lg hover:shadow-xl border border-gray-100">
+  class="card container mx-auto max-w-5xl p-8 rounded-lg shadow-lg hover:shadow-xl border border-gray-100"
+>
   <form [formGroup]="inquiryForm" class="max-w-5xl mx-auto">
     <div class="flex justify-between align-items-center mb-3">
-      <p-button (click)="goBack()" [text]="true" icon="pi pi-arrow-left" label="Back"></p-button>
-      <h2 class="font-bold">{{ editMode ? 'Edit' : 'New' }} Inquiry</h2>
+      <p-button
+        (click)="goBack()"
+        [text]="true"
+        icon="pi pi-arrow-left"
+        label="Back"
+      ></p-button>
+      <h2 class="font-bold">{{ editMode ? "Edit" : "New" }} Inquiry</h2>
     </div>
 
     <!-- Basic Information Section -->
@@ -23,15 +29,26 @@
         </p-float-label>
 
         <p-float-label variant="on">
-          <p-date-picker [showIcon]="true" dateFormat="mm-dd-yy" fluid formControlName="date"
-                         inputId="date"></p-date-picker>
+          <p-date-picker
+            [showIcon]="true"
+            dateFormat="mm-dd-yy"
+            fluid
+            formControlName="date"
+            inputId="date"
+          ></p-date-picker>
           <label for="date">Date</label>
         </p-float-label>
       </div>
 
       <div class="mt-4">
         <p-float-label variant="on">
-          <input class="w-full" formControlName="clientName" id="clientName" pInputText type="text">
+          <input
+            class="w-full"
+            formControlName="clientName"
+            id="clientName"
+            pInputText
+            type="text"
+          />
           <label for="clientName">Client Name</label>
         </p-float-label>
       </div>
@@ -40,15 +57,27 @@
         <label class="font-semibold block mb-2">Source</label>
         <div class="flex flex-wrap items-center gap-4">
           <div class="flex items-center">
-            <p-radio-button formControlName="source" inputId="sourceFB" value="FB"/>
+            <p-radio-button
+              formControlName="source"
+              inputId="sourceFB"
+              value="FB"
+            />
             <label class="ml-2" for="sourceFB">Facebook/Instagram</label>
           </div>
           <div class="flex items-center">
-            <p-radio-button formControlName="source" inputId="sourceW" value="WALK_IN"/>
+            <p-radio-button
+              formControlName="source"
+              inputId="sourceW"
+              value="WALK_IN"
+            />
             <label class="ml-2" for="sourceW">Walk-In</label>
           </div>
           <div class="flex items-center">
-            <p-radio-button formControlName="source" inputId="sourceRe" value="REFERRAL"/>
+            <p-radio-button
+              formControlName="source"
+              inputId="sourceRe"
+              value="REFERRAL"
+            />
             <label class="ml-2" for="sourceRe">Referral</label>
           </div>
         </div>
@@ -60,8 +89,38 @@
       <h3 class="font-bold mb-4 border-b pb-2">Travel Details</h3>
       <p-fluid class="grid grid-cols-2 gap-4 mb-4">
         <p-float-label variant="on">
-          <p-select [options]="countries" formControlName="countryId" inputId="countryId" optionLabel="name"
-                    optionValue="id" (onChange)="updateProviders($event)">
+          <p-select
+            (onChange)="updateProviders($event)"
+            [options]="countries"
+            formControlName="countryId"
+            inputId="countryId"
+            optionLabel="name"
+            optionValue="id"
+          >
+            <ng-template let-country pTemplate="selectedItem">
+              <div class="flex items-center gap-2">
+                <img
+                  [class]="'flag flag-' + country.code.toLowerCase()"
+                  [ngSrc]="country.flag"
+                  alt="flag"
+                  height="18"
+                  width="18"
+                />
+                <div>{{ country.name }}</div>
+              </div>
+            </ng-template>
+            <ng-template let-country pTemplate="item">
+              <div class="flex items-center gap-2">
+                <img
+                  [class]="'flag flag-' + country.code.toLowerCase()"
+                  [ngSrc]="country.flag"
+                  alt="flag"
+                  height="18"
+                  width="18"
+                />
+                <div>{{ country.name }}</div>
+              </div>
+            </ng-template>
             <ng-template pTemplate="dropdownicon">
               <i class="pi pi-map"></i>
             </ng-template>
@@ -70,20 +129,36 @@
         </p-float-label>
 
         <p-float-label variant="on">
-          <input class="w-full" formControlName="destination" id="destination" pInputText
-                 type="text">
+          <input
+            class="w-full"
+            formControlName="destination"
+            id="destination"
+            pInputText
+            type="text"
+          />
           <label for="destination">Destination</label>
         </p-float-label>
 
         <p-float-label variant="on">
-          <p-date-picker [showIcon]="true" dateFormat="mm/dd/y" formControlName="startDate"
-                         iconDisplay="input" (onSelect)="calculateTravelDuration()"/>
+          <p-date-picker
+            (onSelect)="calculateTravelDuration()"
+            [showIcon]="true"
+            dateFormat="mm/dd/y"
+            formControlName="startDate"
+            iconDisplay="input"
+          />
           <label for="startDate">Start Date</label>
         </p-float-label>
         <p-float-label variant="on">
-          <p-date-picker [showIcon]="true" dateFormat="mm/dd/y" formControlName="endDate"
-                         [minDate]="startDate" [defaultDate]="startDate"
-                         iconDisplay="input" (onSelect)="calculateTravelDuration()"/>
+          <p-date-picker
+            (onSelect)="calculateTravelDuration()"
+            [defaultDate]="startDate"
+            [minDate]="startDate"
+            [showIcon]="true"
+            dateFormat="mm/dd/y"
+            formControlName="endDate"
+            iconDisplay="input"
+          />
           <label for="endDate">End Date</label>
         </p-float-label>
       </p-fluid>
@@ -91,18 +166,32 @@
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div class="grid gap-4 grid-cols-2">
           <p-float-label variant="on">
-            <p-input-number [showButtons]="true" formControlName="days" inputId="days"/>
+            <p-input-number
+              [showButtons]="true"
+              formControlName="days"
+              inputId="days"
+            />
             <label for="days">Days</label>
           </p-float-label>
 
           <p-float-label variant="on">
-            <p-input-number [showButtons]="true" formControlName="nights" inputId="nights"/>
+            <p-input-number
+              [showButtons]="true"
+              formControlName="nights"
+              inputId="nights"
+            />
             <label for="nights">Nights</label>
           </p-float-label>
         </div>
 
         <p-float-label variant="on">
-          <input fluid formControlName="preferredHotel" id="preferredHotel" pInputText type="text">
+          <input
+            fluid
+            formControlName="preferredHotel"
+            id="preferredHotel"
+            pInputText
+            type="text"
+          />
           <label for="preferredHotel">Preferred Hotel(s)</label>
         </p-float-label>
       </div>
@@ -111,20 +200,32 @@
         <label class="font-semibold block mb-2">Number of Travelers</label>
         <p-fluid class="grid grid-cols-2 gap-4">
           <p-float-label variant="on">
-            <p-input-number [showButtons]="true" formControlName="adults" inputId="adults"/>
+            <p-input-number
+              [showButtons]="true"
+              formControlName="adults"
+              inputId="adults"
+            />
             <label for="adults">Adults</label>
           </p-float-label>
           <p-float-label variant="on">
-            <p-input-number [showButtons]="true" formControlName="children" inputId="children"/>
+            <p-input-number
+              [showButtons]="true"
+              formControlName="children"
+              inputId="children"
+            />
             <label for="children">Children</label>
           </p-float-label>
           <p-float-label variant="on">
-            <p-input-number [showButtons]="true" formControlName="seniors" inputId="seniors" />
+            <p-input-number
+              [showButtons]="true"
+              formControlName="seniors"
+              inputId="seniors"
+            />
             <label for="seniors">Seniors</label>
           </p-float-label>
           @if (childrenControl.value) {
             <p-float-label variant="on">
-              <input pInputText formControlName="childAges" id="childAges"/>
+              <input pInputText formControlName="childAges" id="childAges" />
               <label for="childAges">Child Age(s)</label>
             </p-float-label>
           }
@@ -140,26 +241,35 @@
           <label class="font-semibold block mb-2">Package Type</label>
           <div class="grid grid-cols-1 gap-2">
             <div class="flex items-center gap-2">
-              <p-radio-button formControlName="packageType" inputId="allInclusive"
-                              value="ALL_INCLUSIVE"/>
+              <p-radio-button
+                formControlName="packageType"
+                inputId="allInclusive"
+                value="ALL_INCLUSIVE"
+              />
               <label for="allInclusive">All-Inclusive Package</label>
             </div>
             <div class="flex flex-col gap-2">
               <div class="flex items-center gap-2">
-                <p-radio-button formControlName="packageType" inputId="custom" value="CUSTOM"/>
+                <p-radio-button
+                  formControlName="packageType"
+                  inputId="custom"
+                  value="CUSTOM"
+                />
                 <label for="custom">Custom Package</label>
               </div>
-              @if (inquiryForm.controls.packageType.value === 'CUSTOM') {
-                <div
-                  class="ml-6 flex flex-col gap-2">
+              @if (inquiryForm.controls.packageType.value === "CUSTOM") {
+                <div class="ml-6 flex flex-col gap-2">
                   @for (option of packageOptions; track option) {
                     <div class="flex items-center gap-2">
                       <p-checkbox
                         [formControlName]="'customPackageOptions'"
                         [inputId]="option.id"
-                        [value]="option.id">
+                        [value]="option.id"
+                      >
                       </p-checkbox>
-                      <label [for]="option.id" class="ml-2"> {{ option.label }} </label>
+                      <label [for]="option.id" class="ml-2">
+                        {{ option.label }}
+                      </label>
                     </div>
                   }
                 </div>
@@ -180,27 +290,48 @@
           <div class="flex justify-between items-center mb-4">
             <label class="font-semibold">Provider Quotations</label>
             <div class="flex gap-2 items-center">
-              <p-select [(ngModel)]="selectedProvider" [ngModelOptions]="{standalone: true}"
-                        [options]="availableProviders" [placeholder]="'Select Provider'"
-                        optionLabel="name" optionValue="id"></p-select>
-              <p-button (onClick)="addQuotation()" [disabled]="!selectedProvider"
-                        icon="pi pi-plus" label="Add Quotation"></p-button>
+              <p-select
+                [(ngModel)]="selectedProvider"
+                [ngModelOptions]="{ standalone: true }"
+                [options]="availableProviders"
+                [placeholder]="'Select Provider'"
+                optionLabel="name"
+                optionValue="id"
+              ></p-select>
+              <p-button
+                (onClick)="addQuotation()"
+                [disabled]="!selectedProvider"
+                icon="pi pi-plus"
+                label="Add Quotation"
+              ></p-button>
             </div>
           </div>
 
           <div class="space-y-4">
-            @for (quotationControl of quotations.controls; track quotationControl; let i = $index) {
-              <app-provider-quotation (onGenerateQuotation)="generateQuotation($event)"
-                                      [formGroup]="getProviderQuotationControl(i)"
-                                      [isEditMode]="editMode"
-                                      [inquiryId]="inquiryId"
-                                      [inquiryStatus]="status ?? 'NEW'"
-                                      [showFlightDetails]="showFlightDetails"
-                                      [showChildPrices]="!!inquiryForm.get('travelDetails.children')?.value"
-                                      [showSeniorPrices]="!!inquiryForm.get('travelDetails.seniors')?.value"
-                                      [provider]="providerMap.get(quotationControl.get('providerId')?.value)!"
-                                      (onSendEmail)="openEmailModal($event)"
-                                      (onRemove)="removeQuotation(i)">
+            @for (
+              quotationControl of quotations.controls;
+              track quotationControl;
+              let i = $index
+            ) {
+              <app-provider-quotation
+                (onGenerateQuotation)="generateQuotation($event)"
+                [formGroup]="getProviderQuotationControl(i)"
+                [isEditMode]="editMode"
+                [inquiryId]="inquiryId"
+                [inquiryStatus]="status ?? 'NEW'"
+                [showFlightDetails]="showFlightDetails"
+                [showChildPrices]="
+                  !!inquiryForm.get('travelDetails.children')?.value
+                "
+                [showSeniorPrices]="
+                  !!inquiryForm.get('travelDetails.seniors')?.value
+                "
+                [provider]="
+                  providerMap.get(quotationControl.get('providerId')?.value)!
+                "
+                (onSendEmail)="openEmailModal($event)"
+                (onRemove)="removeQuotation(i)"
+              >
               </app-provider-quotation>
             }
           </div>
@@ -211,25 +342,39 @@
     <!-- Remarks Section -->
     <section class="mb-8">
       <h3 class="font-bold mb-4 border-b pb-2">Remarks</h3>
-      <textarea class="w-full" formControlName="remarks" id="remarks" pTextarea rows="4"></textarea>
+      <textarea
+        class="w-full"
+        formControlName="remarks"
+        id="remarks"
+        pTextarea
+        rows="4"
+      ></textarea>
     </section>
 
     <div class="flex justify-end gap-2">
-      <p-button (onClick)="saveInquiry()" [loading]="saving" [rounded]="true"
-                class="transform transition-all duration-300 hover:scale-105"
-                icon="pi pi-save" label="Save" severity="info"
-                type="button" />
+      <p-button
+        (onClick)="saveInquiry()"
+        [loading]="saving"
+        [rounded]="true"
+        class="transform transition-all duration-300 hover:scale-105"
+        icon="pi pi-save"
+        label="Save"
+        severity="info"
+        type="button"
+      />
     </div>
 
     <!-- Audit Information -->
     @if (editMode) {
       <div class="mt-12 text-xs text-gray-500 border-t pt-4 p-4 rounded-lg">
         <div class="grid grid-cols-2 gap-2">
-          <div>Created by {{ auditFields.createdBy }}
-            on {{ auditFields.createdAt| date:'medium' }}
+          <div>
+            Created by {{ auditFields.createdBy }} on
+            {{ auditFields.createdAt | date: "medium" }}
           </div>
-          <div>Last updated by {{ auditFields.updatedBy }}
-            on {{ auditFields.updatedAt | date:'medium' }}
+          <div>
+            Last updated by {{ auditFields.updatedBy }} on
+            {{ auditFields.updatedAt | date: "medium" }}
           </div>
         </div>
       </div>
